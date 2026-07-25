@@ -10,7 +10,7 @@ import {
   Trophy,
 } from "lucide-react";
 
-import PageHero from "../components/PageHero";
+import PageHeader from "../components/PageHeader";
 import meshShield from "../assets/logos/mfl-shield.png";
 
 import "../styles/scores.css";
@@ -596,9 +596,7 @@ function TeamRow({
         <strong>{displayedNumber}</strong>
 
         <span>
-          {score === null
-            ? "PROJECTED"
-            : `PROJ ${projection.toFixed(1)}`}
+          {score === null ? "PROJECTED" : `PROJ ${projection.toFixed(1)}`}
         </span>
       </div>
     </div>
@@ -645,10 +643,7 @@ function ScoreCard({ game, featured = false }) {
           </div>
         </div>
 
-        <StatusBadge
-          status={game.status}
-          label={game.statusLabel}
-        />
+        <StatusBadge status={game.status} label={game.statusLabel} />
       </div>
 
       <div className="score-card-time">
@@ -742,37 +737,18 @@ function Scores() {
   const [selectedSecondaryFilter, setSelectedSecondaryFilter] =
     useState("all");
 
-  const heroStats = useMemo(() => {
-    const liveCount = scoreData.filter(
-      (game) => game.status === "live",
-    ).length;
-
-    const upcomingCount = scoreData.filter(
+  const scoreTotals = useMemo(() => {
+    const live = scoreData.filter((game) => game.status === "live").length;
+    const upcoming = scoreData.filter(
       (game) => game.status === "upcoming",
     ).length;
+    const final = scoreData.filter((game) => game.status === "final").length;
 
-    const finalCount = scoreData.filter(
-      (game) => game.status === "final",
-    ).length;
-
-    return [
-      {
-        label: "Live",
-        value: liveCount.toString(),
-      },
-      {
-        label: "Upcoming",
-        value: upcomingCount.toString(),
-      },
-      {
-        label: "Final",
-        value: finalCount.toString(),
-      },
-      {
-        label: "Total Games",
-        value: "101",
-      },
-    ];
+    return {
+      live,
+      upcoming,
+      final,
+    };
   }, []);
 
   const featuredGroups = useMemo(() => {
@@ -781,8 +757,7 @@ function Scores() {
       tier: tierClass.toUpperCase(),
       games: scoreData
         .filter(
-          (game) =>
-            game.tierClass === tierClass && game.featured,
+          (game) => game.tierClass === tierClass && game.featured,
         )
         .sort(
           (firstGame, secondGame) =>
@@ -845,25 +820,23 @@ function Scores() {
     setSelectedSecondaryFilter("all");
 
     window.requestAnimationFrame(() => {
-      document
-        .querySelector(".scores-controls")
-        ?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
+      document.querySelector(".scores-controls")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     });
   };
 
   return (
     <main className="scores-page">
-      <PageHero
+      <PageHeader
         eyebrow="Live Game Center"
         title="Scores"
         description="Follow the biggest games first, then explore every matchup by tier, conference, ranking, and week."
         imageSrc={meshShield}
         imageAlt="MESH Football shield"
         accent="scores"
-        stats={heroStats}
+        size="compact"
       />
 
       <section className="scores-controls">
@@ -903,9 +876,7 @@ function Scores() {
               className={[
                 "scores-primary-tab",
                 `scores-primary-tab-${filter.id}`,
-                selectedPrimaryFilter === filter.id
-                  ? "active"
-                  : "",
+                selectedPrimaryFilter === filter.id ? "active" : "",
               ]
                 .filter(Boolean)
                 .join(" ")}
@@ -939,9 +910,7 @@ function Scores() {
                     ? "scores-secondary-tab active"
                     : "scores-secondary-tab"
                 }
-                onClick={() =>
-                  setSelectedSecondaryFilter(filter.id)
-                }
+                onClick={() => setSelectedSecondaryFilter(filter.id)}
               >
                 {filter.label}
               </button>
@@ -955,7 +924,7 @@ function Scores() {
           <Radio size={16} />
 
           <div>
-            <strong>{heroStats[0].value}</strong>
+            <strong>{scoreTotals.live}</strong>
             <span>Live</span>
           </div>
         </div>
@@ -964,7 +933,7 @@ function Scores() {
           <Clock3 size={16} />
 
           <div>
-            <strong>{heroStats[1].value}</strong>
+            <strong>{scoreTotals.upcoming}</strong>
             <span>Upcoming</span>
           </div>
         </div>
@@ -973,7 +942,7 @@ function Scores() {
           <Trophy size={16} />
 
           <div>
-            <strong>{heroStats[2].value}</strong>
+            <strong>{scoreTotals.final}</strong>
             <span>Final</span>
           </div>
         </div>
@@ -1022,13 +991,9 @@ function Scores() {
         >
           <div className="scores-section-heading scores-tier-view-heading">
             <div>
-              <span>
-                {visibleTierGames.length} matchups shown
-              </span>
+              <span>{visibleTierGames.length} matchups shown</span>
 
-              <h2>
-                {activeSecondaryLabel || activePrimaryLabel}
-              </h2>
+              <h2>{activeSecondaryLabel || activePrimaryLabel}</h2>
             </div>
 
             <TierBadge

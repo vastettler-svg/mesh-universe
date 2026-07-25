@@ -7,29 +7,10 @@ import {
   UserRound,
 } from "lucide-react";
 
-import PageHero from "../components/PageHero";
+import PageHeader from "../components/PageHeader";
 import meshShield from "../assets/logos/mfl-shield.png";
 
 import "../styles/league.css";
-
-const leagueStats = [
-  {
-    label: "Franchises",
-    value: "202",
-  },
-  {
-    label: "Coaches",
-    value: "202",
-  },
-  {
-    label: "Sleeper Leagues",
-    value: "15",
-  },
-  {
-    label: "Tiers",
-    value: "3",
-  },
-];
 
 const leagueSections = [
   {
@@ -152,15 +133,15 @@ function LeagueSectionCard({ section }) {
 
 function League() {
   return (
-    <div className="league-page">
-      <PageHero
+    <main className="league-page">
+      <PageHeader
         eyebrow="The history of MESH"
         title="League"
         description="Explore every franchise and coaching career across the complete history of MESH Football."
         imageSrc={meshShield}
         imageAlt="MESH Football shield"
         accent="league"
-        stats={leagueStats}
+        size="medium"
       />
 
       <section className="league-section">
@@ -211,7 +192,7 @@ function League() {
           })}
         </div>
       </section>
-    </div>
+    </main>
   );
 }
 

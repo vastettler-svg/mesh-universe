@@ -1,0 +1,648 @@
+/* =========================================================
+   MESH FOOTBALL — SCORES PAGE
+========================================================= */
+
+.scores-page {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+
+  padding:
+    20px
+    clamp(14px, 3vw, 34px)
+    calc(110px + env(safe-area-inset-bottom));
+
+  color: var(--color-white, #ffffff);
+}
+
+/* =========================================================
+   CONTROLS
+========================================================= */
+
+.scores-controls {
+  display: grid;
+  gap: 14px;
+
+  margin-top: 22px;
+}
+
+.scores-week-selector {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 10px;
+
+  min-height: 66px;
+  padding: 10px;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(27, 48, 73, 0.96),
+      rgba(10, 24, 41, 0.98)
+    );
+}
+
+.scores-week-selector button {
+  width: 42px;
+  height: 42px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 11px;
+
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.055);
+
+  cursor: pointer;
+}
+
+.scores-week-selector button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.scores-week-selector button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.scores-week-selector > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+
+  text-align: center;
+}
+
+.scores-week-selector span {
+  font-size: 0.58rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: var(--color-muted, #95a5b5);
+}
+
+.scores-week-selector strong {
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.scores-tier-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+
+  padding: 6px;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.scores-tier-tab {
+  min-height: 40px;
+  padding: 8px;
+
+  border: 0;
+  border-radius: 10px;
+
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 850;
+
+  color: var(--color-muted, #99a9b8);
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.scores-tier-tab.active {
+  color: #ffffff;
+  background: rgba(239, 64, 82, 0.18);
+}
+
+.scores-tier-tab-nfl.active {
+  background: rgba(31, 178, 101, 0.18);
+}
+
+.scores-tier-tab-fbs.active {
+  background: rgba(66, 135, 255, 0.18);
+}
+
+.scores-tier-tab-fcs.active {
+  background: rgba(160, 104, 255, 0.18);
+}
+
+/* =========================================================
+   SUMMARY BAR
+========================================================= */
+
+.scores-summary-bar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+
+  margin-top: 14px;
+}
+
+.scores-summary-item {
+  min-width: 0;
+  min-height: 62px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 10px 6px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.scores-summary-item svg {
+  flex: 0 0 auto;
+  color: var(--color-red, #ef4052);
+}
+
+.scores-summary-item div {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.scores-summary-item strong {
+  font-size: 0.78rem;
+}
+
+.scores-summary-item span {
+  font-size: 0.49rem;
+  font-weight: 850;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+
+  color: var(--color-muted, #92a2b2);
+}
+
+/* =========================================================
+   TIER SECTIONS
+========================================================= */
+
+.scores-tier-section {
+  margin-top: clamp(28px, 5vw, 46px);
+}
+
+.scores-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+
+  margin-bottom: 13px;
+}
+
+.scores-section-heading span {
+  display: block;
+  margin-bottom: 3px;
+
+  font-size: 0.58rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+
+  color: var(--color-muted, #93a3b3);
+}
+
+.scores-section-heading h2 {
+  margin: 0;
+
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: 1.25rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.scores-grid {
+  display: grid;
+  gap: 12px;
+}
+
+/* =========================================================
+   TIER BADGES
+========================================================= */
+
+.scores-tier-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 38px;
+  padding: 5px 8px;
+
+  border-radius: 999px;
+
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.055em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.scores-tier-badge-nfl {
+  color: #d8f8e7;
+  background: rgba(31, 178, 101, 0.18);
+  border: 1px solid rgba(31, 178, 101, 0.28);
+}
+
+.scores-tier-badge-fbs {
+  color: #dceaff;
+  background: rgba(55, 128, 255, 0.18);
+  border: 1px solid rgba(55, 128, 255, 0.28);
+}
+
+.scores-tier-badge-fcs {
+  color: #eedfff;
+  background: rgba(155, 89, 255, 0.18);
+  border: 1px solid rgba(155, 89, 255, 0.28);
+}
+
+/* =========================================================
+   SCORE CARDS
+========================================================= */
+
+.score-card {
+  position: relative;
+  overflow: hidden;
+
+  padding: 15px;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(27, 48, 73, 0.97),
+      rgba(10, 24, 41, 0.99)
+    );
+
+  box-shadow:
+    0 17px 40px rgba(0, 0, 0, 0.21),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.score-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+}
+
+.score-card-nfl::before {
+  background: #24b86d;
+}
+
+.score-card-fbs::before {
+  background: #4287ff;
+}
+
+.score-card-fcs::before {
+  background: #a068ff;
+}
+
+.score-card-live {
+  box-shadow:
+    0 0 0 1px rgba(239, 64, 82, 0.1),
+    0 17px 40px rgba(0, 0, 0, 0.21);
+}
+
+.score-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-bottom: 10px;
+}
+
+.score-card-header > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  min-width: 0;
+}
+
+.score-league-name {
+  overflow: hidden;
+
+  font-size: 0.59rem;
+  font-weight: 750;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: var(--color-muted, #9baab8);
+}
+
+.scores-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  flex: 0 0 auto;
+
+  padding: 6px 8px;
+
+  border-radius: 999px;
+
+  font-size: 0.54rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.scores-status-live {
+  color: #ffffff;
+  background: #df2638;
+}
+
+.scores-status-upcoming {
+  color: #b8c4d0;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.scores-status-final {
+  color: #d8e1e8;
+  background: rgba(195, 204, 213, 0.12);
+}
+
+.score-card-time {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  margin-bottom: 9px;
+
+  font-size: 0.58rem;
+  font-weight: 700;
+
+  color: var(--color-muted, #93a3b3);
+}
+
+/* =========================================================
+   TEAM ROWS
+========================================================= */
+
+.score-team-list {
+  display: grid;
+}
+
+.score-team-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+
+  min-height: 62px;
+  padding: 9px 2px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+}
+
+.score-team-row:last-child {
+  border-bottom: 0;
+}
+
+.score-team-row.winner {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.score-team-logo {
+  width: 40px;
+  height: 40px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: 0.78rem;
+
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.score-team-logo-nfl {
+  border: 1px solid rgba(36, 184, 109, 0.38);
+}
+
+.score-team-logo-fbs {
+  border: 1px solid rgba(66, 135, 255, 0.38);
+}
+
+.score-team-logo-fcs {
+  border: 1px solid rgba(160, 104, 255, 0.38);
+}
+
+.score-team-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.score-team-info strong {
+  overflow: hidden;
+
+  font-size: 0.76rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.score-team-info span {
+  font-size: 0.59rem;
+  color: var(--color-muted, #94a4b3);
+}
+
+.score-team-numbers {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.score-team-numbers strong {
+  font-size: 0.92rem;
+}
+
+.score-team-row.winner .score-team-numbers strong {
+  color: #ffffff;
+}
+
+.score-team-numbers span {
+  font-size: 0.48rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+
+  color: var(--color-muted, #8394a4);
+}
+
+/* =========================================================
+   SCORE CARD FOOTER
+========================================================= */
+
+.score-card-footer {
+  margin-top: 10px;
+  padding-top: 12px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.065);
+}
+
+.score-probability-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-bottom: 6px;
+
+  font-size: 0.52rem;
+  font-weight: 850;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+
+  color: var(--color-muted, #92a2b2);
+}
+
+.score-probability-track {
+  height: 7px;
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.score-probability-fill {
+  height: 100%;
+  border-radius: inherit;
+}
+
+.score-probability-fill-nfl {
+  background: linear-gradient(90deg, #167d4a, #2ed47c);
+}
+
+.score-probability-fill-fbs {
+  background: linear-gradient(90deg, #2455aa, #4c91ff);
+}
+
+.score-probability-fill-fcs {
+  background: linear-gradient(90deg, #6132a6, #ae78ff);
+}
+
+.score-game-center-button {
+  width: 100%;
+  min-height: 39px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  margin-top: 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  border-radius: 10px;
+
+  font: inherit;
+  font-size: 0.61rem;
+  font-weight: 850;
+
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.045);
+
+  cursor: pointer;
+}
+
+.score-game-center-button:hover {
+  background: rgba(255, 255, 255, 0.085);
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (min-width: 700px) {
+  .scores-page {
+    padding-top: 28px;
+  }
+
+  .scores-controls {
+    grid-template-columns: minmax(250px, 0.7fr) minmax(320px, 1fr);
+    align-items: stretch;
+  }
+
+  .scores-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .score-card {
+    padding: 17px;
+  }
+}
+
+/* =========================================================
+   DESKTOP
+========================================================= */
+
+@media (min-width: 1100px) {
+  .scores-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* =========================================================
+   SMALL PHONES
+========================================================= */
+
+@media (max-width: 410px) {
+  .scores-page {
+    padding-inline: 11px;
+  }
+
+  .scores-summary-item {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+
+  .score-card {
+    padding: 13px;
+  }
+
+  .score-team-row {
+    grid-template-columns: 37px minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .score-team-logo {
+    width: 36px;
+    height: 36px;
+  }
+}

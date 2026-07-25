@@ -1,0 +1,476 @@
+/* =========================================================
+   MESH FOOTBALL — LEAGUE HUB
+========================================================= */
+
+.league-page {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+
+  padding:
+    20px
+    clamp(14px, 3vw, 34px)
+    calc(110px + env(safe-area-inset-bottom));
+
+  color: var(--color-white, #ffffff);
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.league-hero {
+  position: relative;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  min-height: 190px;
+  padding: clamp(22px, 5vw, 40px);
+
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 20px;
+
+  background:
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(223, 38, 56, 0.24),
+      transparent 32%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(27, 49, 75, 0.98),
+      rgba(8, 22, 38, 0.99)
+    );
+
+  box-shadow:
+    0 22px 54px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.league-hero::after {
+  content: "";
+  position: absolute;
+  right: -70px;
+  bottom: -100px;
+
+  width: 260px;
+  height: 260px;
+
+  border: 1px solid rgba(255, 255, 255, 0.045);
+  border-radius: 50%;
+}
+
+.league-hero-content {
+  position: relative;
+  z-index: 1;
+
+  max-width: 650px;
+}
+
+.league-hero-eyebrow {
+  display: block;
+  margin-bottom: 8px;
+
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  color: var(--color-red, #ef4052);
+}
+
+.league-hero h1 {
+  margin: 0 0 10px;
+
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: clamp(1.8rem, 5vw, 3.1rem);
+  font-weight: 400;
+  letter-spacing: 0.035em;
+}
+
+.league-hero p {
+  max-width: 590px;
+  margin: 0;
+
+  font-size: clamp(0.8rem, 1.5vw, 0.95rem);
+  line-height: 1.65;
+
+  color: var(--color-muted, #a5b1bd);
+}
+
+.league-hero-badge {
+  position: relative;
+  z-index: 1;
+
+  flex: 0 0 auto;
+
+  width: 92px;
+  height: 92px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 24px;
+
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(223, 38, 56, 0.86),
+      rgba(130, 18, 35, 0.92)
+    );
+
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+/* =========================================================
+   SECTIONS
+========================================================= */
+
+.league-section {
+  margin-top: clamp(28px, 5vw, 48px);
+}
+
+.league-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-bottom: 15px;
+}
+
+.league-section-heading span {
+  display: block;
+  margin-bottom: 4px;
+
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  color: var(--color-muted, #93a3b3);
+}
+
+.league-section-heading h2 {
+  margin: 0;
+
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  font-weight: 400;
+  letter-spacing: 0.025em;
+}
+
+/* =========================================================
+   PRIMARY DIRECTORY CARDS
+========================================================= */
+
+.league-sections-grid {
+  display: grid;
+  gap: 15px;
+}
+
+.league-section-card {
+  position: relative;
+  overflow: hidden;
+
+  min-width: 0;
+  padding: clamp(18px, 4vw, 28px);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+
+  color: inherit;
+  text-decoration: none;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(27, 48, 73, 0.97),
+      rgba(10, 24, 41, 0.99)
+    );
+
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.league-section-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+}
+
+.league-section-card-franchises::before {
+  background: linear-gradient(90deg, #df2638, #ff6876);
+}
+
+.league-section-card-coaches::before {
+  background: linear-gradient(90deg, #4287ff, #76a9ff);
+}
+
+.league-section-card:hover {
+  transform: translateY(-3px);
+
+  border-color: rgba(255, 255, 255, 0.17);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(34, 59, 86, 0.99),
+      rgba(12, 29, 47, 0.99)
+    );
+}
+
+.league-section-card:focus-visible {
+  outline: 2px solid var(--color-red, #ef4052);
+  outline-offset: 3px;
+}
+
+.league-section-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+
+  margin-bottom: 22px;
+}
+
+.league-section-icon {
+  width: 60px;
+  height: 60px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 16px;
+}
+
+.league-section-icon-franchises {
+  color: #ff7985;
+  background: rgba(223, 38, 56, 0.15);
+  border: 1px solid rgba(223, 38, 56, 0.22);
+}
+
+.league-section-icon-coaches {
+  color: #83b1ff;
+  background: rgba(66, 135, 255, 0.14);
+  border: 1px solid rgba(66, 135, 255, 0.22);
+}
+
+.league-section-arrow {
+  width: 36px;
+  height: 36px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  color: var(--color-muted, #9eacbb);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.league-card-eyebrow {
+  display: block;
+  margin-bottom: 5px;
+
+  font-size: 0.57rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+
+  color: var(--color-muted, #93a3b3);
+}
+
+.league-section-copy h2 {
+  margin: 0 0 8px;
+
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: clamp(1.2rem, 2.5vw, 1.55rem);
+  font-weight: 400;
+  letter-spacing: 0.025em;
+}
+
+.league-section-copy p {
+  margin: 0;
+
+  font-size: 0.76rem;
+  line-height: 1.58;
+
+  color: var(--color-muted, #a3afbb);
+}
+
+.league-card-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+
+  margin-top: 22px;
+  padding-top: 17px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.075);
+}
+
+.league-card-stat {
+  min-width: 0;
+  padding: 10px 8px;
+
+  border-radius: 11px;
+
+  text-align: center;
+
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.league-card-stat strong {
+  display: block;
+  margin-bottom: 3px;
+
+  font-size: 0.9rem;
+}
+
+.league-card-stat span {
+  font-size: 0.53rem;
+  font-weight: 850;
+  letter-spacing: 0.065em;
+  text-transform: uppercase;
+
+  color: var(--color-muted, #91a1b1);
+}
+
+.league-card-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+
+  margin-top: 15px;
+}
+
+.league-card-features span {
+  padding: 6px 8px;
+
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 999px;
+
+  font-size: 0.55rem;
+  font-weight: 750;
+
+  color: var(--color-muted, #a8b4c0);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+/* =========================================================
+   HIGHLIGHTS
+========================================================= */
+
+.league-highlights-grid {
+  display: grid;
+  gap: 11px;
+}
+
+.league-highlight-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  padding: 15px;
+
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.league-highlight-icon {
+  flex: 0 0 auto;
+
+  width: 39px;
+  height: 39px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 11px;
+
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.league-highlight-card h3 {
+  margin: 0 0 5px;
+
+  font-size: 0.8rem;
+}
+
+.league-highlight-card p {
+  margin: 0;
+
+  font-size: 0.67rem;
+  line-height: 1.5;
+
+  color: var(--color-muted, #9eacbb);
+}
+
+/* =========================================================
+   TABLET / DESKTOP
+========================================================= */
+
+@media (min-width: 700px) {
+  .league-page {
+    padding-top: 28px;
+  }
+
+  .league-sections-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .league-highlights-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* =========================================================
+   SMALL PHONES
+========================================================= */
+
+@media (max-width: 520px) {
+  .league-hero {
+    min-height: 0;
+    padding: 22px 18px;
+  }
+
+  .league-hero-badge {
+    width: 62px;
+    height: 62px;
+
+    border-radius: 17px;
+  }
+
+  .league-hero-badge svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .league-card-stats {
+    gap: 5px;
+  }
+
+  .league-card-stat {
+    padding-inline: 4px;
+  }
+}

@@ -1,0 +1,623 @@
+.mesh-card {
+  overflow: hidden;
+  border: var(--border-subtle);
+  border-radius: var(--radius-medium);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(25, 49, 76, 0.82),
+      rgba(12, 29, 48, 0.96)
+    );
+  box-shadow: var(--shadow-card);
+}
+
+.featured-matchup-card {
+  position: relative;
+  padding: var(--space-4);
+}
+
+.featured-matchup-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--tier-nfl);
+}
+
+.matchup-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.live-badge,
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: var(--radius-small);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.live-badge {
+  padding: 6px 8px;
+  color: var(--color-white);
+  background: var(--color-red);
+}
+
+.tier-badge {
+  padding: 5px 8px;
+}
+
+.tier-badge-nfl {
+  color: #d8f8e7;
+  background: var(--tier-nfl-soft);
+}
+
+.matchup-teams {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.matchup-team {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.team-logo-placeholder {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: var(--border-subtle);
+  border-radius: 50%;
+  font-family: var(--heading-font);
+  font-size: 1.15rem;
+  background: var(--color-card-light);
+}
+
+.matchup-team-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.matchup-team-name {
+  overflow: hidden;
+  max-width: 100%;
+  font-weight: 800;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.matchup-team-record {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.matchup-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.matchup-score-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.matchup-score-row strong {
+  font-size: 1.25rem;
+}
+
+.matchup-score-row span {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.live-status {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--color-red);
+}
+
+.win-probability {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: var(--border-subtle);
+}
+
+.win-probability-heading {
+  margin-bottom: var(--space-2);
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.probability-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 0.75rem;
+}
+
+.probability-track {
+  height: 9px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--color-navy);
+}
+
+.probability-fill {
+  height: 100%;
+  border-radius: inherit;
+  background:
+    linear-gradient(
+      90deg,
+      var(--color-red),
+      var(--color-red-hover)
+    );
+}
+
+.standings-card {
+  padding: var(--space-3);
+}
+
+.standings-table-header,
+.standings-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px 28px 44px;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.standings-table-header {
+  padding: var(--space-2);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.standings-row {
+  min-height: 45px;
+  padding: var(--space-2);
+  border-top: var(--border-subtle);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.standings-team {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.standings-rank {
+  width: 16px;
+  color: var(--color-muted);
+}
+
+.standings-team-logo {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 0.65rem;
+  background: var(--color-card-light);
+}
+/* =========================================================
+   GAMES OF THE WEEK
+========================================================= */
+
+.featured-matchups-grid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.featured-matchup-card {
+  position: relative;
+  min-width: 0;
+  padding: var(--space-4);
+}
+
+.featured-matchup-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+}
+
+.tier-nfl-card::before {
+  background: var(--tier-nfl);
+}
+
+.tier-fbs-card::before {
+  background: var(--tier-fbs);
+}
+
+.tier-fcs-card::before {
+  background: var(--tier-fcs);
+}
+
+.matchup-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.live-badge,
+.matchup-status-badge,
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  border-radius: var(--radius-small);
+
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.live-badge {
+  padding: 6px 8px;
+  color: var(--color-white);
+  background: var(--color-red);
+}
+
+.matchup-status-badge {
+  padding: 6px 8px;
+  color: var(--color-silver);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tier-badge {
+  padding: 5px 8px;
+}
+
+.tier-badge-nfl {
+  color: #d8f8e7;
+  background: var(--tier-nfl-soft);
+}
+
+.tier-badge-fbs {
+  color: #dceaff;
+  background: var(--tier-fbs-soft);
+}
+
+.tier-badge-fcs {
+  color: #eedfff;
+  background: var(--tier-fcs-soft);
+}
+
+.game-of-week-label {
+  margin-bottom: var(--space-5);
+
+  font-family: var(--heading-font);
+  font-size: 0.9rem;
+  letter-spacing: 0.045em;
+  text-align: center;
+  text-transform: uppercase;
+
+  color: var(--color-white);
+}
+
+.matchup-teams {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(105px, auto)
+    minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.matchup-team {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+
+  text-align: center;
+}
+
+.team-logo-placeholder {
+  width: 52px;
+  height: 52px;
+
+  display: grid;
+  place-items: center;
+
+  border: var(--border-subtle);
+  border-radius: 50%;
+
+  font-family: var(--heading-font);
+  font-size: 1.05rem;
+
+  color: var(--color-white);
+  background: var(--color-card-light);
+}
+
+.matchup-team-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.matchup-team-name {
+  max-width: 100%;
+  overflow: hidden;
+
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.matchup-team-record {
+  font-size: 0.72rem;
+  color: var(--color-muted);
+}
+
+.matchup-score {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+
+  text-align: center;
+}
+
+.matchup-score-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+}
+
+.matchup-score-row strong {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.matchup-score-row span {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.live-status {
+  font-size: 0.69rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--color-red);
+}
+
+.scheduled-status {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--color-muted);
+}
+
+.win-probability {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: var(--border-subtle);
+}
+
+.win-probability-heading {
+  margin-bottom: var(--space-2);
+
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+
+  color: var(--color-muted);
+}
+
+.probability-labels {
+  display: flex;
+  justify-content: space-between;
+
+  margin-bottom: 5px;
+
+  font-size: 0.72rem;
+}
+
+.probability-track {
+  height: 9px;
+  overflow: hidden;
+
+  border-radius: var(--radius-pill);
+  background: var(--color-navy);
+}
+
+.probability-fill {
+  height: 100%;
+  border-radius: inherit;
+}
+
+.probability-fill-nfl {
+  background: linear-gradient(
+    90deg,
+    var(--tier-nfl-soft),
+    var(--tier-nfl)
+  );
+}
+
+.probability-fill-fbs {
+  background: linear-gradient(
+    90deg,
+    var(--tier-fbs-soft),
+    var(--tier-fbs)
+  );
+}
+
+.probability-fill-fcs {
+  background: linear-gradient(
+    90deg,
+    var(--tier-fcs-soft),
+    var(--tier-fcs)
+  );
+}
+
+@media (min-width: 700px) {
+  .featured-matchup-card {
+    padding: var(--space-5);
+  }
+
+  .team-logo-placeholder {
+    width: 60px;
+    height: 60px;
+  }
+
+  .matchup-score-row strong {
+    font-size: 1.3rem;
+  }
+}
+
+@media (min-width: 1000px) {
+  .featured-matchups-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .featured-matchup-card {
+    padding: var(--space-4);
+  }
+
+  .team-logo-placeholder {
+    width: 50px;
+    height: 50px;
+  }
+
+  .matchup-score-row strong {
+    font-size: 1rem;
+  }
+}
+/* =========================================================
+   MESH HEADLINES
+========================================================= */
+
+.headlines-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.headline-card {
+  position: relative;
+  overflow: hidden;
+
+  display: grid;
+  grid-template-columns: 4px minmax(0, 1fr);
+
+  border: var(--border-subtle);
+  border-radius: var(--radius-medium);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(25, 49, 76, 0.72),
+      rgba(12, 29, 48, 0.94)
+    );
+
+  box-shadow: var(--shadow-card);
+}
+
+.headline-tier-bar {
+  width: 100%;
+  height: 100%;
+}
+
+.headline-tier-nfl {
+  background: var(--tier-nfl);
+}
+
+.headline-tier-fbs {
+  background: var(--tier-fbs);
+}
+
+.headline-tier-fcs {
+  background: var(--tier-fcs);
+}
+
+.headline-content {
+  min-width: 0;
+  padding: var(--space-4);
+}
+
+.headline-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+
+  margin-bottom: var(--space-3);
+
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--color-muted);
+}
+
+.headline-content h3 {
+  margin-bottom: var(--space-2);
+
+  font-size: 0.94rem;
+  line-height: 1.35;
+}
+
+.headline-content p {
+  margin-bottom: 0;
+
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+
+@media (min-width: 800px) {
+  .headlines-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .headline-content {
+    padding: var(--space-5);
+  }
+}

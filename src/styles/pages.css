@@ -1,0 +1,83 @@
+.home-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.season-toolbar {
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border-subtle);
+}
+
+.season-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+  border: 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  background: transparent;
+  cursor: pointer;
+}
+
+.season-selector-divider {
+  color: var(--color-red);
+}
+
+.home-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.section-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.section-title-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.section-title-row h2 {
+  margin-bottom: 0;
+}
+
+.text-button {
+  padding: 0;
+  border: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--color-red);
+  background: transparent;
+  cursor: pointer;
+}
+
+@media (min-width: 700px) {
+  .home-page {
+    max-width: 720px;
+    margin-inline: auto;
+  }
+
+  .featured-matchup-card {
+    padding: var(--space-6);
+  }
+
+  .team-logo-placeholder {
+    width: 64px;
+    height: 64px;
+  }
+
+  .matchup-score-row strong {
+    font-size: 1.55rem;
+  }
+}

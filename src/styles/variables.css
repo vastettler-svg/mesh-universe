@@ -1,0 +1,68 @@
+:root {
+  /* Typography */
+  --heading-font: "Graduate", serif;
+  --body-font: "Inter", sans-serif;
+
+  /* Main brand colors */
+  --color-navy: #0b1d36;
+  --color-navy-deep: #061426;
+  --color-navy-dark: #040d18;
+
+  --color-card: #12243a;
+  --color-card-light: #1f2937;
+  --color-card-hover: #19314c;
+
+  --color-red: #cf0a1a;
+  --color-red-hover: #ea1728;
+
+  --color-white: #ffffff;
+  --color-silver: #e5e7eb;
+  --color-muted: #9ca3af;
+  --color-border: rgba(255, 255, 255, 0.08);
+
+  --color-positive: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
+  /* Tier identities */
+  --tier-nfl: #22c55e;
+  --tier-nfl-soft: #173f2d;
+
+  --tier-fbs: #3b82f6;
+  --tier-fbs-soft: #1d3d68;
+
+  --tier-fcs: #a855f7;
+  --tier-fcs-soft: #472662;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Border radius */
+  --radius-small: 8px;
+  --radius-medium: 12px;
+  --radius-large: 18px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.22);
+  --shadow-nav: 0 -8px 24px rgba(0, 0, 0, 0.3);
+
+  /* Borders */
+  --border-subtle: 1px solid var(--color-border);
+
+  /* Layout */
+  --app-max-width: 1180px;
+  --mobile-nav-height: 72px;
+  --header-height: 64px;
+
+  /* Motion */
+  --transition-fast: 160ms ease;
+  --transition-standard: 240ms ease;
+}

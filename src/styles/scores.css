@@ -1,5 +1,5 @@
 /* =========================================================
-   MESH FOOTBALL — SCORES PAGE
+   MESH FOOTBALL — SCORES BLUEPRINT
 ========================================================= */
 
 .scores-page {
@@ -16,7 +16,7 @@
 }
 
 /* =========================================================
-   CONTROLS
+   WEEK AND PRIMARY FILTERS
 ========================================================= */
 
 .scores-controls {
@@ -24,6 +24,7 @@
   gap: 14px;
 
   margin-top: 22px;
+  scroll-margin-top: 86px;
 }
 
 .scores-week-selector {
@@ -96,7 +97,7 @@
   letter-spacing: 0.04em;
 }
 
-.scores-tier-tabs {
+.scores-primary-tabs {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
@@ -109,15 +110,16 @@
   background: rgba(255, 255, 255, 0.035);
 }
 
-.scores-tier-tab {
-  min-height: 40px;
-  padding: 8px;
+.scores-primary-tab {
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 5px;
 
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 10px;
 
   font: inherit;
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 850;
 
   color: var(--color-muted, #99a9b8);
@@ -126,25 +128,143 @@
   cursor: pointer;
 }
 
-.scores-tier-tab.active {
+.scores-primary-tab:hover {
   color: #ffffff;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.scores-primary-tab-featured.active {
+  color: #ffffff;
+  border-color: rgba(239, 64, 82, 0.24);
   background: rgba(239, 64, 82, 0.18);
 }
 
-.scores-tier-tab-nfl.active {
+.scores-primary-tab-nfl.active {
+  color: #d8f8e7;
+  border-color: rgba(31, 178, 101, 0.3);
   background: rgba(31, 178, 101, 0.18);
 }
 
-.scores-tier-tab-fbs.active {
+.scores-primary-tab-fbs.active {
+  color: #dceaff;
+  border-color: rgba(66, 135, 255, 0.3);
   background: rgba(66, 135, 255, 0.18);
 }
 
-.scores-tier-tab-fcs.active {
+.scores-primary-tab-fcs.active {
+  color: #eedfff;
+  border-color: rgba(160, 104, 255, 0.3);
   background: rgba(160, 104, 255, 0.18);
 }
 
 /* =========================================================
-   SUMMARY BAR
+   SECONDARY FILTERS
+========================================================= */
+
+.scores-secondary-filter {
+  margin-top: 13px;
+  padding: 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.026);
+}
+
+.scores-secondary-filter-nfl {
+  border-color: rgba(31, 178, 101, 0.15);
+}
+
+.scores-secondary-filter-fbs {
+  border-color: rgba(66, 135, 255, 0.16);
+}
+
+.scores-secondary-filter-fcs {
+  border-color: rgba(160, 104, 255, 0.16);
+}
+
+.scores-secondary-filter-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-bottom: 9px;
+}
+
+.scores-secondary-filter-heading span {
+  font-size: 0.54rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: var(--color-muted, #93a3b3);
+}
+
+.scores-secondary-filter-heading strong {
+  font-size: 0.64rem;
+}
+
+.scores-secondary-tabs {
+  display: flex;
+  gap: 7px;
+
+  overflow-x: auto;
+  padding-bottom: 3px;
+
+  scrollbar-width: none;
+  overscroll-behavior-inline: contain;
+}
+
+.scores-secondary-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.scores-secondary-tab {
+  flex: 0 0 auto;
+
+  min-height: 35px;
+  padding: 7px 11px;
+
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 999px;
+
+  font: inherit;
+  font-size: 0.58rem;
+  font-weight: 800;
+  white-space: nowrap;
+
+  color: var(--color-muted, #9dabb9);
+  background: rgba(255, 255, 255, 0.03);
+
+  cursor: pointer;
+}
+
+.scores-secondary-tab:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.scores-secondary-filter-nfl .scores-secondary-tab.active {
+  color: #d8f8e7;
+  border-color: rgba(31, 178, 101, 0.33);
+  background: rgba(31, 178, 101, 0.17);
+}
+
+.scores-secondary-filter-fbs .scores-secondary-tab.active {
+  color: #dceaff;
+  border-color: rgba(66, 135, 255, 0.34);
+  background: rgba(66, 135, 255, 0.17);
+}
+
+.scores-secondary-filter-fcs .scores-secondary-tab.active {
+  color: #eedfff;
+  border-color: rgba(160, 104, 255, 0.34);
+  background: rgba(160, 104, 255, 0.17);
+}
+
+/* =========================================================
+   SCORE STATUS SUMMARY
 ========================================================= */
 
 .scores-summary-bar {
@@ -174,7 +294,12 @@
 
 .scores-summary-item svg {
   flex: 0 0 auto;
+
   color: var(--color-red, #ef4052);
+}
+
+.scores-summary-live svg {
+  color: #ff5263;
 }
 
 .scores-summary-item div {
@@ -198,12 +323,72 @@
 }
 
 /* =========================================================
-   TIER SECTIONS
+   FEATURED VIEW
 ========================================================= */
 
-.scores-tier-section {
+.scores-featured-view {
   margin-top: clamp(28px, 5vw, 46px);
 }
+
+.scores-featured-intro {
+  max-width: 700px;
+  margin-bottom: 25px;
+}
+
+.scores-featured-intro > span {
+  display: block;
+  margin-bottom: 4px;
+
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+
+  color: var(--color-red, #ef4052);
+}
+
+.scores-featured-intro h2 {
+  margin: 0;
+
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: clamp(1.25rem, 3vw, 1.65rem);
+  font-weight: 400;
+  letter-spacing: 0.035em;
+}
+
+.scores-featured-intro p {
+  margin: 8px 0 0;
+
+  font-size: 0.72rem;
+  line-height: 1.55;
+
+  color: var(--color-muted, #a2afbc);
+}
+
+.featured-tier-section {
+  position: relative;
+
+  margin-top: clamp(30px, 5vw, 48px);
+  padding-left: 12px;
+
+  border-left: 3px solid transparent;
+}
+
+.featured-tier-section-nfl {
+  border-left-color: #24b86d;
+}
+
+.featured-tier-section-fbs {
+  border-left-color: #4287ff;
+}
+
+.featured-tier-section-fcs {
+  border-left-color: #a068ff;
+}
+
+/* =========================================================
+   SECTION HEADINGS
+========================================================= */
 
 .scores-section-heading {
   display: flex;
@@ -214,7 +399,7 @@
   margin-bottom: 13px;
 }
 
-.scores-section-heading span {
+.scores-section-heading > div > span {
   display: block;
   margin-bottom: 3px;
 
@@ -238,6 +423,81 @@
 .scores-grid {
   display: grid;
   gap: 12px;
+}
+
+/* =========================================================
+   VIEW ALL TIER BUTTONS
+========================================================= */
+
+.scores-view-tier-button {
+  width: 100%;
+  min-height: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  margin-top: 13px;
+
+  border-radius: 12px;
+
+  font: inherit;
+  font-size: 0.64rem;
+  font-weight: 900;
+
+  cursor: pointer;
+}
+
+.scores-view-tier-button-nfl {
+  color: #d8f8e7;
+  border: 1px solid rgba(31, 178, 101, 0.3);
+  background: rgba(31, 178, 101, 0.14);
+}
+
+.scores-view-tier-button-fbs {
+  color: #dceaff;
+  border: 1px solid rgba(66, 135, 255, 0.3);
+  background: rgba(66, 135, 255, 0.14);
+}
+
+.scores-view-tier-button-fcs {
+  color: #eedfff;
+  border: 1px solid rgba(160, 104, 255, 0.3);
+  background: rgba(160, 104, 255, 0.14);
+}
+
+.scores-view-tier-button:hover {
+  filter: brightness(1.13);
+}
+
+/* =========================================================
+   TIER VIEW
+========================================================= */
+
+.scores-tier-view {
+  position: relative;
+
+  margin-top: clamp(28px, 5vw, 46px);
+  padding-left: 12px;
+
+  border-left: 3px solid transparent;
+}
+
+.scores-tier-view-nfl {
+  border-left-color: #24b86d;
+}
+
+.scores-tier-view-fbs {
+  border-left-color: #4287ff;
+}
+
+.scores-tier-view-fcs {
+  border-left-color: #a068ff;
+}
+
+.scores-tier-view-heading {
+  margin-bottom: 15px;
 }
 
 /* =========================================================
@@ -308,6 +568,7 @@
   content: "";
   position: absolute;
   inset: 0 0 auto;
+
   height: 3px;
 }
 
@@ -329,21 +590,33 @@
     0 17px 40px rgba(0, 0, 0, 0.21);
 }
 
+.score-card-featured {
+  border-color: rgba(255, 255, 255, 0.13);
+}
+
 .score-card-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 
   margin-bottom: 10px;
 }
 
-.score-card-header > div {
+.score-card-identity {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
 
   min-width: 0;
+}
+
+.score-card-identity > div {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .score-league-name {
@@ -355,6 +628,19 @@
   text-overflow: ellipsis;
 
   color: var(--color-muted, #9baab8);
+}
+
+.score-featured-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+
+  font-size: 0.48rem;
+  font-weight: 850;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+
+  color: #f0c95c;
 }
 
 .scores-status-badge {
@@ -477,6 +763,7 @@
 
 .score-team-info span {
   font-size: 0.59rem;
+
   color: var(--color-muted, #94a4b3);
 }
 
@@ -541,6 +828,7 @@
 
 .score-probability-fill {
   height: 100%;
+
   border-radius: inherit;
 }
 
@@ -585,6 +873,49 @@
 }
 
 /* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.scores-empty-state {
+  min-height: 190px;
+  padding: 28px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+
+  text-align: center;
+
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.scores-empty-state svg {
+  margin-bottom: 10px;
+
+  color: var(--color-muted, #8fa0b0);
+}
+
+.scores-empty-state h3 {
+  margin: 0 0 6px;
+
+  font-size: 0.86rem;
+}
+
+.scores-empty-state p {
+  max-width: 360px;
+  margin: 0;
+
+  font-size: 0.66rem;
+  line-height: 1.5;
+
+  color: var(--color-muted, #96a6b5);
+}
+
+/* =========================================================
    TABLET
 ========================================================= */
 
@@ -594,7 +925,10 @@
   }
 
   .scores-controls {
-    grid-template-columns: minmax(250px, 0.7fr) minmax(320px, 1fr);
+    grid-template-columns:
+      minmax(250px, 0.72fr)
+      minmax(330px, 1fr);
+
     align-items: stretch;
   }
 
@@ -604,6 +938,12 @@
 
   .score-card {
     padding: 17px;
+  }
+
+  .scores-view-tier-button {
+    width: auto;
+    min-width: 220px;
+    margin-left: auto;
   }
 }
 
@@ -629,6 +969,7 @@
   .scores-summary-item {
     flex-direction: column;
     gap: 4px;
+
     text-align: center;
   }
 
@@ -644,5 +985,10 @@
   .score-team-logo {
     width: 36px;
     height: 36px;
+  }
+
+  .featured-tier-section,
+  .scores-tier-view {
+    padding-left: 9px;
   }
 }

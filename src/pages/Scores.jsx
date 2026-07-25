@@ -4,9 +4,9 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
-  Circle,
   Clock3,
   Radio,
+  Sparkles,
   Trophy,
 } from "lucide-react";
 
@@ -18,22 +18,127 @@ import "../styles/scores.css";
 const CURRENT_WEEK = 5;
 const MAX_WEEK = 18;
 
-const tierOptions = [
-  { id: "all", label: "All" },
-  { id: "nfl", label: "NFL" },
-  { id: "fbs", label: "FBS" },
-  { id: "fcs", label: "FCS" },
+const primaryFilters = [
+  {
+    id: "featured",
+    label: "Featured",
+  },
+  {
+    id: "nfl",
+    label: "NFL",
+  },
+  {
+    id: "fbs",
+    label: "FBS",
+  },
+  {
+    id: "fcs",
+    label: "FCS",
+  },
 ];
+
+const secondaryFilters = {
+  nfl: [
+    {
+      id: "all",
+      label: "All NFL",
+    },
+    {
+      id: "afc",
+      label: "AFC",
+    },
+    {
+      id: "nfc",
+      label: "NFC",
+    },
+  ],
+  fbs: [
+    {
+      id: "all",
+      label: "All FBS",
+    },
+    {
+      id: "top-25",
+      label: "Top 25",
+    },
+    {
+      id: "acc",
+      label: "ACC",
+    },
+    {
+      id: "big-ten",
+      label: "Big Ten",
+    },
+    {
+      id: "big-12",
+      label: "Big 12",
+    },
+    {
+      id: "mac",
+      label: "MAC",
+    },
+    {
+      id: "mountain-west",
+      label: "Mountain West",
+    },
+    {
+      id: "sec",
+      label: "SEC",
+    },
+    {
+      id: "sun-belt",
+      label: "Sun Belt",
+    },
+  ],
+  fcs: [
+    {
+      id: "all",
+      label: "All FCS",
+    },
+    {
+      id: "top-25",
+      label: "Top 25",
+    },
+    {
+      id: "big-sky",
+      label: "Big Sky",
+    },
+    {
+      id: "coastal",
+      label: "Coastal",
+    },
+    {
+      id: "ivy",
+      label: "Ivy",
+    },
+    {
+      id: "missouri-valley",
+      label: "Missouri Valley",
+    },
+    {
+      id: "northeast",
+      label: "Northeast",
+    },
+    {
+      id: "southland",
+      label: "Southland",
+    },
+  ],
+};
 
 const scoreData = [
   {
-    id: "nfl-1",
+    id: "nfl-afc-1",
     tier: "NFL",
     tierClass: "nfl",
+    conference: "AFC",
+    conferenceId: "afc",
     league: "NFL League A",
     status: "live",
     statusLabel: "Live",
-    clock: "4th Quarter",
+    clock: "Sunday Night",
+    featured: true,
+    featuredRank: 1,
     awayTeam: "Bulldogs",
     awayInitial: "B",
     awayRecord: "3–1",
@@ -47,13 +152,17 @@ const scoreData = [
     winProbability: 72,
   },
   {
-    id: "nfl-2",
+    id: "nfl-nfc-1",
     tier: "NFL",
     tierClass: "nfl",
+    conference: "NFC",
+    conferenceId: "nfc",
     league: "NFL League B",
     status: "final",
     statusLabel: "Final",
     clock: "Final",
+    featured: true,
+    featuredRank: 2,
     awayTeam: "Panthers",
     awayInitial: "P",
     awayRecord: "3–2",
@@ -67,13 +176,66 @@ const scoreData = [
     winProbability: 100,
   },
   {
-    id: "fbs-1",
+    id: "nfl-afc-2",
+    tier: "NFL",
+    tierClass: "nfl",
+    conference: "AFC",
+    conferenceId: "afc",
+    league: "NFL League A",
+    status: "upcoming",
+    statusLabel: "Upcoming",
+    clock: "Mon 8:15 PM",
+    featured: true,
+    featuredRank: 3,
+    awayTeam: "Bears",
+    awayInitial: "B",
+    awayRecord: "1–3",
+    awayScore: null,
+    awayProjection: 144.8,
+    homeTeam: "Jets",
+    homeInitial: "J",
+    homeRecord: "1–3",
+    homeScore: null,
+    homeProjection: 142.6,
+    winProbability: 53,
+  },
+  {
+    id: "nfl-nfc-2",
+    tier: "NFL",
+    tierClass: "nfl",
+    conference: "NFC",
+    conferenceId: "nfc",
+    league: "NFL League B",
+    status: "upcoming",
+    statusLabel: "Upcoming",
+    clock: "Sun 4:25 PM",
+    featured: false,
+    awayTeam: "Wolves",
+    awayInitial: "W",
+    awayRecord: "2–2",
+    awayScore: null,
+    awayProjection: 137.5,
+    homeTeam: "Ravens",
+    homeInitial: "R",
+    homeRecord: "3–1",
+    homeScore: null,
+    homeProjection: 149.1,
+    winProbability: 38,
+  },
+
+  {
+    id: "fbs-sec-1",
     tier: "FBS",
     tierClass: "fbs",
+    conference: "SEC",
+    conferenceId: "sec",
     league: "SEC",
     status: "live",
     statusLabel: "Live",
     clock: "Sunday Afternoon",
+    top25: true,
+    featured: true,
+    featuredRank: 1,
     awayTeam: "Tigers",
     awayInitial: "T",
     awayRecord: "4–0",
@@ -87,13 +249,18 @@ const scoreData = [
     winProbability: 54,
   },
   {
-    id: "fbs-2",
+    id: "fbs-big-ten-1",
     tier: "FBS",
     tierClass: "fbs",
+    conference: "Big Ten",
+    conferenceId: "big-ten",
     league: "Big Ten",
     status: "upcoming",
     statusLabel: "Upcoming",
     clock: "Sun 4:25 PM",
+    top25: true,
+    featured: true,
+    featuredRank: 2,
     awayTeam: "Hurricanes",
     awayInitial: "H",
     awayRecord: "3–1",
@@ -107,13 +274,18 @@ const scoreData = [
     winProbability: 52,
   },
   {
-    id: "fbs-3",
+    id: "fbs-big-12-1",
     tier: "FBS",
     tierClass: "fbs",
+    conference: "Big 12",
+    conferenceId: "big-12",
     league: "Big 12",
     status: "final",
     statusLabel: "Final",
     clock: "Final",
+    top25: true,
+    featured: true,
+    featuredRank: 3,
     awayTeam: "Falcons",
     awayInitial: "F",
     awayRecord: "2–3",
@@ -127,13 +299,115 @@ const scoreData = [
     winProbability: 0,
   },
   {
-    id: "fcs-1",
+    id: "fbs-acc-1",
+    tier: "FBS",
+    tierClass: "fbs",
+    conference: "ACC",
+    conferenceId: "acc",
+    league: "ACC",
+    status: "upcoming",
+    statusLabel: "Upcoming",
+    clock: "Sun 1:00 PM",
+    top25: false,
+    featured: false,
+    awayTeam: "Cardinals",
+    awayInitial: "C",
+    awayRecord: "2–2",
+    awayScore: null,
+    awayProjection: 139.7,
+    homeTeam: "Blue Devils",
+    homeInitial: "B",
+    homeRecord: "3–1",
+    homeScore: null,
+    homeProjection: 143.2,
+    winProbability: 46,
+  },
+  {
+    id: "fbs-mac-1",
+    tier: "FBS",
+    tierClass: "fbs",
+    conference: "MAC",
+    conferenceId: "mac",
+    league: "MAC",
+    status: "final",
+    statusLabel: "Final",
+    clock: "Final",
+    top25: false,
+    featured: false,
+    awayTeam: "Golden Flashes",
+    awayInitial: "G",
+    awayRecord: "1–4",
+    awayScore: 110.4,
+    awayProjection: 116.9,
+    homeTeam: "RedHawks",
+    homeInitial: "R",
+    homeRecord: "3–2",
+    homeScore: 129.8,
+    homeProjection: 125.3,
+    winProbability: 0,
+  },
+  {
+    id: "fbs-mountain-west-1",
+    tier: "FBS",
+    tierClass: "fbs",
+    conference: "Mountain West",
+    conferenceId: "mountain-west",
+    league: "Mountain West",
+    status: "live",
+    statusLabel: "Live",
+    clock: "Sunday Night",
+    top25: false,
+    featured: false,
+    awayTeam: "Broncos",
+    awayInitial: "B",
+    awayRecord: "3–1",
+    awayScore: 127.8,
+    awayProjection: 145.6,
+    homeTeam: "Aggies",
+    homeInitial: "A",
+    homeRecord: "2–2",
+    homeScore: 121.3,
+    homeProjection: 139.8,
+    winProbability: 63,
+  },
+  {
+    id: "fbs-sun-belt-1",
+    tier: "FBS",
+    tierClass: "fbs",
+    conference: "Sun Belt",
+    conferenceId: "sun-belt",
+    league: "Sun Belt",
+    status: "upcoming",
+    statusLabel: "Upcoming",
+    clock: "Mon 7:15 PM",
+    top25: false,
+    featured: false,
+    awayTeam: "Mountaineers",
+    awayInitial: "M",
+    awayRecord: "2–2",
+    awayScore: null,
+    awayProjection: 132.9,
+    homeTeam: "Trojans",
+    homeInitial: "T",
+    homeRecord: "2–2",
+    homeScore: null,
+    homeProjection: 134.1,
+    winProbability: 49,
+  },
+
+  {
+    id: "fcs-big-sky-1",
     tier: "FCS",
     tierClass: "fcs",
+    conference: "Big Sky",
+    conferenceId: "big-sky",
     league: "Big Sky",
     status: "upcoming",
     statusLabel: "Upcoming",
     clock: "Sun 8:20 PM",
+    top25: true,
+    featured: true,
+    featuredRank: 1,
     awayTeam: "Wildcats",
     awayInitial: "W",
     awayRecord: "4–0",
@@ -147,13 +421,18 @@ const scoreData = [
     winProbability: 51,
   },
   {
-    id: "fcs-2",
+    id: "fcs-missouri-valley-1",
     tier: "FCS",
     tierClass: "fcs",
+    conference: "Missouri Valley",
+    conferenceId: "missouri-valley",
     league: "Missouri Valley",
     status: "live",
     statusLabel: "Live",
     clock: "Sunday Night",
+    top25: true,
+    featured: true,
+    featuredRank: 2,
     awayTeam: "Bison",
     awayInitial: "B",
     awayRecord: "3–1",
@@ -166,13 +445,103 @@ const scoreData = [
     homeProjection: 137.8,
     winProbability: 61,
   },
-];
-
-const heroStats = [
-  { label: "Live", value: "3" },
-  { label: "Upcoming", value: "2" },
-  { label: "Final", value: "2" },
-  { label: "Leagues", value: "15" },
+  {
+    id: "fcs-ivy-1",
+    tier: "FCS",
+    tierClass: "fcs",
+    conference: "Ivy",
+    conferenceId: "ivy",
+    league: "Ivy",
+    status: "final",
+    statusLabel: "Final",
+    clock: "Final",
+    top25: true,
+    featured: true,
+    featuredRank: 3,
+    awayTeam: "Crimson",
+    awayInitial: "C",
+    awayRecord: "4–1",
+    awayScore: 128.9,
+    awayProjection: 126.2,
+    homeTeam: "Bears",
+    homeInitial: "B",
+    homeRecord: "3–2",
+    homeScore: 122.1,
+    homeProjection: 125.7,
+    winProbability: 100,
+  },
+  {
+    id: "fcs-coastal-1",
+    tier: "FCS",
+    tierClass: "fcs",
+    conference: "Coastal",
+    conferenceId: "coastal",
+    league: "Coastal",
+    status: "upcoming",
+    statusLabel: "Upcoming",
+    clock: "Sun 1:00 PM",
+    top25: false,
+    featured: false,
+    awayTeam: "Seahawks",
+    awayInitial: "S",
+    awayRecord: "2–2",
+    awayScore: null,
+    awayProjection: 129.5,
+    homeTeam: "Phoenix",
+    homeInitial: "P",
+    homeRecord: "3–1",
+    homeScore: null,
+    homeProjection: 136.2,
+    winProbability: 42,
+  },
+  {
+    id: "fcs-northeast-1",
+    tier: "FCS",
+    tierClass: "fcs",
+    conference: "Northeast",
+    conferenceId: "northeast",
+    league: "Northeast",
+    status: "final",
+    statusLabel: "Final",
+    clock: "Final",
+    top25: false,
+    featured: false,
+    awayTeam: "Pioneers",
+    awayInitial: "P",
+    awayRecord: "2–3",
+    awayScore: 115.8,
+    awayProjection: 121.4,
+    homeTeam: "Dukes",
+    homeInitial: "D",
+    homeRecord: "3–2",
+    homeScore: 123.7,
+    homeProjection: 119.2,
+    winProbability: 0,
+  },
+  {
+    id: "fcs-southland-1",
+    tier: "FCS",
+    tierClass: "fcs",
+    conference: "Southland",
+    conferenceId: "southland",
+    league: "Southland",
+    status: "live",
+    statusLabel: "Live",
+    clock: "Late Sunday",
+    top25: false,
+    featured: false,
+    awayTeam: "Cowboys",
+    awayInitial: "C",
+    awayRecord: "3–1",
+    awayScore: 117.9,
+    awayProjection: 138.4,
+    homeTeam: "Lumberjacks",
+    homeInitial: "L",
+    homeRecord: "2–2",
+    homeScore: 113.6,
+    homeProjection: 134.7,
+    winProbability: 58,
+  },
 ];
 
 function TierBadge({ tier, tierClass }) {
@@ -184,13 +553,13 @@ function TierBadge({ tier, tierClass }) {
 }
 
 function StatusBadge({ status, label }) {
-  const icons = {
+  const statusIcons = {
     live: Radio,
     upcoming: Clock3,
     final: Trophy,
   };
 
-  const StatusIcon = icons[status] ?? Circle;
+  const StatusIcon = statusIcons[status] ?? Activity;
 
   return (
     <span className={`scores-status-badge scores-status-${status}`}>
@@ -209,6 +578,9 @@ function TeamRow({
   tierClass,
   isWinner,
 }) {
+  const displayedNumber =
+    score === null ? projection.toFixed(1) : score.toFixed(1);
+
   return (
     <div className={`score-team-row${isWinner ? " winner" : ""}`}>
       <div className={`score-team-logo score-team-logo-${tierClass}`}>
@@ -221,15 +593,19 @@ function TeamRow({
       </div>
 
       <div className="score-team-numbers">
-        <strong>{score === null ? projection.toFixed(1) : score.toFixed(1)}</strong>
+        <strong>{displayedNumber}</strong>
 
-        <span>{score === null ? "PROJ" : `PROJ ${projection.toFixed(1)}`}</span>
+        <span>
+          {score === null
+            ? "PROJECTED"
+            : `PROJ ${projection.toFixed(1)}`}
+        </span>
       </div>
     </div>
   );
 }
 
-function ScoreCard({ game }) {
+function ScoreCard({ game, featured = false }) {
   const awayWinner =
     game.status === "final" &&
     game.awayScore !== null &&
@@ -244,15 +620,35 @@ function ScoreCard({ game }) {
 
   return (
     <article
-      className={`score-card score-card-${game.tierClass} score-card-${game.status}`}
+      className={[
+        "score-card",
+        `score-card-${game.tierClass}`,
+        `score-card-${game.status}`,
+        featured ? "score-card-featured" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       <div className="score-card-header">
-        <div>
+        <div className="score-card-identity">
           <TierBadge tier={game.tier} tierClass={game.tierClass} />
-          <span className="score-league-name">{game.league}</span>
+
+          <div>
+            <span className="score-league-name">{game.league}</span>
+
+            {featured ? (
+              <span className="score-featured-label">
+                <Sparkles size={10} />
+                Featured matchup
+              </span>
+            ) : null}
+          </div>
         </div>
 
-        <StatusBadge status={game.status} label={game.statusLabel} />
+        <StatusBadge
+          status={game.status}
+          label={game.statusLabel}
+        />
       </div>
 
       <div className="score-card-time">
@@ -285,6 +681,7 @@ function ScoreCard({ game }) {
       <div className="score-card-footer">
         <div className="score-probability-heading">
           <span>Win probability</span>
+
           <span>
             {game.winProbability}% / {100 - game.winProbability}%
           </span>
@@ -306,31 +703,129 @@ function ScoreCard({ game }) {
   );
 }
 
+function FeaturedTierSection({ tierClass, tier, games, onViewAll }) {
+  return (
+    <section
+      className={`featured-tier-section featured-tier-section-${tierClass}`}
+    >
+      <div className="scores-section-heading">
+        <div>
+          <span>Three games to watch</span>
+          <h2>{tier}</h2>
+        </div>
+
+        <TierBadge tier={tier} tierClass={tierClass} />
+      </div>
+
+      <div className="scores-grid">
+        {games.map((game) => (
+          <ScoreCard key={game.id} game={game} featured />
+        ))}
+      </div>
+
+      <button
+        type="button"
+        className={`scores-view-tier-button scores-view-tier-button-${tierClass}`}
+        onClick={() => onViewAll(tierClass)}
+      >
+        View All {tier} Games
+        <ChevronRight size={17} />
+      </button>
+    </section>
+  );
+}
+
 function Scores() {
   const [selectedWeek, setSelectedWeek] = useState(CURRENT_WEEK);
-  const [selectedTier, setSelectedTier] = useState("all");
+  const [selectedPrimaryFilter, setSelectedPrimaryFilter] =
+    useState("featured");
+  const [selectedSecondaryFilter, setSelectedSecondaryFilter] =
+    useState("all");
 
-  const filteredGames = useMemo(() => {
-    if (selectedTier === "all") {
-      return scoreData;
+  const heroStats = useMemo(() => {
+    const liveCount = scoreData.filter(
+      (game) => game.status === "live",
+    ).length;
+
+    const upcomingCount = scoreData.filter(
+      (game) => game.status === "upcoming",
+    ).length;
+
+    const finalCount = scoreData.filter(
+      (game) => game.status === "final",
+    ).length;
+
+    return [
+      {
+        label: "Live",
+        value: liveCount.toString(),
+      },
+      {
+        label: "Upcoming",
+        value: upcomingCount.toString(),
+      },
+      {
+        label: "Final",
+        value: finalCount.toString(),
+      },
+      {
+        label: "Total Games",
+        value: "101",
+      },
+    ];
+  }, []);
+
+  const featuredGroups = useMemo(() => {
+    return ["nfl", "fbs", "fcs"].map((tierClass) => ({
+      tierClass,
+      tier: tierClass.toUpperCase(),
+      games: scoreData
+        .filter(
+          (game) =>
+            game.tierClass === tierClass && game.featured,
+        )
+        .sort(
+          (firstGame, secondGame) =>
+            firstGame.featuredRank - secondGame.featuredRank,
+        )
+        .slice(0, 3),
+    }));
+  }, []);
+
+  const visibleTierGames = useMemo(() => {
+    if (selectedPrimaryFilter === "featured") {
+      return [];
     }
 
-    return scoreData.filter(
-      (game) => game.tierClass === selectedTier,
-    );
-  }, [selectedTier]);
+    return scoreData.filter((game) => {
+      if (game.tierClass !== selectedPrimaryFilter) {
+        return false;
+      }
 
-  const groupedGames = useMemo(() => {
-    return ["nfl", "fbs", "fcs"]
-      .map((tierClass) => ({
-        tierClass,
-        tier: tierClass.toUpperCase(),
-        games: filteredGames.filter(
-          (game) => game.tierClass === tierClass,
-        ),
-      }))
-      .filter((group) => group.games.length > 0);
-  }, [filteredGames]);
+      if (selectedSecondaryFilter === "all") {
+        return true;
+      }
+
+      if (selectedSecondaryFilter === "top-25") {
+        return Boolean(game.top25);
+      }
+
+      return game.conferenceId === selectedSecondaryFilter;
+    });
+  }, [selectedPrimaryFilter, selectedSecondaryFilter]);
+
+  const activeSecondaryFilters =
+    secondaryFilters[selectedPrimaryFilter] ?? [];
+
+  const activePrimaryLabel =
+    primaryFilters.find(
+      (filter) => filter.id === selectedPrimaryFilter,
+    )?.label ?? "Featured";
+
+  const activeSecondaryLabel =
+    activeSecondaryFilters.find(
+      (filter) => filter.id === selectedSecondaryFilter,
+    )?.label ?? "";
 
   const goToPreviousWeek = () => {
     setSelectedWeek((week) => Math.max(1, week - 1));
@@ -340,12 +835,31 @@ function Scores() {
     setSelectedWeek((week) => Math.min(MAX_WEEK, week + 1));
   };
 
+  const selectPrimaryFilter = (filterId) => {
+    setSelectedPrimaryFilter(filterId);
+    setSelectedSecondaryFilter("all");
+  };
+
+  const viewAllTierGames = (tierClass) => {
+    setSelectedPrimaryFilter(tierClass);
+    setSelectedSecondaryFilter("all");
+
+    window.requestAnimationFrame(() => {
+      document
+        .querySelector(".scores-controls")
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+    });
+  };
+
   return (
     <main className="scores-page">
       <PageHero
         eyebrow="Live Game Center"
         title="Scores"
-        description="Follow every matchup across all 15 MESH leagues with live scores, projections, schedules, and final results."
+        description="Follow the biggest games first, then explore every matchup by tier, conference, ranking, and week."
         imageSrc={meshShield}
         imageAlt="MESH Football shield"
         accent="scores"
@@ -378,82 +892,171 @@ function Scores() {
           </button>
         </div>
 
-        <div className="scores-tier-tabs" aria-label="Filter scores by tier">
-          {tierOptions.map((tier) => (
+        <div
+          className="scores-primary-tabs"
+          aria-label="Choose scores view"
+        >
+          {primaryFilters.map((filter) => (
             <button
               type="button"
-              key={tier.id}
-              className={
-                selectedTier === tier.id
-                  ? `scores-tier-tab active scores-tier-tab-${tier.id}`
-                  : `scores-tier-tab scores-tier-tab-${tier.id}`
-              }
-              onClick={() => setSelectedTier(tier.id)}
+              key={filter.id}
+              className={[
+                "scores-primary-tab",
+                `scores-primary-tab-${filter.id}`,
+                selectedPrimaryFilter === filter.id
+                  ? "active"
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              onClick={() => selectPrimaryFilter(filter.id)}
             >
-              {tier.label}
+              {filter.label}
             </button>
           ))}
         </div>
       </section>
 
+      {selectedPrimaryFilter !== "featured" ? (
+        <section
+          className={`scores-secondary-filter scores-secondary-filter-${selectedPrimaryFilter}`}
+        >
+          <div className="scores-secondary-filter-heading">
+            <span>Filter {activePrimaryLabel}</span>
+            <strong>{activeSecondaryLabel}</strong>
+          </div>
+
+          <div
+            className="scores-secondary-tabs"
+            aria-label={`Filter ${activePrimaryLabel} games`}
+          >
+            {activeSecondaryFilters.map((filter) => (
+              <button
+                type="button"
+                key={filter.id}
+                className={
+                  selectedSecondaryFilter === filter.id
+                    ? "scores-secondary-tab active"
+                    : "scores-secondary-tab"
+                }
+                onClick={() =>
+                  setSelectedSecondaryFilter(filter.id)
+                }
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="scores-summary-bar">
-        <div className="scores-summary-item">
+        <div className="scores-summary-item scores-summary-live">
           <Radio size={16} />
+
           <div>
-            <strong>3</strong>
+            <strong>{heroStats[0].value}</strong>
             <span>Live</span>
           </div>
         </div>
 
         <div className="scores-summary-item">
           <Clock3 size={16} />
+
           <div>
-            <strong>2</strong>
+            <strong>{heroStats[1].value}</strong>
             <span>Upcoming</span>
           </div>
         </div>
 
         <div className="scores-summary-item">
           <Trophy size={16} />
+
           <div>
-            <strong>2</strong>
+            <strong>{heroStats[2].value}</strong>
             <span>Final</span>
           </div>
         </div>
 
         <div className="scores-summary-item">
           <Activity size={16} />
+
           <div>
-            <strong>{filteredGames.length}</strong>
+            <strong>
+              {selectedPrimaryFilter === "featured"
+                ? "9"
+                : visibleTierGames.length}
+            </strong>
+
             <span>Shown</span>
           </div>
         </div>
       </section>
 
-      {groupedGames.map((group) => (
+      {selectedPrimaryFilter === "featured" ? (
+        <section className="scores-featured-view">
+          <div className="scores-featured-intro">
+            <span>Curated scoreboard</span>
+            <h2>Featured Matchups</h2>
+
+            <p>
+              Three notable games from each tier, selected from live
+              action, ranked matchups, close projections, and major
+              weekly storylines.
+            </p>
+          </div>
+
+          {featuredGroups.map((group) => (
+            <FeaturedTierSection
+              key={group.tierClass}
+              tierClass={group.tierClass}
+              tier={group.tier}
+              games={group.games}
+              onViewAll={viewAllTierGames}
+            />
+          ))}
+        </section>
+      ) : (
         <section
-          className={`scores-tier-section scores-tier-section-${group.tierClass}`}
-          key={group.tierClass}
+          className={`scores-tier-view scores-tier-view-${selectedPrimaryFilter}`}
         >
-          <div className="scores-section-heading">
+          <div className="scores-section-heading scores-tier-view-heading">
             <div>
-              <span>{group.games.length} matchups</span>
-              <h2>{group.tier}</h2>
+              <span>
+                {visibleTierGames.length} matchups shown
+              </span>
+
+              <h2>
+                {activeSecondaryLabel || activePrimaryLabel}
+              </h2>
             </div>
 
             <TierBadge
-              tier={group.tier}
-              tierClass={group.tierClass}
+              tier={activePrimaryLabel}
+              tierClass={selectedPrimaryFilter}
             />
           </div>
 
-          <div className="scores-grid">
-            {group.games.map((game) => (
-              <ScoreCard key={game.id} game={game} />
-            ))}
-          </div>
+          {visibleTierGames.length > 0 ? (
+            <div className="scores-grid">
+              {visibleTierGames.map((game) => (
+                <ScoreCard key={game.id} game={game} />
+              ))}
+            </div>
+          ) : (
+            <div className="scores-empty-state">
+              <Activity size={28} />
+
+              <h3>No matchups found</h3>
+
+              <p>
+                No games currently match this tier and conference
+                filter.
+              </p>
+            </div>
+          )}
         </section>
-      ))}
+      )}
     </main>
   );
 }

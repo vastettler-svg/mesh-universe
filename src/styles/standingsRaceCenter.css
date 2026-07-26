@@ -1,0 +1,316 @@
+/* =========================================================
+   MESH FOOTBALL — STANDINGS RACE CENTER
+========================================================= */
+
+.standings-race-center {
+    margin-top: clamp(30px, 5vw, 48px);
+  }
+  
+  .standings-race-center-heading {
+    max-width: 680px;
+    margin-bottom: 15px;
+  }
+  
+  .standings-race-center-heading > span {
+    display: block;
+    margin-bottom: 4px;
+  
+    font-size: 0.56rem;
+    font-weight: 900;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  
+    color: #efc85a;
+  }
+  
+  .standings-race-center-heading h2 {
+    margin: 0;
+  
+    font-family: var(--heading-font, "Graduate", serif);
+    font-size: clamp(1.25rem, 3vw, 1.65rem);
+    font-weight: 400;
+    letter-spacing: 0.035em;
+  }
+  
+  .standings-race-center-heading p {
+    margin: 8px 0 0;
+  
+    font-size: 0.7rem;
+    line-height: 1.55;
+  
+    color: var(--color-muted, #9eacba);
+  }
+  
+  .standings-race-grid {
+    display: grid;
+    gap: 13px;
+  }
+  
+  .standings-race-card {
+    position: relative;
+    overflow: hidden;
+  
+    padding: 16px;
+  
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 16px;
+  
+    background:
+      linear-gradient(
+        145deg,
+        rgba(27, 48, 73, 0.97),
+        rgba(10, 24, 41, 0.99)
+      );
+  
+    box-shadow:
+      0 17px 40px rgba(0, 0, 0, 0.21),
+      inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  }
+  
+  .standings-race-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+  
+    height: 3px;
+  }
+  
+  .standings-race-card-nfl::before {
+    background: #24b86d;
+  }
+  
+  .standings-race-card-fbs::before {
+    background: #4287ff;
+  }
+  
+  .standings-race-card-fcs::before {
+    background: #a068ff;
+  }
+  
+  .standings-race-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  
+    margin-bottom: 14px;
+  }
+  
+  .standings-race-icon {
+    width: 39px;
+    height: 39px;
+  
+    display: grid;
+    place-items: center;
+  
+    border-radius: 11px;
+  }
+  
+  .standings-race-icon-nfl {
+    color: #64e3a4;
+    background: rgba(31, 178, 101, 0.14);
+  }
+  
+  .standings-race-icon-fbs {
+    color: #7eaeff;
+    background: rgba(66, 135, 255, 0.14);
+  }
+  
+  .standings-race-icon-fcs {
+    color: #bd93ff;
+    background: rgba(160, 104, 255, 0.14);
+  }
+  
+  .standings-race-tier {
+    padding: 5px 8px;
+  
+    border-radius: 999px;
+  
+    font-size: 0.56rem;
+    font-weight: 900;
+    letter-spacing: 0.055em;
+  }
+  
+  .standings-race-tier-nfl {
+    color: #d8f8e7;
+    border: 1px solid rgba(31, 178, 101, 0.28);
+    background: rgba(31, 178, 101, 0.16);
+  }
+  
+  .standings-race-tier-fbs {
+    color: #dceaff;
+    border: 1px solid rgba(66, 135, 255, 0.28);
+    background: rgba(66, 135, 255, 0.16);
+  }
+  
+  .standings-race-tier-fcs {
+    color: #eedfff;
+    border: 1px solid rgba(160, 104, 255, 0.28);
+    background: rgba(160, 104, 255, 0.16);
+  }
+  
+  .standings-race-eyebrow {
+    display: block;
+    margin-bottom: 4px;
+  
+    font-size: 0.52rem;
+    font-weight: 850;
+    letter-spacing: 0.075em;
+    text-transform: uppercase;
+  
+    color: var(--color-muted, #91a1b1);
+  }
+  
+  .standings-race-card h3 {
+    margin: 0;
+  
+    font-size: 0.88rem;
+  }
+  
+  .standings-race-card > p {
+    margin: 7px 0 0;
+  
+    font-size: 0.64rem;
+    line-height: 1.48;
+  
+    color: var(--color-muted, #9eacba);
+  }
+  
+  .race-position-list {
+    overflow: hidden;
+  
+    margin-top: 14px;
+  
+    border: 1px solid rgba(255, 255, 255, 0.065);
+    border-radius: 12px;
+  }
+  
+  .race-position-row {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 9px;
+  
+    min-height: 52px;
+    padding: 8px 10px;
+  
+    border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+  }
+  
+  .race-position-row:last-child {
+    border-bottom: 0;
+  }
+  
+  .race-position-promotion,
+  .race-position-safe {
+    background: rgba(31, 178, 101, 0.035);
+  }
+  
+  .race-position-danger {
+    background: rgba(225, 58, 75, 0.045);
+  }
+  
+  .race-position-chasing {
+    background: rgba(66, 135, 255, 0.04);
+  }
+  
+  .race-position-warning {
+    background: rgba(240, 128, 60, 0.04);
+  }
+  
+  .race-position-rank {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+  
+    font-size: 0.61rem;
+  }
+  
+  .race-position-promotion .race-position-rank,
+  .race-position-safe .race-position-rank {
+    color: #55dfa0;
+  }
+  
+  .race-position-danger .race-position-rank {
+    color: #ff6474;
+  }
+  
+  .race-position-team {
+    min-width: 0;
+  
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  
+  .race-position-team strong {
+    overflow: hidden;
+  
+    font-size: 0.67rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  
+  .race-position-team span {
+    overflow: hidden;
+  
+    font-size: 0.48rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  
+    color: var(--color-muted, #8f9fae);
+  }
+  
+  .race-position-record {
+    font-size: 0.62rem;
+  }
+  
+  .standings-race-button {
+    width: 100%;
+    min-height: 41px;
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  
+    margin-top: 12px;
+  
+    border-radius: 10px;
+  
+    font: inherit;
+    font-size: 0.59rem;
+    font-weight: 850;
+  
+    cursor: pointer;
+  }
+  
+  .standings-race-button-nfl {
+    color: #d8f8e7;
+    border: 1px solid rgba(31, 178, 101, 0.28);
+    background: rgba(31, 178, 101, 0.12);
+  }
+  
+  .standings-race-button-fbs {
+    color: #dceaff;
+    border: 1px solid rgba(66, 135, 255, 0.28);
+    background: rgba(66, 135, 255, 0.12);
+  }
+  
+  .standings-race-button-fcs {
+    color: #eedfff;
+    border: 1px solid rgba(160, 104, 255, 0.28);
+    background: rgba(160, 104, 255, 0.12);
+  }
+  
+  @media (min-width: 700px) {
+    .standings-race-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  
+  @media (min-width: 1050px) {
+    .standings-race-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }

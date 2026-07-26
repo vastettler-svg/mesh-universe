@@ -16,6 +16,7 @@ import {
 
 import PageHeader from "../components/PageHeader";
 import meshShield from "../assets/logos/mfl-shield.png";
+import StandingsRaceCenter from "../components/StandingsRaceCenter";
 
 import "../styles/standings.css";
 
@@ -925,7 +926,7 @@ function Standings() {
   return (
     <main className="standings-page">
       <PageHeader
-        eyebrow="The race for MESH"
+        eyebrow="The race for the MESH Championship"
         title="Standings"
         description="Track playoff races, overall rankings, promotions, relegation pressure, streaks, and weekly movement."
         imageSrc={meshShield}
@@ -1022,6 +1023,7 @@ function Standings() {
               ))}
             </div>
           </section>
+          <StandingsRaceCenter onSelectTier={viewTier} />
 
           <TierSnapshot
             tierClass="nfl"

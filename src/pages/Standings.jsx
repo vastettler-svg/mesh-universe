@@ -7,7 +7,6 @@ import {
   CircleMinus,
   Flame,
   Medal,
-  ShieldAlert,
   Sparkles,
   TrendingDown,
   TrendingUp,
@@ -15,13 +14,13 @@ import {
 } from "lucide-react";
 
 import PageHeader from "../components/PageHeader";
-import meshShield from "../assets/logos/mfl-shield.png";
 import StandingsRaceCenter from "../components/StandingsRaceCenter";
+import meshShield from "../assets/logos/mfl-shield.png";
 
 import "../styles/standings.css";
 
 const primaryFilters = [
-  { id: "featured", label: "Featured" },
+  { id: "overview", label: "Overview" },
   { id: "nfl", label: "NFL" },
   { id: "fbs", label: "FBS" },
   { id: "fcs", label: "FCS" },
@@ -67,8 +66,6 @@ const standingsData = [
     team: "Bulldogs",
     coach: "Coach Daniels",
     record: "5–0",
-    wins: 5,
-    losses: 0,
     pointsFor: 768.4,
     pointsAgainst: 641.2,
     streak: "W5",
@@ -86,8 +83,6 @@ const standingsData = [
     team: "Lions",
     coach: "Coach Morris",
     record: "4–1",
-    wins: 4,
-    losses: 1,
     pointsFor: 742.1,
     pointsAgainst: 689.8,
     streak: "W3",
@@ -105,8 +100,6 @@ const standingsData = [
     team: "Panthers",
     coach: "Coach Carter",
     record: "4–1",
-    wins: 4,
-    losses: 1,
     pointsFor: 721.6,
     pointsAgainst: 693.5,
     streak: "W2",
@@ -124,8 +117,6 @@ const standingsData = [
     team: "Raiders",
     coach: "Coach Walker",
     record: "3–2",
-    wins: 3,
-    losses: 2,
     pointsFor: 704.7,
     pointsAgainst: 698.2,
     streak: "L1",
@@ -143,8 +134,6 @@ const standingsData = [
     team: "Wolves",
     coach: "Coach Smith",
     record: "2–3",
-    wins: 2,
-    losses: 3,
     pointsFor: 654.2,
     pointsAgainst: 702.9,
     streak: "L2",
@@ -162,8 +151,6 @@ const standingsData = [
     team: "Ravens",
     coach: "Coach Hill",
     record: "2–3",
-    wins: 2,
-    losses: 3,
     pointsFor: 647.8,
     pointsAgainst: 711.4,
     streak: "L1",
@@ -181,8 +168,6 @@ const standingsData = [
     team: "Bears",
     coach: "Coach Young",
     record: "1–4",
-    wins: 1,
-    losses: 4,
     pointsFor: 618.4,
     pointsAgainst: 735.6,
     streak: "L3",
@@ -200,8 +185,6 @@ const standingsData = [
     team: "Jets",
     coach: "Coach Green",
     record: "1–4",
-    wins: 1,
-    losses: 4,
     pointsFor: 606.9,
     pointsAgainst: 748.3,
     streak: "L4",
@@ -220,8 +203,6 @@ const standingsData = [
     team: "Tigers",
     coach: "Coach Franklin",
     record: "5–0",
-    wins: 5,
-    losses: 0,
     pointsFor: 781.3,
     pointsAgainst: 632.4,
     streak: "W5",
@@ -240,8 +221,6 @@ const standingsData = [
     team: "Eagles",
     coach: "Coach Morris",
     record: "5–0",
-    wins: 5,
-    losses: 0,
     pointsFor: 768.7,
     pointsAgainst: 648.9,
     streak: "W5",
@@ -260,8 +239,6 @@ const standingsData = [
     team: "Hurricanes",
     coach: "Coach James",
     record: "4–1",
-    wins: 4,
-    losses: 1,
     pointsFor: 754.1,
     pointsAgainst: 671.5,
     streak: "W3",
@@ -280,8 +257,6 @@ const standingsData = [
     team: "Longhorns",
     coach: "Coach Brown",
     record: "4–1",
-    wins: 4,
-    losses: 1,
     pointsFor: 746.8,
     pointsAgainst: 682.2,
     streak: "W2",
@@ -300,8 +275,6 @@ const standingsData = [
     team: "Broncos",
     coach: "Coach Miller",
     record: "4–1",
-    wins: 4,
-    losses: 1,
     pointsFor: 739.5,
     pointsAgainst: 681.6,
     streak: "W4",
@@ -320,8 +293,6 @@ const standingsData = [
     team: "Mountaineers",
     coach: "Coach Lee",
     record: "4–1",
-    wins: 4,
-    losses: 1,
     pointsFor: 724.2,
     pointsAgainst: 690.1,
     streak: "L1",
@@ -340,8 +311,6 @@ const standingsData = [
     team: "RedHawks",
     coach: "Coach Reed",
     record: "2–3",
-    wins: 2,
-    losses: 3,
     pointsFor: 641.8,
     pointsAgainst: 704.3,
     streak: "L2",
@@ -360,8 +329,6 @@ const standingsData = [
     team: "Falcons",
     coach: "Coach Allen",
     record: "2–3",
-    wins: 2,
-    losses: 3,
     pointsFor: 635.4,
     pointsAgainst: 711.8,
     streak: "L1",
@@ -380,8 +347,6 @@ const standingsData = [
     team: "Blue Devils",
     coach: "Coach West",
     record: "1–4",
-    wins: 1,
-    losses: 4,
     pointsFor: 612.2,
     pointsAgainst: 733.9,
     streak: "L4",
@@ -400,8 +365,6 @@ const standingsData = [
     team: "Bobcats",
     coach: "Coach Adams",
     record: "1–4",
-    wins: 1,
-    losses: 4,
     pointsFor: 604.7,
     pointsAgainst: 741.5,
     streak: "L3",
@@ -421,8 +384,6 @@ const standingsData = [
     team: "Wildcats",
     coach: "Coach Carter",
     record: "5–0",
-    wins: 5,
-    losses: 0,
     pointsFor: 761.6,
     pointsAgainst: 628.9,
     streak: "W5",
@@ -441,8 +402,6 @@ const standingsData = [
     team: "Bison",
     coach: "Coach Harris",
     record: "5–0",
-    wins: 5,
-    losses: 0,
     pointsFor: 748.3,
     pointsAgainst: 645.2,
     streak: "W5",
@@ -461,8 +420,6 @@ const standingsData = [
     team: "Crimson",
     coach: "Coach Taylor",
     record: "4–1",
-    wins: 4,
-    losses: 1,
     pointsFor: 732.5,
     pointsAgainst: 662.8,
     streak: "W3",
@@ -481,8 +438,6 @@ const standingsData = [
     team: "Seahawks",
     coach: "Coach Lewis",
     record: "4–1",
-    wins: 4,
-    losses: 1,
     pointsFor: 721.9,
     pointsAgainst: 669.4,
     streak: "W2",
@@ -501,8 +456,6 @@ const standingsData = [
     team: "Lumberjacks",
     coach: "Coach King",
     record: "4–1",
-    wins: 4,
-    losses: 1,
     pointsFor: 701.2,
     pointsAgainst: 681.7,
     streak: "W4",
@@ -521,8 +474,6 @@ const standingsData = [
     team: "Dukes",
     coach: "Coach White",
     record: "3–2",
-    wins: 3,
-    losses: 2,
     pointsFor: 692.6,
     pointsAgainst: 684.9,
     streak: "L1",
@@ -541,8 +492,6 @@ const standingsData = [
     team: "Rams",
     coach: "Coach Hall",
     record: "3–2",
-    wins: 3,
-    losses: 2,
     pointsFor: 687.1,
     pointsAgainst: 689.8,
     streak: "W1",
@@ -561,8 +510,6 @@ const standingsData = [
     team: "Cowboys",
     coach: "Coach Martin",
     record: "3–2",
-    wins: 3,
-    losses: 2,
     pointsFor: 679.4,
     pointsAgainst: 693.2,
     streak: "L2",
@@ -589,7 +536,7 @@ const pulseStories = [
     id: "fall",
     eyebrow: "Biggest Fall",
     title: "Falcons",
-    detail: "Three-place drop puts the program near relegation.",
+    detail: "A three-place drop puts the program near relegation.",
     value: "−3",
     tier: "FBS",
     tierClass: "fbs",
@@ -675,7 +622,6 @@ function StandingsRow({ team }) {
       <div className="standings-team-info">
         <div className="standings-team-heading">
           <strong>{team.team}</strong>
-
           <span>{team.conference}</span>
         </div>
 
@@ -717,7 +663,7 @@ function StandingsRow({ team }) {
 }
 
 function StandingsLine({ type, label }) {
-  const LineIcon = type === "promotion" ? ArrowUp : ShieldAlert;
+  const LineIcon = type === "promotion" ? ArrowUp : ArrowDown;
 
   return (
     <div className={`standings-line standings-line-${type}`}>
@@ -792,7 +738,9 @@ function PulseCard({ story }) {
         />
       </div>
 
-      <span className="standings-pulse-eyebrow">{story.eyebrow}</span>
+      <span className="standings-pulse-eyebrow">
+        {story.eyebrow}
+      </span>
 
       <div className="standings-pulse-title">
         <h3>{story.title}</h3>
@@ -804,61 +752,12 @@ function PulseCard({ story }) {
   );
 }
 
-function TierSnapshot({ tierClass, title, teams, onViewTier }) {
-  return (
-    <section
-      className={`standings-snapshot standings-snapshot-${tierClass}`}
-    >
-      <div className="standings-section-heading">
-        <div>
-          <span>Current race</span>
-          <h2>{title}</h2>
-        </div>
-
-        <TierBadge tier={title} tierClass={tierClass} />
-      </div>
-
-      <StandingsList teams={teams} tierClass={tierClass} />
-
-      <button
-        type="button"
-        className={`standings-view-button standings-view-button-${tierClass}`}
-        onClick={() => onViewTier(tierClass)}
-      >
-        View Full {title} Standings
-        <ChevronRight size={16} />
-      </button>
-    </section>
-  );
-}
-
 function Standings() {
   const [selectedPrimaryFilter, setSelectedPrimaryFilter] =
-    useState("featured");
+    useState("overview");
 
   const [selectedSecondaryFilter, setSelectedSecondaryFilter] =
     useState("overall");
-
-  const featuredSnapshots = useMemo(
-    () => ({
-      nfl: standingsData.filter(
-        (team) =>
-          team.tierClass === "nfl" &&
-          [1, 2, 28, 29].includes(team.rank),
-      ),
-      fbs: standingsData.filter(
-        (team) =>
-          team.tierClass === "fbs" &&
-          [1, 4, 5, 91].includes(team.rank),
-      ),
-      fcs: standingsData.filter(
-        (team) =>
-          team.tierClass === "fcs" &&
-          [1, 7, 8, 9].includes(team.rank),
-      ),
-    }),
-    [],
-  );
 
   const activeSecondaryFilters =
     secondaryFilters[selectedPrimaryFilter] ?? [];
@@ -866,7 +765,7 @@ function Standings() {
   const activePrimaryLabel =
     primaryFilters.find(
       (filter) => filter.id === selectedPrimaryFilter,
-    )?.label ?? "Featured";
+    )?.label ?? "Overview";
 
   const activeSecondaryLabel =
     activeSecondaryFilters.find(
@@ -874,7 +773,7 @@ function Standings() {
     )?.label ?? "Overall";
 
   const visibleStandings = useMemo(() => {
-    if (selectedPrimaryFilter === "featured") {
+    if (selectedPrimaryFilter === "overview") {
       return [];
     }
 
@@ -897,7 +796,10 @@ function Standings() {
 
         return team.conferenceId === selectedSecondaryFilter;
       })
-      .sort((firstTeam, secondTeam) => firstTeam.rank - secondTeam.rank);
+      .sort(
+        (firstTeam, secondTeam) =>
+          firstTeam.rank - secondTeam.rank,
+      );
   }, [selectedPrimaryFilter, selectedSecondaryFilter]);
 
   const selectPrimaryFilter = (filterId) => {
@@ -926,7 +828,7 @@ function Standings() {
   return (
     <main className="standings-page">
       <PageHeader
-        eyebrow="The race for the MESH Championship"
+        eyebrow="The race for MESH"
         title="Standings"
         description="Track playoff races, overall rankings, promotions, relegation pressure, streaks, and weekly movement."
         imageSrc={meshShield}
@@ -936,7 +838,10 @@ function Standings() {
       />
 
       <section className="standings-controls">
-        <button type="button" className="standings-version-selector">
+        <button
+          type="button"
+          className="standings-version-selector"
+        >
           <div>
             <span>Current Standings</span>
             <strong>Week 5</strong>
@@ -956,7 +861,9 @@ function Standings() {
               className={[
                 "standings-primary-tab",
                 `standings-primary-tab-${filter.id}`,
-                selectedPrimaryFilter === filter.id ? "active" : "",
+                selectedPrimaryFilter === filter.id
+                  ? "active"
+                  : "",
               ]
                 .filter(Boolean)
                 .join(" ")}
@@ -968,7 +875,7 @@ function Standings() {
         </div>
       </section>
 
-      {selectedPrimaryFilter !== "featured" ? (
+      {selectedPrimaryFilter !== "overview" ? (
         <section
           className={`standings-secondary-filter standings-secondary-filter-${selectedPrimaryFilter}`}
         >
@@ -977,7 +884,10 @@ function Standings() {
             <strong>{activeSecondaryLabel}</strong>
           </div>
 
-          <div className="standings-secondary-tabs">
+          <div
+            className="standings-secondary-tabs"
+            aria-label={`Filter ${activePrimaryLabel} standings`}
+          >
             {activeSecondaryFilters.map((filter) => (
               <button
                 type="button"
@@ -998,7 +908,7 @@ function Standings() {
         </section>
       ) : null}
 
-      {selectedPrimaryFilter === "featured" ? (
+      {selectedPrimaryFilter === "overview" ? (
         <>
           <section className="standings-featured-section">
             <div className="standings-featured-heading">
@@ -1023,28 +933,8 @@ function Standings() {
               ))}
             </div>
           </section>
+
           <StandingsRaceCenter onSelectTier={viewTier} />
-
-          <TierSnapshot
-            tierClass="nfl"
-            title="NFL"
-            teams={featuredSnapshots.nfl}
-            onViewTier={viewTier}
-          />
-
-          <TierSnapshot
-            tierClass="fbs"
-            title="FBS"
-            teams={featuredSnapshots.fbs}
-            onViewTier={viewTier}
-          />
-
-          <TierSnapshot
-            tierClass="fcs"
-            title="FCS"
-            teams={featuredSnapshots.fcs}
-            onViewTier={viewTier}
-          />
         </>
       ) : (
         <section
@@ -1052,7 +942,10 @@ function Standings() {
         >
           <div className="standings-section-heading">
             <div>
-              <span>{visibleStandings.length} teams shown</span>
+              <span>
+                {visibleStandings.length} teams shown
+              </span>
+
               <h2>{activeSecondaryLabel}</h2>
             </div>
 

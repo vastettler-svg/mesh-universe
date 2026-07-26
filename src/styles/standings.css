@@ -112,7 +112,7 @@
     background: rgba(255, 255, 255, 0.055);
   }
   
-  .standings-primary-tab-featured.active {
+  .standings-primary-tab-overview.active {
     color: #ffffff;
     border-color: rgba(196, 206, 215, 0.2);
     background: rgba(196, 206, 215, 0.12);

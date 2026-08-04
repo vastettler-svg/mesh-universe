@@ -183,15 +183,15 @@
   padding: var(--space-3);
 }
 
-.standings-table-header,
-.standings-row {
+.standings-card .standings-table-header,
+.standings-card .standings-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 28px 28px 44px;
   align-items: center;
   gap: var(--space-2);
 }
 
-.standings-table-header {
+.standings-card .standings-table-header {
   padding: var(--space-2);
   font-size: 0.65rem;
   font-weight: 800;
@@ -200,7 +200,7 @@
   color: var(--color-muted);
 }
 
-.standings-row {
+.standings-card .standings-row {
   min-height: 45px;
   padding: var(--space-2);
   border-top: var(--border-subtle);
@@ -208,19 +208,19 @@
   font-weight: 700;
 }
 
-.standings-team {
+.standings-card .standings-team {
   min-width: 0;
   display: flex;
   align-items: center;
   gap: var(--space-2);
 }
 
-.standings-rank {
+.standings-card .standings-rank {
   width: 16px;
   color: var(--color-muted);
 }
 
-.standings-team-logo {
+.standings-card .standings-team-logo {
   width: 24px;
   height: 24px;
   flex-shrink: 0;

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -15,6 +15,7 @@ import {
 
 import PageHeader from "../components/PageHeader";
 import StandingsRaceCenter from "../components/StandingsRaceCenter";
+import { getStandingsData } from "../services/googleSheets";
 import meshShield from "../assets/logos/mfl-shield.png";
 
 import "../styles/standings.css";
@@ -29,6 +30,7 @@ const primaryFilters = [
 const secondaryFilters = {
   nfl: [
     { id: "all", label: "All NFL" },
+    { id: "playoff-picture", label: "Playoff Picture" },
     { id: "afc", label: "AFC" },
     { id: "nfc", label: "NFC" },
   ],
@@ -49,484 +51,36 @@ const secondaryFilters = {
     { id: "big-sky", label: "Big Sky" },
     { id: "coastal", label: "Coastal" },
     { id: "ivy", label: "Ivy" },
-    { id: "missouri-valley", label: "Missouri Valley" },
+    { id: "mvc", label: "Missouri Valley" },
     { id: "northeast", label: "Northeast" },
     { id: "southland", label: "Southland" },
   ],
 };
 
-const standingsData = [
-  {
-    id: "nfl-1",
-    tier: "NFL",
-    tierClass: "nfl",
-    conferenceId: "afc",
-    conference: "AFC",
-    rank: 1,
-    team: "Bulldogs",
-    coach: "Coach Daniels",
-    record: "5–0",
-    pointsFor: 768.4,
-    pointsAgainst: 641.2,
-    streak: "W5",
-    movement: 1,
-    status: "playoff",
-    statusLabel: "No. 1 Seed",
-  },
-  {
-    id: "nfl-2",
-    tier: "NFL",
-    tierClass: "nfl",
-    conferenceId: "nfc",
-    conference: "NFC",
-    rank: 2,
-    team: "Lions",
-    coach: "Coach Morris",
-    record: "4–1",
-    pointsFor: 742.1,
-    pointsAgainst: 689.8,
-    streak: "W3",
-    movement: 2,
-    status: "playoff",
-    statusLabel: "Playoff Position",
-  },
-  {
-    id: "nfl-3",
-    tier: "NFL",
-    tierClass: "nfl",
-    conferenceId: "afc",
-    conference: "AFC",
-    rank: 3,
-    team: "Panthers",
-    coach: "Coach Carter",
-    record: "4–1",
-    pointsFor: 721.6,
-    pointsAgainst: 693.5,
-    streak: "W2",
-    movement: 0,
-    status: "playoff",
-    statusLabel: "Playoff Position",
-  },
-  {
-    id: "nfl-4",
-    tier: "NFL",
-    tierClass: "nfl",
-    conferenceId: "nfc",
-    conference: "NFC",
-    rank: 4,
-    team: "Raiders",
-    coach: "Coach Walker",
-    record: "3–2",
-    pointsFor: 704.7,
-    pointsAgainst: 698.2,
-    streak: "L1",
-    movement: -1,
-    status: "neutral",
-    statusLabel: "In the Hunt",
-  },
-  {
-    id: "nfl-27",
-    tier: "NFL",
-    tierClass: "nfl",
-    conferenceId: "afc",
-    conference: "AFC",
-    rank: 27,
-    team: "Wolves",
-    coach: "Coach Smith",
-    record: "2–3",
-    pointsFor: 654.2,
-    pointsAgainst: 702.9,
-    streak: "L2",
-    movement: 1,
-    status: "neutral",
-    statusLabel: "Above the Line",
-  },
-  {
-    id: "nfl-28",
-    tier: "NFL",
-    tierClass: "nfl",
-    conferenceId: "nfc",
-    conference: "NFC",
-    rank: 28,
-    team: "Ravens",
-    coach: "Coach Hill",
-    record: "2–3",
-    pointsFor: 647.8,
-    pointsAgainst: 711.4,
-    streak: "L1",
-    movement: -2,
-    status: "warning",
-    statusLabel: "Hot Seat",
-  },
-  {
-    id: "nfl-29",
-    tier: "NFL",
-    tierClass: "nfl",
-    conferenceId: "afc",
-    conference: "AFC",
-    rank: 29,
-    team: "Bears",
-    coach: "Coach Young",
-    record: "1–4",
-    pointsFor: 618.4,
-    pointsAgainst: 735.6,
-    streak: "L3",
-    movement: -1,
-    status: "relegation",
-    statusLabel: "Relegation Zone",
-  },
-  {
-    id: "nfl-30",
-    tier: "NFL",
-    tierClass: "nfl",
-    conferenceId: "nfc",
-    conference: "NFC",
-    rank: 30,
-    team: "Jets",
-    coach: "Coach Green",
-    record: "1–4",
-    pointsFor: 606.9,
-    pointsAgainst: 748.3,
-    streak: "L4",
-    movement: -3,
-    status: "relegation",
-    statusLabel: "Relegation Zone",
-  },
-
-  {
-    id: "fbs-1",
-    tier: "FBS",
-    tierClass: "fbs",
-    conferenceId: "sec",
-    conference: "SEC",
-    rank: 1,
-    team: "Tigers",
-    coach: "Coach Franklin",
-    record: "5–0",
-    pointsFor: 781.3,
-    pointsAgainst: 632.4,
-    streak: "W5",
-    movement: 2,
-    top25: true,
-    status: "promotion",
-    statusLabel: "Promotion Position",
-  },
-  {
-    id: "fbs-2",
-    tier: "FBS",
-    tierClass: "fbs",
-    conferenceId: "big-ten",
-    conference: "Big Ten",
-    rank: 2,
-    team: "Eagles",
-    coach: "Coach Morris",
-    record: "5–0",
-    pointsFor: 768.7,
-    pointsAgainst: 648.9,
-    streak: "W5",
-    movement: 1,
-    top25: true,
-    status: "promotion",
-    statusLabel: "Promotion Position",
-  },
-  {
-    id: "fbs-3",
-    tier: "FBS",
-    tierClass: "fbs",
-    conferenceId: "acc",
-    conference: "ACC",
-    rank: 3,
-    team: "Hurricanes",
-    coach: "Coach James",
-    record: "4–1",
-    pointsFor: 754.1,
-    pointsAgainst: 671.5,
-    streak: "W3",
-    movement: -1,
-    top25: true,
-    status: "promotion",
-    statusLabel: "Promotion Position",
-  },
-  {
-    id: "fbs-4",
-    tier: "FBS",
-    tierClass: "fbs",
-    conferenceId: "big-12",
-    conference: "Big 12",
-    rank: 4,
-    team: "Longhorns",
-    coach: "Coach Brown",
-    record: "4–1",
-    pointsFor: 746.8,
-    pointsAgainst: 682.2,
-    streak: "W2",
-    movement: 3,
-    top25: true,
-    status: "promotion",
-    statusLabel: "Promotion Position",
-  },
-  {
-    id: "fbs-5",
-    tier: "FBS",
-    tierClass: "fbs",
-    conferenceId: "mountain-west",
-    conference: "Mountain West",
-    rank: 5,
-    team: "Broncos",
-    coach: "Coach Miller",
-    record: "4–1",
-    pointsFor: 739.5,
-    pointsAgainst: 681.6,
-    streak: "W4",
-    movement: 4,
-    top25: true,
-    status: "chasing",
-    statusLabel: "First Team Out",
-  },
-  {
-    id: "fbs-6",
-    tier: "FBS",
-    tierClass: "fbs",
-    conferenceId: "sun-belt",
-    conference: "Sun Belt",
-    rank: 6,
-    team: "Mountaineers",
-    coach: "Coach Lee",
-    record: "4–1",
-    pointsFor: 724.2,
-    pointsAgainst: 690.1,
-    streak: "L1",
-    movement: -2,
-    top25: true,
-    status: "neutral",
-    statusLabel: "In the Hunt",
-  },
-  {
-    id: "fbs-89",
-    tier: "FBS",
-    tierClass: "fbs",
-    conferenceId: "mac",
-    conference: "MAC",
-    rank: 89,
-    team: "RedHawks",
-    coach: "Coach Reed",
-    record: "2–3",
-    pointsFor: 641.8,
-    pointsAgainst: 704.3,
-    streak: "L2",
-    movement: 1,
-    top25: false,
-    status: "neutral",
-    statusLabel: "Above the Line",
-  },
-  {
-    id: "fbs-90",
-    tier: "FBS",
-    tierClass: "fbs",
-    conferenceId: "sec",
-    conference: "SEC",
-    rank: 90,
-    team: "Falcons",
-    coach: "Coach Allen",
-    record: "2–3",
-    pointsFor: 635.4,
-    pointsAgainst: 711.8,
-    streak: "L1",
-    movement: -3,
-    top25: false,
-    status: "warning",
-    statusLabel: "Hot Seat",
-  },
-  {
-    id: "fbs-91",
-    tier: "FBS",
-    tierClass: "fbs",
-    conferenceId: "acc",
-    conference: "ACC",
-    rank: 91,
-    team: "Blue Devils",
-    coach: "Coach West",
-    record: "1–4",
-    pointsFor: 612.2,
-    pointsAgainst: 733.9,
-    streak: "L4",
-    movement: -2,
-    top25: false,
-    status: "relegation",
-    statusLabel: "Relegation Zone",
-  },
-  {
-    id: "fbs-92",
-    tier: "FBS",
-    tierClass: "fbs",
-    conferenceId: "big-12",
-    conference: "Big 12",
-    rank: 92,
-    team: "Bobcats",
-    coach: "Coach Adams",
-    record: "1–4",
-    pointsFor: 604.7,
-    pointsAgainst: 741.5,
-    streak: "L3",
-    movement: -1,
-    top25: false,
-    status: "relegation",
-    statusLabel: "Relegation Zone",
-  },
-
-  {
-    id: "fcs-1",
-    tier: "FCS",
-    tierClass: "fcs",
-    conferenceId: "big-sky",
-    conference: "Big Sky",
-    rank: 1,
-    team: "Wildcats",
-    coach: "Coach Carter",
-    record: "5–0",
-    pointsFor: 761.6,
-    pointsAgainst: 628.9,
-    streak: "W5",
-    movement: 3,
-    top25: true,
-    status: "promotion",
-    statusLabel: "Promotion Position",
-  },
-  {
-    id: "fcs-2",
-    tier: "FCS",
-    tierClass: "fcs",
-    conferenceId: "missouri-valley",
-    conference: "Missouri Valley",
-    rank: 2,
-    team: "Bison",
-    coach: "Coach Harris",
-    record: "5–0",
-    pointsFor: 748.3,
-    pointsAgainst: 645.2,
-    streak: "W5",
-    movement: 1,
-    top25: true,
-    status: "promotion",
-    statusLabel: "Promotion Position",
-  },
-  {
-    id: "fcs-3",
-    tier: "FCS",
-    tierClass: "fcs",
-    conferenceId: "ivy",
-    conference: "Ivy",
-    rank: 3,
-    team: "Crimson",
-    coach: "Coach Taylor",
-    record: "4–1",
-    pointsFor: 732.5,
-    pointsAgainst: 662.8,
-    streak: "W3",
-    movement: -1,
-    top25: true,
-    status: "promotion",
-    statusLabel: "Promotion Position",
-  },
-  {
-    id: "fcs-4",
-    tier: "FCS",
-    tierClass: "fcs",
-    conferenceId: "coastal",
-    conference: "Coastal",
-    rank: 4,
-    team: "Seahawks",
-    coach: "Coach Lewis",
-    record: "4–1",
-    pointsFor: 721.9,
-    pointsAgainst: 669.4,
-    streak: "W2",
-    movement: 2,
-    top25: true,
-    status: "promotion",
-    statusLabel: "Promotion Position",
-  },
-  {
-    id: "fcs-7",
-    tier: "FCS",
-    tierClass: "fcs",
-    conferenceId: "southland",
-    conference: "Southland",
-    rank: 7,
-    team: "Lumberjacks",
-    coach: "Coach King",
-    record: "4–1",
-    pointsFor: 701.2,
-    pointsAgainst: 681.7,
-    streak: "W4",
-    movement: 4,
-    top25: true,
-    status: "promotion",
-    statusLabel: "Promotion Position",
-  },
-  {
-    id: "fcs-8",
-    tier: "FCS",
-    tierClass: "fcs",
-    conferenceId: "northeast",
-    conference: "Northeast",
-    rank: 8,
-    team: "Dukes",
-    coach: "Coach White",
-    record: "3–2",
-    pointsFor: 692.6,
-    pointsAgainst: 684.9,
-    streak: "L1",
-    movement: -2,
-    top25: true,
-    status: "promotion",
-    statusLabel: "Promotion Position",
-  },
-  {
-    id: "fcs-9",
-    tier: "FCS",
-    tierClass: "fcs",
-    conferenceId: "big-sky",
-    conference: "Big Sky",
-    rank: 9,
-    team: "Rams",
-    coach: "Coach Hall",
-    record: "3–2",
-    pointsFor: 687.1,
-    pointsAgainst: 689.8,
-    streak: "W1",
-    movement: 1,
-    top25: true,
-    status: "chasing",
-    statusLabel: "First Team Out",
-  },
-  {
-    id: "fcs-10",
-    tier: "FCS",
-    tierClass: "fcs",
-    conferenceId: "southland",
-    conference: "Southland",
-    rank: 10,
-    team: "Cowboys",
-    coach: "Coach Martin",
-    record: "3–2",
-    pointsFor: 679.4,
-    pointsAgainst: 693.2,
-    streak: "L2",
-    movement: -3,
-    top25: true,
-    status: "neutral",
-    statusLabel: "In the Hunt",
-  },
-];
+const nflDivisionFilters = {
+  afc: [
+    { id: "all", label: "All AFC" },
+    { id: "east", label: "East" },
+    { id: "north", label: "North" },
+    { id: "south", label: "South" },
+    { id: "west", label: "West" },
+  ],
+  nfc: [
+    { id: "all", label: "All NFC" },
+    { id: "east", label: "East" },
+    { id: "north", label: "North" },
+    { id: "south", label: "South" },
+    { id: "west", label: "West" },
+  ],
+};
 
 const pulseStories = [
   {
     id: "rise",
     eyebrow: "Biggest Rise",
-    title: "Broncos",
-    detail: "Up four spots to No. 5 in the FBS rankings.",
-    value: "+4",
+    title: "Rankings",
+    detail: "Weekly movement will update from the live MESH standings.",
+    value: "Live",
     tier: "FBS",
     tierClass: "fbs",
     icon: TrendingUp,
@@ -535,9 +89,9 @@ const pulseStories = [
   {
     id: "fall",
     eyebrow: "Biggest Fall",
-    title: "Falcons",
-    detail: "A three-place drop puts the program near relegation.",
-    value: "−3",
+    title: "Hot Seats",
+    detail: "Programs under pressure will appear as rankings update.",
+    value: "Live",
     tier: "FBS",
     tierClass: "fbs",
     icon: TrendingDown,
@@ -546,9 +100,9 @@ const pulseStories = [
   {
     id: "streak",
     eyebrow: "Longest Streak",
-    title: "Bulldogs",
-    detail: "Five straight wins and the current NFL No. 1 seed.",
-    value: "W5",
+    title: "League Leaders",
+    detail: "Current streak information will appear when available.",
+    value: "Live",
     tier: "NFL",
     tierClass: "nfl",
     icon: Flame,
@@ -557,15 +111,73 @@ const pulseStories = [
   {
     id: "race",
     eyebrow: "Closest Race",
-    title: "FCS Promotion",
-    detail: "Only 14.5 points separate positions seven through nine.",
-    value: "14.5",
+    title: "Promotion Race",
+    detail: "Follow every promotion and relegation race across MESH.",
+    value: "Live",
     tier: "FCS",
     tierClass: "fcs",
     icon: Trophy,
     type: "race",
   },
 ];
+
+function normalizeSlug(value) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function conferenceMatches(team, filterId) {
+  const conferenceId = normalizeSlug(
+    team.conferenceId || team.conference,
+  );
+
+  const aliases = {
+    coastal: [
+      "coastal",
+      "caa",
+      "coastal-athletic-association",
+    ],
+    mvc: [
+      "mvc",
+      "missouri-valley",
+      "missouri-valley-conference",
+    ],
+    ivy: ["ivy", "ivy-league"],
+    northeast: ["northeast", "nec"],
+    southland: ["southland", "slc"],
+  };
+
+  if (aliases[filterId]) {
+    return aliases[filterId].includes(conferenceId);
+  }
+
+  return conferenceId === filterId;
+}
+
+function divisionMatches(team, divisionFilter) {
+  const divisionId = normalizeSlug(
+    team.divisionId || team.division,
+  );
+
+  return (
+    divisionId === divisionFilter ||
+    divisionId.endsWith(`-${divisionFilter}`)
+  );
+}
+
+function formatPoints(value) {
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return "0.0";
+  }
+
+  return number.toFixed(1);
+}
 
 function TierBadge({ tier, tierClass }) {
   return (
@@ -604,57 +216,59 @@ function MovementIndicator({ movement }) {
 }
 
 function StandingsRow({ team }) {
+  const teamName = team.team || "Unnamed Franchise";
+  const teamInitial = teamName.charAt(0).toUpperCase();
+
   return (
     <article
       className={`standings-row standings-row-${team.status} standings-row-${team.tierClass}`}
     >
       <div className="standings-rank">
-        <strong>{team.rank}</strong>
+        <strong>{team.rank || "—"}</strong>
         <MovementIndicator movement={team.movement} />
       </div>
 
       <div
         className={`standings-team-logo standings-team-logo-${team.tierClass}`}
       >
-        {team.team.charAt(0)}
+        {teamInitial}
       </div>
 
       <div className="standings-team-info">
         <div className="standings-team-heading">
-          <strong>{team.team}</strong>
+          <strong>{teamName}</strong>
           <span>{team.conference}</span>
         </div>
 
-        <span className="standings-coach">{team.coach}</span>
-
-        <span
-          className={`standings-status standings-status-${team.status}`}
-        >
-          {team.statusLabel}
+        <span className="standings-coach">
+          {team.coach || "Coach unavailable"}
         </span>
+
+        {team.statusLabel ? (
+          <span
+            className={`standings-status standings-status-${team.status}`}
+          >
+            {team.statusLabel}
+          </span>
+        ) : null}
       </div>
 
       <div className="standings-record">
-        <strong>{team.record}</strong>
-        <span>{team.streak}</span>
+        <strong>{team.record || "0–0"}</strong>
+        <span>{team.streak || "—"}</span>
       </div>
 
       <div className="standings-points">
         <span>
           <small>PF</small>
-          {team.pointsFor.toFixed(1)}
-        </span>
-
-        <span>
-          <small>PA</small>
-          {team.pointsAgainst.toFixed(1)}
+          {formatPoints(team.pointsFor)}
         </span>
       </div>
 
       <button
         type="button"
         className="standings-row-action"
-        aria-label={`View ${team.team}`}
+        aria-label={`View ${teamName}`}
       >
         <ChevronRight size={17} />
       </button>
@@ -675,7 +289,11 @@ function StandingsLine({ type, label }) {
   );
 }
 
-function StandingsList({ teams, tierClass }) {
+function StandingsList({
+  teams,
+  tierClass,
+  showTierLines = true,
+}) {
   const promotionCutoff =
     tierClass === "fbs" ? 4 : tierClass === "fcs" ? 8 : null;
 
@@ -693,7 +311,8 @@ function StandingsList({ teams, tierClass }) {
 
       {teams.map((team, index) => (
         <div key={team.id}>
-          {promotionCutoff &&
+          {showTierLines &&
+          promotionCutoff &&
           index > 0 &&
           teams[index - 1].rank <= promotionCutoff &&
           team.rank > promotionCutoff ? (
@@ -703,7 +322,8 @@ function StandingsList({ teams, tierClass }) {
             />
           ) : null}
 
-          {relegationStart &&
+          {showTierLines &&
+          relegationStart &&
           index > 0 &&
           teams[index - 1].rank < relegationStart &&
           team.rank >= relegationStart ? (
@@ -753,11 +373,53 @@ function PulseCard({ story }) {
 }
 
 function Standings() {
+  const [standingsData, setStandingsData] = useState([]);
+  const [standingsLoading, setStandingsLoading] = useState(true);
+  const [standingsError, setStandingsError] = useState("");
+
   const [selectedPrimaryFilter, setSelectedPrimaryFilter] =
     useState("overview");
 
   const [selectedSecondaryFilter, setSelectedSecondaryFilter] =
     useState("overall");
+
+  const [selectedNflDivisionFilter, setSelectedNflDivisionFilter] =
+    useState("all");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadStandings() {
+      try {
+        setStandingsLoading(true);
+        setStandingsError("");
+
+        const data = await getStandingsData();
+
+        if (isMounted) {
+          setStandingsData(data);
+        }
+      } catch (error) {
+        console.error("Unable to load standings:", error);
+
+        if (isMounted) {
+          setStandingsError(
+            "Standings could not be loaded from Google Sheets.",
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setStandingsLoading(false);
+        }
+      }
+    }
+
+    loadStandings();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const activeSecondaryFilters =
     secondaryFilters[selectedPrimaryFilter] ?? [];
@@ -772,6 +434,14 @@ function Standings() {
       (filter) => filter.id === selectedSecondaryFilter,
     )?.label ?? "Overall";
 
+  const activeNflDivisionFilters =
+    nflDivisionFilters[selectedSecondaryFilter] ?? [];
+
+  const activeNflDivisionLabel =
+    activeNflDivisionFilters.find(
+      (filter) => filter.id === selectedNflDivisionFilter,
+    )?.label ?? "";
+
   const visibleStandings = useMemo(() => {
     if (selectedPrimaryFilter === "overview") {
       return [];
@@ -783,6 +453,38 @@ function Standings() {
           return false;
         }
 
+        if (selectedPrimaryFilter === "nfl") {
+          if (selectedSecondaryFilter === "all") {
+            return true;
+          }
+
+          if (selectedSecondaryFilter === "playoff-picture") {
+            return Number(team.playoffSeed) > 0;
+          }
+
+          if (
+            selectedSecondaryFilter === "afc" ||
+            selectedSecondaryFilter === "nfc"
+          ) {
+            if (
+              !conferenceMatches(team, selectedSecondaryFilter)
+            ) {
+              return false;
+            }
+
+            if (selectedNflDivisionFilter === "all") {
+              return true;
+            }
+
+            return divisionMatches(
+              team,
+              selectedNflDivisionFilter,
+            );
+          }
+
+          return false;
+        }
+
         if (
           selectedSecondaryFilter === "all" ||
           selectedSecondaryFilter === "overall"
@@ -791,25 +493,165 @@ function Standings() {
         }
 
         if (selectedSecondaryFilter === "top-25") {
-          return Boolean(team.top25);
+          return (
+            Number(team.top25Rank) >= 1 &&
+            Number(team.top25Rank) <= 25
+          );
         }
 
-        return team.conferenceId === selectedSecondaryFilter;
+        return conferenceMatches(
+          team,
+          selectedSecondaryFilter,
+        );
       })
-      .sort(
-        (firstTeam, secondTeam) =>
-          firstTeam.rank - secondTeam.rank,
-      );
-  }, [selectedPrimaryFilter, selectedSecondaryFilter]);
+      .sort((firstTeam, secondTeam) => {
+        if (
+          selectedPrimaryFilter === "nfl" &&
+          selectedSecondaryFilter === "playoff-picture"
+        ) {
+          return (
+            (firstTeam.playoffSeed || 999) -
+            (secondTeam.playoffSeed || 999)
+          );
+        }
+
+        if (
+          selectedPrimaryFilter === "nfl" &&
+          (selectedSecondaryFilter === "afc" ||
+            selectedSecondaryFilter === "nfc")
+        ) {
+          if (selectedNflDivisionFilter !== "all") {
+            return (
+              firstTeam.divisionRank -
+              secondTeam.divisionRank
+            );
+          }
+
+          return (
+            firstTeam.conferenceRank -
+            secondTeam.conferenceRank
+          );
+        }
+
+        if (
+          selectedPrimaryFilter !== "nfl" &&
+          selectedSecondaryFilter !== "overall" &&
+          selectedSecondaryFilter !== "top-25"
+        ) {
+          return (
+            firstTeam.conferenceRank -
+            secondTeam.conferenceRank
+          );
+        }
+
+        if (selectedSecondaryFilter === "top-25") {
+          return firstTeam.top25Rank - secondTeam.top25Rank;
+        }
+
+        return firstTeam.overallRank - secondTeam.overallRank;
+      });
+  }, [
+    standingsData,
+    selectedPrimaryFilter,
+    selectedSecondaryFilter,
+    selectedNflDivisionFilter,
+  ]);
+
+  const displayStandings = useMemo(() => {
+    return visibleStandings.map((team) => {
+      const isNflConferenceView =
+        selectedPrimaryFilter === "nfl" &&
+        (selectedSecondaryFilter === "afc" ||
+          selectedSecondaryFilter === "nfc");
+
+      const isCollegeConferenceView =
+        selectedPrimaryFilter !== "nfl" &&
+        selectedSecondaryFilter !== "overall" &&
+        selectedSecondaryFilter !== "top-25";
+
+      const isTop25View =
+        selectedSecondaryFilter === "top-25";
+
+      const isCollegeOverallView =
+        selectedPrimaryFilter !== "nfl" &&
+        selectedSecondaryFilter === "overall";
+
+      const isPlayoffPicture =
+        selectedPrimaryFilter === "nfl" &&
+        selectedSecondaryFilter === "playoff-picture";
+
+      let displayRank = team.overallRank;
+      let displayRecord = team.tierStandingsRecord;
+      let displayPointsFor = team.regularSeasonPF;
+
+      if (
+        isNflConferenceView &&
+        selectedNflDivisionFilter !== "all"
+      ) {
+        displayRank = team.divisionRank;
+      } else if (
+        isNflConferenceView ||
+        isCollegeConferenceView
+      ) {
+        displayRank = team.conferenceRank;
+      } else if (isTop25View) {
+        displayRank = team.top25Rank;
+        displayRecord = team.overallSeasonRecord;
+        displayPointsFor = team.overallSeasonPF;
+      } else if (isCollegeOverallView) {
+        displayRank = team.overallRank;
+        displayRecord = team.overallSeasonRecord;
+        displayPointsFor = team.overallSeasonPF;
+      } else if (isPlayoffPicture) {
+        displayRank = team.playoffSeed || team.overallRank;
+      }
+
+      return {
+        ...team,
+        rank: displayRank,
+        record: displayRecord,
+        pointsFor: displayPointsFor,
+      };
+    });
+  }, [
+    visibleStandings,
+    selectedPrimaryFilter,
+    selectedSecondaryFilter,
+    selectedNflDivisionFilter,
+  ]);
+
+  const showTierLines =
+    selectedSecondaryFilter === "all" ||
+    selectedSecondaryFilter === "overall" ||
+    selectedSecondaryFilter === "top-25";
+
+  const isNflPlayoffPicture =
+    selectedPrimaryFilter === "nfl" &&
+    selectedSecondaryFilter === "playoff-picture";
+
+  const isNflConferenceView =
+    selectedPrimaryFilter === "nfl" &&
+    (selectedSecondaryFilter === "afc" ||
+      selectedSecondaryFilter === "nfc");
+
+  const standingsHeading = isNflConferenceView
+    ? activeNflDivisionLabel
+    : activeSecondaryLabel;
 
   const selectPrimaryFilter = (filterId) => {
     setSelectedPrimaryFilter(filterId);
+    setSelectedNflDivisionFilter("all");
 
     if (filterId === "nfl") {
       setSelectedSecondaryFilter("all");
     } else {
       setSelectedSecondaryFilter("overall");
     }
+  };
+
+  const selectSecondaryFilter = (filterId) => {
+    setSelectedSecondaryFilter(filterId);
+    setSelectedNflDivisionFilter("all");
   };
 
   const viewTier = (tierClass) => {
@@ -823,6 +665,100 @@ function Standings() {
           block: "start",
         });
     });
+  };
+
+  const renderStandingsContent = () => {
+    if (standingsLoading) {
+      return (
+        <div className="standings-empty-state">
+          <Medal size={30} />
+          <h3>Loading standings</h3>
+          <p>Retrieving the latest MESH standings.</p>
+        </div>
+      );
+    }
+
+    if (standingsError) {
+      return (
+        <div className="standings-empty-state">
+          <Medal size={30} />
+          <h3>Standings unavailable</h3>
+          <p>{standingsError}</p>
+        </div>
+      );
+    }
+
+    if (isNflPlayoffPicture) {
+      return (
+        <div className="standings-playoff-picture">
+          {["afc", "nfc"].map((conferenceId) => {
+            const conferenceTeams = displayStandings
+              .filter((team) =>
+                conferenceMatches(team, conferenceId),
+              )
+              .sort(
+                (firstTeam, secondTeam) =>
+                  (firstTeam.playoffSeed || 999) -
+                  (secondTeam.playoffSeed || 999),
+              );
+
+            return (
+              <section
+                className="standings-playoff-conference"
+                key={conferenceId}
+              >
+                <div className="standings-section-heading">
+                  <div>
+                    <span>Current playoff seeds</span>
+                    <h2>{conferenceId.toUpperCase()}</h2>
+                  </div>
+
+                  <TierBadge tier="NFL" tierClass="nfl" />
+                </div>
+
+                {conferenceTeams.length > 0 ? (
+                  <StandingsList
+                    teams={conferenceTeams}
+                    tierClass="nfl"
+                    showTierLines={false}
+                  />
+                ) : (
+                  <div className="standings-empty-state">
+                    <Medal size={30} />
+                    <h3>No playoff data found</h3>
+                    <p>
+                      Playoff teams will appear once seeds are
+                      available in TEAM DATA.
+                    </p>
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </div>
+      );
+    }
+
+    if (displayStandings.length > 0) {
+      return (
+        <StandingsList
+          teams={displayStandings}
+          tierClass={selectedPrimaryFilter}
+          showTierLines={showTierLines}
+        />
+      );
+    }
+
+    return (
+      <div className="standings-empty-state">
+        <Medal size={30} />
+        <h3>No standings found</h3>
+        <p>
+          No teams currently match this tier, conference, and
+          division filter.
+        </p>
+      </div>
+    );
   };
 
   return (
@@ -844,7 +780,7 @@ function Standings() {
         >
           <div>
             <span>Current Standings</span>
-            <strong>Week 5</strong>
+            <strong>Live Data</strong>
           </div>
 
           <ChevronDown size={18} />
@@ -898,7 +834,40 @@ function Standings() {
                     : "standings-secondary-tab"
                 }
                 onClick={() =>
-                  setSelectedSecondaryFilter(filter.id)
+                  selectSecondaryFilter(filter.id)
+                }
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {isNflConferenceView ? (
+        <section className="standings-secondary-filter standings-secondary-filter-nfl">
+          <div className="standings-secondary-heading">
+            <span>
+              Filter {selectedSecondaryFilter.toUpperCase()} divisions
+            </span>
+            <strong>{activeNflDivisionLabel}</strong>
+          </div>
+
+          <div
+            className="standings-secondary-tabs"
+            aria-label={`Filter ${selectedSecondaryFilter.toUpperCase()} divisions`}
+          >
+            {activeNflDivisionFilters.map((filter) => (
+              <button
+                type="button"
+                key={filter.id}
+                className={
+                  selectedNflDivisionFilter === filter.id
+                    ? "standings-secondary-tab active"
+                    : "standings-secondary-tab"
+                }
+                onClick={() =>
+                  setSelectedNflDivisionFilter(filter.id)
                 }
               >
                 {filter.label}
@@ -943,10 +912,12 @@ function Standings() {
           <div className="standings-section-heading">
             <div>
               <span>
-                {visibleStandings.length} teams shown
+                {standingsLoading
+                  ? "Loading teams"
+                  : `${displayStandings.length} teams shown`}
               </span>
 
-              <h2>{activeSecondaryLabel}</h2>
+              <h2>{standingsHeading}</h2>
             </div>
 
             <TierBadge
@@ -955,23 +926,7 @@ function Standings() {
             />
           </div>
 
-          {visibleStandings.length > 0 ? (
-            <StandingsList
-              teams={visibleStandings}
-              tierClass={selectedPrimaryFilter}
-            />
-          ) : (
-            <div className="standings-empty-state">
-              <Medal size={30} />
-
-              <h3>No standings found</h3>
-
-              <p>
-                No teams currently match this tier and conference
-                filter.
-              </p>
-            </div>
-          )}
+          {renderStandingsContent()}
         </section>
       )}
     </main>

@@ -3,1104 +3,1331 @@
 ========================================================= */
 
 .standings-page {
-    width: 100%;
-    max-width: 1240px;
-    margin: 0 auto;
-  
-    padding:
-      20px
-      clamp(14px, 3vw, 34px)
-      calc(110px + env(safe-area-inset-bottom));
-  
-    color: var(--color-white, #ffffff);
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+
+  padding:
+    20px
+    clamp(14px, 3vw, 34px)
+    calc(110px + env(safe-area-inset-bottom));
+
+  color: var(--color-white, #ffffff);
+}
+
+/* =========================================================
+   CONTROLS
+========================================================= */
+
+.standings-controls {
+  display: grid;
+  gap: 14px;
+
+  margin-top: 18px;
+  scroll-margin-top: 86px;
+}
+
+.standings-version-selector {
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+
+  font: inherit;
+  text-align: left;
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(27, 48, 73, 0.96),
+      rgba(10, 24, 41, 0.98)
+    );
+
+  cursor: pointer;
+}
+
+.standings-version-selector > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.standings-version-selector span {
+  font-size: 0.55rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: var(--color-muted, #95a5b5);
+}
+
+.standings-version-selector strong {
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: 0.92rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.standings-primary-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+
+  padding: 6px;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.standings-primary-tab {
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 5px;
+
+  border: 1px solid transparent;
+  border-radius: 10px;
+
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 850;
+
+  color: var(--color-muted, #99a9b8);
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.standings-primary-tab:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.standings-primary-tab-overview.active {
+  color: #ffffff;
+  border-color: rgba(196, 206, 215, 0.2);
+  background: rgba(196, 206, 215, 0.12);
+}
+
+.standings-primary-tab-nfl.active {
+  color: #d8f8e7;
+  border-color: rgba(31, 178, 101, 0.3);
+  background: rgba(31, 178, 101, 0.18);
+}
+
+.standings-primary-tab-fbs.active {
+  color: #dceaff;
+  border-color: rgba(66, 135, 255, 0.3);
+  background: rgba(66, 135, 255, 0.18);
+}
+
+.standings-primary-tab-fcs.active {
+  color: #eedfff;
+  border-color: rgba(160, 104, 255, 0.3);
+  background: rgba(160, 104, 255, 0.18);
+}
+
+/* =========================================================
+   SECONDARY FILTERS
+========================================================= */
+
+.standings-secondary-filter {
+  margin-top: 13px;
+  padding: 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.026);
+}
+
+.standings-secondary-filter-nfl {
+  border-color: rgba(31, 178, 101, 0.15);
+}
+
+.standings-secondary-filter-fbs {
+  border-color: rgba(66, 135, 255, 0.16);
+}
+
+.standings-secondary-filter-fcs {
+  border-color: rgba(160, 104, 255, 0.16);
+}
+
+.standings-secondary-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-bottom: 9px;
+}
+
+.standings-secondary-heading span {
+  font-size: 0.54rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: var(--color-muted, #93a3b3);
+}
+
+.standings-secondary-heading strong {
+  font-size: 0.64rem;
+}
+
+.standings-secondary-tabs {
+  display: flex;
+  gap: 7px;
+
+  overflow-x: auto;
+  padding-bottom: 3px;
+
+  scrollbar-width: none;
+  overscroll-behavior-inline: contain;
+}
+
+.standings-secondary-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.standings-secondary-tab {
+  flex: 0 0 auto;
+
+  min-height: 35px;
+  padding: 7px 11px;
+
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 999px;
+
+  font: inherit;
+  font-size: 0.58rem;
+  font-weight: 800;
+  white-space: nowrap;
+
+  color: var(--color-muted, #9dabb9);
+  background: rgba(255, 255, 255, 0.03);
+
+  cursor: pointer;
+}
+
+.standings-secondary-tab:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.065);
+}
+
+.standings-secondary-filter-nfl
+  .standings-secondary-tab.active {
+  color: #d8f8e7;
+  border-color: rgba(31, 178, 101, 0.33);
+  background: rgba(31, 178, 101, 0.17);
+}
+
+.standings-secondary-filter-fbs
+  .standings-secondary-tab.active {
+  color: #dceaff;
+  border-color: rgba(66, 135, 255, 0.34);
+  background: rgba(66, 135, 255, 0.17);
+}
+
+.standings-secondary-filter-fcs
+  .standings-secondary-tab.active {
+  color: #eedfff;
+  border-color: rgba(160, 104, 255, 0.34);
+  background: rgba(160, 104, 255, 0.17);
+}
+
+/* =========================================================
+   MESH PULSE
+========================================================= */
+
+.standings-featured-section {
+  margin-top: clamp(26px, 5vw, 44px);
+}
+
+.standings-featured-heading span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  margin-bottom: 4px;
+
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+
+  color: #efc85a;
+}
+
+.standings-featured-heading h2 {
+  margin: 0;
+
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: clamp(1.25rem, 3vw, 1.65rem);
+  font-weight: 400;
+}
+
+.standings-featured-heading p {
+  max-width: 650px;
+  margin: 8px 0 0;
+
+  font-size: 0.7rem;
+  line-height: 1.55;
+
+  color: var(--color-muted, #9eacba);
+}
+
+.standings-pulse-grid {
+  display: grid;
+  gap: 11px;
+
+  margin-top: 15px;
+}
+
+.standings-pulse-card {
+  min-width: 0;
+  padding: 15px;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 15px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(27, 48, 73, 0.97),
+      rgba(10, 24, 41, 0.99)
+    );
+
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.standings-pulse-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 13px;
+}
+
+.standings-pulse-icon {
+  width: 38px;
+  height: 38px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 11px;
+
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.065);
+}
+
+.standings-pulse-rise .standings-pulse-icon {
+  color: #55dfa0;
+  background: rgba(31, 178, 101, 0.14);
+}
+
+.standings-pulse-fall .standings-pulse-icon {
+  color: #ff6474;
+  background: rgba(223, 38, 56, 0.14);
+}
+
+.standings-pulse-streak .standings-pulse-icon {
+  color: #f2cb61;
+  background: rgba(242, 203, 97, 0.14);
+}
+
+.standings-pulse-race .standings-pulse-icon {
+  color: #b98aff;
+  background: rgba(160, 104, 255, 0.14);
+}
+
+.standings-pulse-eyebrow {
+  display: block;
+  margin-bottom: 4px;
+
+  font-size: 0.53rem;
+  font-weight: 850;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+
+  color: var(--color-muted, #91a1b1);
+}
+
+.standings-pulse-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.standings-pulse-title h3 {
+  margin: 0;
+  font-size: 0.86rem;
+}
+
+.standings-pulse-title strong {
+  font-size: 0.93rem;
+  color: #ffffff;
+}
+
+.standings-pulse-card p {
+  margin: 7px 0 0;
+
+  font-size: 0.64rem;
+  line-height: 1.48;
+
+  color: var(--color-muted, #9eacba);
+}
+
+/* =========================================================
+   TIER VIEW
+========================================================= */
+
+.standings-tier-view {
+  position: relative;
+
+  margin-top: clamp(27px, 5vw, 44px);
+  padding-left: 11px;
+
+  border-left: 3px solid transparent;
+}
+
+.standings-tier-view-nfl {
+  border-left-color: #24b86d;
+}
+
+.standings-tier-view-fbs {
+  border-left-color: #4287ff;
+}
+
+.standings-tier-view-fcs {
+  border-left-color: #a068ff;
+}
+
+.standings-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+
+  margin-bottom: 13px;
+}
+
+.standings-section-heading > div > span {
+  display: block;
+  margin-bottom: 3px;
+
+  font-size: 0.56rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+
+  color: var(--color-muted, #93a3b3);
+}
+
+.standings-section-heading h2 {
+  margin: 0;
+
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: 1.2rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+/* =========================================================
+   TIER BADGES
+========================================================= */
+
+.standings-tier-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 38px;
+  padding: 5px 8px;
+
+  border-radius: 999px;
+
+  font-size: 0.57rem;
+  font-weight: 900;
+  letter-spacing: 0.055em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.standings-tier-badge-nfl {
+  color: #d8f8e7;
+  background: rgba(31, 178, 101, 0.18);
+  border: 1px solid rgba(31, 178, 101, 0.28);
+}
+
+.standings-tier-badge-fbs {
+  color: #dceaff;
+  background: rgba(55, 128, 255, 0.18);
+  border: 1px solid rgba(55, 128, 255, 0.28);
+}
+
+.standings-tier-badge-fcs {
+  color: #eedfff;
+  background: rgba(155, 89, 255, 0.18);
+  border: 1px solid rgba(155, 89, 255, 0.28);
+}
+
+/* =========================================================
+   STANDINGS LIST CONTAINER
+========================================================= */
+
+.standings-list {
+  display: grid;
+  gap: 9px;
+}
+
+.standings-list-columns {
+  display: none;
+}
+
+/* =========================================================
+   MOBILE STANDINGS CARD
+========================================================= */
+
+.standings-row {
+  position: relative;
+  overflow: hidden;
+
+  display: grid;
+  grid-template-columns: 42px 46px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "rank logo team record"
+    "rank logo team action"
+    "points points points points";
+  align-items: center;
+  gap: 7px 10px;
+
+  min-height: 116px;
+  padding: 13px 13px 0;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(25, 45, 68, 0.98),
+      rgba(9, 22, 38, 0.99)
+    );
+
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.standings-row::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+
+  width: 3px;
+
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.standings-row-playoff::before {
+  background: #24b86d;
+}
+
+.standings-row-promotion::before {
+  background: #e8c65b;
+}
+
+.standings-row-chasing::before {
+  background: #4287ff;
+}
+
+.standings-row-warning::before {
+  background: #f0803c;
+}
+
+.standings-row-relegation::before {
+  background: #e13a4b;
+}
+
+/* Rank */
+
+.standings-rank {
+  grid-area: rank;
+
+  align-self: start;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+
+  padding-top: 4px;
+}
+
+.standings-rank > strong {
+  font-size: 0.86rem;
+}
+
+.standings-movement {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+
+  font-size: 0.52rem;
+  font-weight: 850;
+}
+
+.standings-movement-up {
+  color: #55dfa0;
+}
+
+.standings-movement-down {
+  color: #ff6474;
+}
+
+.standings-movement-even {
+  color: var(--color-muted, #8999a8);
+}
+
+/* Logo */
+
+.standings-team-logo {
+  grid-area: logo;
+
+  width: 44px;
+  height: 44px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: 0.77rem;
+
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.standings-team-logo-nfl {
+  border: 1px solid rgba(31, 178, 101, 0.4);
+}
+
+.standings-team-logo-fbs {
+  border: 1px solid rgba(66, 135, 255, 0.4);
+}
+
+.standings-team-logo-fcs {
+  border: 1px solid rgba(160, 104, 255, 0.4);
+}
+
+/* Team information */
+
+.standings-team-info {
+  grid-area: team;
+
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.standings-team-heading {
+  width: 100%;
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.standings-team-heading strong {
+  min-width: 0;
+  overflow: hidden;
+
+  font-size: 0.78rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.standings-team-heading > span {
+  flex: 0 0 auto;
+
+  padding: 2px 5px;
+
+  border-radius: 999px;
+
+  font-size: 0.46rem;
+  font-weight: 850;
+  text-transform: uppercase;
+
+  color: var(--color-muted, #a5b2be);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.standings-coach {
+  width: 100%;
+  overflow: hidden;
+
+  font-size: 0.57rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: var(--color-muted, #94a4b3);
+}
+
+.standings-status {
+  width: fit-content;
+  max-width: 100%;
+  padding: 4px 7px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  font-size: 0.44rem;
+  font-weight: 850;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+
+  color: #bac5cf;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.standings-status-playoff {
+  color: #c9f7df;
+  background: rgba(31, 178, 101, 0.15);
+}
+
+.standings-status-promotion {
+  color: #f5dfa0;
+  background: rgba(232, 198, 91, 0.14);
+}
+
+.standings-status-chasing {
+  color: #dceaff;
+  background: rgba(66, 135, 255, 0.14);
+}
+
+.standings-status-warning {
+  color: #ffd3ad;
+  background: rgba(240, 128, 60, 0.14);
+}
+
+.standings-status-relegation {
+  color: #ffc0c7;
+  background: rgba(225, 58, 75, 0.15);
+}
+
+/* Record */
+
+.standings-record {
+  grid-area: record;
+
+  align-self: start;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+
+  padding-top: 3px;
+}
+
+.standings-record strong {
+  font-size: 0.82rem;
+}
+
+.standings-record span {
+  font-size: 0.52rem;
+  font-weight: 850;
+
+  color: var(--color-muted, #9aabb9);
+}
+
+/* PF / PA footer */
+
+.standings-points {
+  grid-area: points;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+
+  margin: 7px -13px 0;
+  padding: 9px 13px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.standings-points span {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  padding: 6px 8px;
+
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: 8px;
+
+  font-size: 0.61rem;
+  font-weight: 750;
+
+  color: #d6dee5;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.standings-points small {
+  font-size: 0.47rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+
+  color: var(--color-muted, #8192a2);
+}
+
+/* Card action */
+
+.standings-row-action {
+  grid-area: action;
+
+  align-self: end;
+  justify-self: end;
+
+  width: 30px;
+  height: 30px;
+  padding: 0;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 50%;
+
+  color: var(--color-muted, #9aa9b7);
+  background: rgba(255, 255, 255, 0.035);
+
+  cursor: pointer;
+}
+
+/* =========================================================
+   PROMOTION / RELEGATION LINES
+========================================================= */
+
+.standings-line {
+  position: relative;
+
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-block: 2px;
+
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+}
+
+.standings-line span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  padding: 5px 10px;
+
+  border-radius: 999px;
+
+  font-size: 0.48rem;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.standings-line-promotion {
+  border-color: rgba(31, 178, 101, 0.24);
+  background: rgba(31, 178, 101, 0.055);
+}
+
+.standings-line-promotion span {
+  color: #73e7ad;
+  background: #102d2a;
+}
+
+.standings-line-relegation {
+  border-color: rgba(225, 58, 75, 0.25);
+  background: rgba(225, 58, 75, 0.055);
+}
+
+.standings-line-relegation span {
+  color: #ff7d8a;
+  background: #33202b;
+}
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.standings-empty-state {
+  min-height: 190px;
+  padding: 28px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+
+  text-align: center;
+
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.standings-empty-state svg {
+  margin-bottom: 10px;
+
+  color: var(--color-muted, #8fa0b0);
+}
+
+.standings-empty-state h3 {
+  margin: 0 0 6px;
+  font-size: 0.86rem;
+}
+
+.standings-empty-state p {
+  max-width: 360px;
+  margin: 0;
+
+  font-size: 0.66rem;
+  line-height: 1.5;
+
+  color: var(--color-muted, #96a6b5);
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (min-width: 700px) {
+  .standings-page {
+    padding-top: 28px;
   }
-  
-  /* =========================================================
-     CONTROLS
-  ========================================================= */
-  
+
   .standings-controls {
-    display: grid;
-    gap: 14px;
-  
-    margin-top: 18px;
-    scroll-margin-top: 86px;
+    grid-template-columns:
+      minmax(230px, 0.7fr)
+      minmax(340px, 1fr);
   }
-  
-  .standings-version-selector {
-    width: 100%;
-    min-height: 64px;
-    padding: 10px 14px;
-  
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-  
-    font: inherit;
-    text-align: left;
-    color: #ffffff;
-  
-    background:
-      linear-gradient(
-        145deg,
-        rgba(27, 48, 73, 0.96),
-        rgba(10, 24, 41, 0.98)
-      );
-  
-    cursor: pointer;
-  }
-  
-  .standings-version-selector > div {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-  
-  .standings-version-selector span {
-    font-size: 0.55rem;
-    font-weight: 850;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  
-    color: var(--color-muted, #95a5b5);
-  }
-  
-  .standings-version-selector strong {
-    font-family: var(--heading-font, "Graduate", serif);
-    font-size: 0.92rem;
-    font-weight: 400;
-    letter-spacing: 0.04em;
-  }
-  
-  .standings-primary-tabs {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 6px;
-  
-    padding: 6px;
-  
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 14px;
-  
-    background: rgba(255, 255, 255, 0.035);
-  }
-  
-  .standings-primary-tab {
-    min-width: 0;
-    min-height: 42px;
-    padding: 8px 5px;
-  
-    border: 1px solid transparent;
-    border-radius: 10px;
-  
-    font: inherit;
-    font-size: 0.66rem;
-    font-weight: 850;
-  
-    color: var(--color-muted, #99a9b8);
-    background: transparent;
-  
-    cursor: pointer;
-  }
-  
-  .standings-primary-tab:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.055);
-  }
-  
-  .standings-primary-tab-overview.active {
-    color: #ffffff;
-    border-color: rgba(196, 206, 215, 0.2);
-    background: rgba(196, 206, 215, 0.12);
-  }
-  
-  .standings-primary-tab-nfl.active {
-    color: #d8f8e7;
-    border-color: rgba(31, 178, 101, 0.3);
-    background: rgba(31, 178, 101, 0.18);
-  }
-  
-  .standings-primary-tab-fbs.active {
-    color: #dceaff;
-    border-color: rgba(66, 135, 255, 0.3);
-    background: rgba(66, 135, 255, 0.18);
-  }
-  
-  .standings-primary-tab-fcs.active {
-    color: #eedfff;
-    border-color: rgba(160, 104, 255, 0.3);
-    background: rgba(160, 104, 255, 0.18);
-  }
-  
-  /* =========================================================
-     SECONDARY FILTERS
-  ========================================================= */
-  
-  .standings-secondary-filter {
-    margin-top: 13px;
-    padding: 12px;
-  
-    border: 1px solid rgba(255, 255, 255, 0.085);
-    border-radius: 14px;
-  
-    background: rgba(255, 255, 255, 0.026);
-  }
-  
-  .standings-secondary-filter-nfl {
-    border-color: rgba(31, 178, 101, 0.15);
-  }
-  
-  .standings-secondary-filter-fbs {
-    border-color: rgba(66, 135, 255, 0.16);
-  }
-  
-  .standings-secondary-filter-fcs {
-    border-color: rgba(160, 104, 255, 0.16);
-  }
-  
-  .standings-secondary-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  
-    margin-bottom: 9px;
-  }
-  
-  .standings-secondary-heading span {
-    font-size: 0.54rem;
-    font-weight: 850;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  
-    color: var(--color-muted, #93a3b3);
-  }
-  
-  .standings-secondary-heading strong {
-    font-size: 0.64rem;
-  }
-  
-  .standings-secondary-tabs {
-    display: flex;
-    gap: 7px;
-  
-    overflow-x: auto;
-    padding-bottom: 3px;
-  
-    scrollbar-width: none;
-    overscroll-behavior-inline: contain;
-  }
-  
-  .standings-secondary-tabs::-webkit-scrollbar {
-    display: none;
-  }
-  
-  .standings-secondary-tab {
-    flex: 0 0 auto;
-  
-    min-height: 35px;
-    padding: 7px 11px;
-  
-    border: 1px solid rgba(255, 255, 255, 0.075);
-    border-radius: 999px;
-  
-    font: inherit;
-    font-size: 0.58rem;
-    font-weight: 800;
-    white-space: nowrap;
-  
-    color: var(--color-muted, #9dabb9);
-    background: rgba(255, 255, 255, 0.03);
-  
-    cursor: pointer;
-  }
-  
-  .standings-secondary-tab:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.065);
-  }
-  
-  .standings-secondary-filter-nfl
-    .standings-secondary-tab.active {
-    color: #d8f8e7;
-    border-color: rgba(31, 178, 101, 0.33);
-    background: rgba(31, 178, 101, 0.17);
-  }
-  
-  .standings-secondary-filter-fbs
-    .standings-secondary-tab.active {
-    color: #dceaff;
-    border-color: rgba(66, 135, 255, 0.34);
-    background: rgba(66, 135, 255, 0.17);
-  }
-  
-  .standings-secondary-filter-fcs
-    .standings-secondary-tab.active {
-    color: #eedfff;
-    border-color: rgba(160, 104, 255, 0.34);
-    background: rgba(160, 104, 255, 0.17);
-  }
-  
-  /* =========================================================
-     MESH PULSE
-  ========================================================= */
-  
-  .standings-featured-section {
-    margin-top: clamp(26px, 5vw, 44px);
-  }
-  
-  .standings-featured-heading span {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  
-    margin-bottom: 4px;
-  
-    font-size: 0.58rem;
-    font-weight: 900;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-  
-    color: #efc85a;
-  }
-  
-  .standings-featured-heading h2 {
-    margin: 0;
-  
-    font-family: var(--heading-font, "Graduate", serif);
-    font-size: clamp(1.25rem, 3vw, 1.65rem);
-    font-weight: 400;
-  }
-  
-  .standings-featured-heading p {
-    max-width: 650px;
-    margin: 8px 0 0;
-  
-    font-size: 0.7rem;
-    line-height: 1.55;
-  
-    color: var(--color-muted, #9eacba);
-  }
-  
+
   .standings-pulse-grid {
-    display: grid;
-    gap: 11px;
-  
-    margin-top: 15px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  
-  .standings-pulse-card {
-    min-width: 0;
-    padding: 15px;
-  
+
+  .standings-list {
+    gap: 7px;
+  }
+
+  .standings-row {
+    grid-template-columns: 48px 48px minmax(0, 1fr) 74px 180px 34px;
+    grid-template-areas: "rank logo team record points action";
+
+    min-height: 88px;
+    padding: 12px 14px;
+  }
+
+  .standings-rank,
+  .standings-record {
+    align-self: center;
+    padding-top: 0;
+  }
+
+  .standings-points {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+
+    margin: 0;
+    padding: 0;
+
+    border-top: 0;
+    background: transparent;
+  }
+
+  .standings-points span {
+    width: 82px;
+    padding: 6px 7px;
+  }
+
+  .standings-row-action {
+    align-self: center;
+  }
+}
+
+/* =========================================================
+   DESKTOP TABLE MODE
+========================================================= */
+
+@media (min-width: 1050px) {
+  .standings-pulse-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .standings-list {
+    gap: 0;
+
+    overflow: hidden;
+
     border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 15px;
-  
+
     background:
       linear-gradient(
         145deg,
-        rgba(27, 48, 73, 0.97),
-        rgba(10, 24, 41, 0.99)
-      );
-  
-    box-shadow:
-      0 16px 36px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.035);
-  }
-  
-  .standings-pulse-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  
-    margin-bottom: 13px;
-  }
-  
-  .standings-pulse-icon {
-    width: 38px;
-    height: 38px;
-  
-    display: grid;
-    place-items: center;
-  
-    border-radius: 11px;
-  
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.065);
-  }
-  
-  .standings-pulse-rise .standings-pulse-icon {
-    color: #55dfa0;
-    background: rgba(31, 178, 101, 0.14);
-  }
-  
-  .standings-pulse-fall .standings-pulse-icon {
-    color: #ff6474;
-    background: rgba(223, 38, 56, 0.14);
-  }
-  
-  .standings-pulse-streak .standings-pulse-icon {
-    color: #f2cb61;
-    background: rgba(242, 203, 97, 0.14);
-  }
-  
-  .standings-pulse-race .standings-pulse-icon {
-    color: #b98aff;
-    background: rgba(160, 104, 255, 0.14);
-  }
-  
-  .standings-pulse-eyebrow {
-    display: block;
-    margin-bottom: 4px;
-  
-    font-size: 0.53rem;
-    font-weight: 850;
-    letter-spacing: 0.075em;
-    text-transform: uppercase;
-  
-    color: var(--color-muted, #91a1b1);
-  }
-  
-  .standings-pulse-title {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  
-  .standings-pulse-title h3 {
-    margin: 0;
-    font-size: 0.86rem;
-  }
-  
-  .standings-pulse-title strong {
-    font-size: 0.93rem;
-    color: #ffffff;
-  }
-  
-  .standings-pulse-card p {
-    margin: 7px 0 0;
-  
-    font-size: 0.64rem;
-    line-height: 1.48;
-  
-    color: var(--color-muted, #9eacba);
-  }
-  
-  /* =========================================================
-     TIER VIEW
-  ========================================================= */
-  
-  .standings-tier-view {
-    position: relative;
-  
-    margin-top: clamp(27px, 5vw, 44px);
-    padding-left: 11px;
-  
-    border-left: 3px solid transparent;
-  }
-  
-  .standings-tier-view-nfl {
-    border-left-color: #24b86d;
-  }
-  
-  .standings-tier-view-fbs {
-    border-left-color: #4287ff;
-  }
-  
-  .standings-tier-view-fcs {
-    border-left-color: #a068ff;
-  }
-  
-  .standings-section-heading {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 14px;
-  
-    margin-bottom: 13px;
-  }
-  
-  .standings-section-heading > div > span {
-    display: block;
-    margin-bottom: 3px;
-  
-    font-size: 0.56rem;
-    font-weight: 850;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-  
-    color: var(--color-muted, #93a3b3);
-  }
-  
-  .standings-section-heading h2 {
-    margin: 0;
-  
-    font-family: var(--heading-font, "Graduate", serif);
-    font-size: 1.2rem;
-    font-weight: 400;
-    letter-spacing: 0.04em;
-  }
-  
-  /* =========================================================
-     TIER BADGES
-  ========================================================= */
-  
-  .standings-tier-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  
-    min-width: 38px;
-    padding: 5px 8px;
-  
-    border-radius: 999px;
-  
-    font-size: 0.57rem;
-    font-weight: 900;
-    letter-spacing: 0.055em;
-    line-height: 1;
-    text-transform: uppercase;
-  }
-  
-  .standings-tier-badge-nfl {
-    color: #d8f8e7;
-    background: rgba(31, 178, 101, 0.18);
-    border: 1px solid rgba(31, 178, 101, 0.28);
-  }
-  
-  .standings-tier-badge-fbs {
-    color: #dceaff;
-    background: rgba(55, 128, 255, 0.18);
-    border: 1px solid rgba(55, 128, 255, 0.28);
-  }
-  
-  .standings-tier-badge-fcs {
-    color: #eedfff;
-    background: rgba(155, 89, 255, 0.18);
-    border: 1px solid rgba(155, 89, 255, 0.28);
-  }
-  
-  /* =========================================================
-     STANDINGS LIST CONTAINER
-  ========================================================= */
-  
-  .standings-list {
-    display: grid;
-    gap: 9px;
-  }
-  
-  .standings-list-columns {
-    display: none;
-  }
-  
-  /* =========================================================
-     MOBILE STANDINGS CARD
-  ========================================================= */
-  
-  .standings-row {
-    position: relative;
-    overflow: hidden;
-  
-    display: grid;
-    grid-template-columns: 42px 46px minmax(0, 1fr) auto;
-    grid-template-areas:
-      "rank logo team record"
-      "rank logo team action"
-      "points points points points";
-    align-items: center;
-    gap: 7px 10px;
-  
-    min-height: 116px;
-    padding: 13px 13px 0;
-  
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 14px;
-  
-    background:
-      linear-gradient(
-        145deg,
-        rgba(25, 45, 68, 0.98),
+        rgba(25, 45, 68, 0.96),
         rgba(9, 22, 38, 0.99)
       );
-  
-    box-shadow:
-      0 12px 28px rgba(0, 0, 0, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.025);
   }
-  
-  .standings-row::before {
-    content: "";
-    position: absolute;
-    inset: 0 auto 0 0;
-  
-    width: 3px;
-  
-    background: rgba(255, 255, 255, 0.09);
-  }
-  
-  .standings-row-playoff::before {
-    background: #24b86d;
-  }
-  
-  .standings-row-promotion::before {
-    background: #e8c65b;
-  }
-  
-  .standings-row-chasing::before {
-    background: #4287ff;
-  }
-  
-  .standings-row-warning::before {
-    background: #f0803c;
-  }
-  
-  .standings-row-relegation::before {
-    background: #e13a4b;
-  }
-  
-  /* Rank */
-  
-  .standings-rank {
-    grid-area: rank;
-  
-    align-self: start;
-  
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  
-    padding-top: 4px;
-  }
-  
-  .standings-rank > strong {
-    font-size: 0.86rem;
-  }
-  
-  .standings-movement {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1px;
-  
-    font-size: 0.52rem;
-    font-weight: 850;
-  }
-  
-  .standings-movement-up {
-    color: #55dfa0;
-  }
-  
-  .standings-movement-down {
-    color: #ff6474;
-  }
-  
-  .standings-movement-even {
-    color: var(--color-muted, #8999a8);
-  }
-  
-  /* Logo */
-  
-  .standings-team-logo {
-    grid-area: logo;
-  
-    width: 44px;
-    height: 44px;
-  
+
+  .standings-list-columns {
     display: grid;
-    place-items: center;
-  
-    border-radius: 50%;
-  
-    font-family: var(--heading-font, "Graduate", serif);
-    font-size: 0.77rem;
-  
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.055);
-  }
-  
-  .standings-team-logo-nfl {
-    border: 1px solid rgba(31, 178, 101, 0.4);
-  }
-  
-  .standings-team-logo-fbs {
-    border: 1px solid rgba(66, 135, 255, 0.4);
-  }
-  
-  .standings-team-logo-fcs {
-    border: 1px solid rgba(160, 104, 255, 0.4);
-  }
-  
-  /* Team information */
-  
-  .standings-team-info {
-    grid-area: team;
-  
-    min-width: 0;
-  
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-  
-  .standings-team-heading {
-    width: 100%;
-    min-width: 0;
-  
-    display: flex;
-    align-items: center;
-    gap: 7px;
-  }
-  
-  .standings-team-heading strong {
-    min-width: 0;
-    overflow: hidden;
-  
-    font-size: 0.78rem;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-  
-  .standings-team-heading > span {
-    flex: 0 0 auto;
-  
-    padding: 2px 5px;
-  
-    border-radius: 999px;
-  
-    font-size: 0.46rem;
-    font-weight: 850;
-    text-transform: uppercase;
-  
-    color: var(--color-muted, #a5b2be);
-    background: rgba(255, 255, 255, 0.055);
-  }
-  
-  .standings-coach {
-    width: 100%;
-    overflow: hidden;
-  
-    font-size: 0.57rem;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  
-    color: var(--color-muted, #94a4b3);
-  }
-  
-  .standings-status {
-    width: fit-content;
-    max-width: 100%;
-    padding: 4px 7px;
-  
-    overflow: hidden;
-  
-    border-radius: 999px;
-  
-    font-size: 0.44rem;
-    font-weight: 850;
-    letter-spacing: 0.025em;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    text-transform: uppercase;
-  
-    color: #bac5cf;
-    background: rgba(255, 255, 255, 0.06);
-  }
-  
-  .standings-status-playoff {
-    color: #c9f7df;
-    background: rgba(31, 178, 101, 0.15);
-  }
-  
-  .standings-status-promotion {
-    color: #f5dfa0;
-    background: rgba(232, 198, 91, 0.14);
-  }
-  
-  .standings-status-chasing {
-    color: #dceaff;
-    background: rgba(66, 135, 255, 0.14);
-  }
-  
-  .standings-status-warning {
-    color: #ffd3ad;
-    background: rgba(240, 128, 60, 0.14);
-  }
-  
-  .standings-status-relegation {
-    color: #ffc0c7;
-    background: rgba(225, 58, 75, 0.15);
-  }
-  
-  /* Record */
-  
-  .standings-record {
-    grid-area: record;
-  
-    align-self: start;
-  
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
-  
-    padding-top: 3px;
-  }
-  
-  .standings-record strong {
-    font-size: 0.82rem;
-  }
-  
-  .standings-record span {
-    font-size: 0.52rem;
-    font-weight: 850;
-  
-    color: var(--color-muted, #9aabb9);
-  }
-  
-  /* PF / PA footer */
-  
-  .standings-points {
-    grid-area: points;
-  
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  
-    margin: 7px -13px 0;
-    padding: 9px 13px;
-  
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-  
-    background: rgba(255, 255, 255, 0.025);
-  }
-  
-  .standings-points span {
-    min-width: 0;
-  
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-  
-    padding: 6px 8px;
-  
-    border: 1px solid rgba(255, 255, 255, 0.055);
-    border-radius: 8px;
-  
-    font-size: 0.61rem;
-    font-weight: 750;
-  
-    color: #d6dee5;
-    background: rgba(255, 255, 255, 0.025);
-  }
-  
-  .standings-points small {
-    font-size: 0.47rem;
-    font-weight: 900;
-    letter-spacing: 0.06em;
-  
-    color: var(--color-muted, #8192a2);
-  }
-  
-  /* Card action */
-  
-  .standings-row-action {
-    grid-area: action;
-  
-    align-self: end;
-    justify-self: end;
-  
-    width: 30px;
-    height: 30px;
-    padding: 0;
-  
-    display: grid;
-    place-items: center;
-  
-    border: 1px solid rgba(255, 255, 255, 0.065);
-    border-radius: 50%;
-  
-    color: var(--color-muted, #9aa9b7);
-    background: rgba(255, 255, 255, 0.035);
-  
-    cursor: pointer;
-  }
-  
-  /* =========================================================
-     PROMOTION / RELEGATION LINES
-  ========================================================= */
-  
-  .standings-line {
-    position: relative;
-  
-    height: 32px;
-  
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  
-    margin-block: 2px;
-  
-    border-top: 1px solid transparent;
-    border-bottom: 1px solid transparent;
-  }
-  
-  .standings-line span {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  
-    padding: 5px 10px;
-  
-    border-radius: 999px;
-  
-    font-size: 0.48rem;
+    grid-template-columns: 96px minmax(0, 1fr) 90px 190px;
+    gap: 10px;
+
+    padding: 11px 16px;
+
+    font-size: 0.49rem;
     font-weight: 900;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-  }
-  
-  .standings-line-promotion {
-    border-color: rgba(31, 178, 101, 0.24);
-    background: rgba(31, 178, 101, 0.055);
-  }
-  
-  .standings-line-promotion span {
-    color: #73e7ad;
-    background: #102d2a;
-  }
-  
-  .standings-line-relegation {
-    border-color: rgba(225, 58, 75, 0.25);
-    background: rgba(225, 58, 75, 0.055);
-  }
-  
-  .standings-line-relegation span {
-    color: #ff7d8a;
-    background: #33202b;
-  }
-  
-  /* =========================================================
-     EMPTY STATE
-  ========================================================= */
-  
-  .standings-empty-state {
-    min-height: 190px;
-    padding: 28px;
-  
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  
-    border: 1px dashed rgba(255, 255, 255, 0.12);
-    border-radius: 16px;
-  
-    text-align: center;
-  
+
+    color: var(--color-muted, #8293a3);
     background: rgba(255, 255, 255, 0.025);
   }
-  
-  .standings-empty-state svg {
-    margin-bottom: 10px;
-  
-    color: var(--color-muted, #8fa0b0);
+
+  .standings-list-columns span:nth-child(3),
+  .standings-list-columns span:nth-child(4) {
+    text-align: right;
   }
-  
-  .standings-empty-state h3 {
-    margin: 0 0 6px;
-    font-size: 0.86rem;
+
+  .standings-row {
+    grid-template-columns: 48px 44px minmax(0, 1fr) 76px 190px 34px;
+
+    min-height: 88px;
+    padding: 12px 16px;
+
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.055);
+    border-radius: 0;
+
+    box-shadow: none;
+    background: transparent;
   }
-  
-  .standings-empty-state p {
-    max-width: 360px;
-    margin: 0;
-  
-    font-size: 0.66rem;
-    line-height: 1.5;
-  
-    color: var(--color-muted, #96a6b5);
+
+  .standings-row:hover {
+    background: rgba(255, 255, 255, 0.025);
   }
-  
-  /* =========================================================
-     TABLET
-  ========================================================= */
-  
-  @media (min-width: 700px) {
-    .standings-page {
-      padding-top: 28px;
-    }
-  
-    .standings-controls {
-      grid-template-columns:
-        minmax(230px, 0.7fr)
-        minmax(340px, 1fr);
-    }
-  
-    .standings-pulse-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  
-    .standings-list {
-      gap: 7px;
-    }
-  
-    .standings-row {
-      grid-template-columns: 48px 48px minmax(0, 1fr) 74px 180px 34px;
-      grid-template-areas: "rank logo team record points action";
-  
-      min-height: 88px;
-      padding: 12px 14px;
-    }
-  
-    .standings-rank,
-    .standings-record {
-      align-self: center;
-      padding-top: 0;
-    }
-  
-    .standings-points {
-      display: flex;
-      justify-content: flex-end;
-      gap: 6px;
-  
-      margin: 0;
-      padding: 0;
-  
-      border-top: 0;
-      background: transparent;
-    }
-  
-    .standings-points span {
-      width: 82px;
-      padding: 6px 7px;
-    }
-  
-    .standings-row-action {
-      align-self: center;
-    }
+}
+
+/* =========================================================
+   SMALL PHONES
+========================================================= */
+
+@media (max-width: 390px) {
+  .standings-page {
+    padding-inline: 10px;
   }
-  
-  /* =========================================================
-     DESKTOP TABLE MODE
-  ========================================================= */
-  
-  @media (min-width: 1050px) {
-    .standings-pulse-grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-  
-    .standings-list {
-      gap: 0;
-  
-      overflow: hidden;
-  
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      border-radius: 15px;
-  
-      background:
-        linear-gradient(
-          145deg,
-          rgba(25, 45, 68, 0.96),
-          rgba(9, 22, 38, 0.99)
-        );
-    }
-  
-    .standings-list-columns {
-      display: grid;
-      grid-template-columns: 96px minmax(0, 1fr) 90px 190px;
-      gap: 10px;
-  
-      padding: 11px 16px;
-  
-      font-size: 0.49rem;
-      font-weight: 900;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-  
-      color: var(--color-muted, #8293a3);
-      background: rgba(255, 255, 255, 0.025);
-    }
-  
-    .standings-list-columns span:nth-child(3),
-    .standings-list-columns span:nth-child(4) {
-      text-align: right;
-    }
-  
-    .standings-row {
-      grid-template-columns: 48px 44px minmax(0, 1fr) 76px 190px 34px;
-  
-      min-height: 88px;
-      padding: 12px 16px;
-  
-      border: 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.055);
-      border-radius: 0;
-  
-      box-shadow: none;
-      background: transparent;
-    }
-  
-    .standings-row:hover {
-      background: rgba(255, 255, 255, 0.025);
-    }
+
+  .standings-tier-view {
+    padding-left: 8px;
   }
-  
-  /* =========================================================
-     SMALL PHONES
-  ========================================================= */
-  
-  @media (max-width: 390px) {
-    .standings-page {
-      padding-inline: 10px;
-    }
-  
-    .standings-tier-view {
-      padding-left: 8px;
-    }
-  
-    .standings-row {
-      grid-template-columns: 36px 40px minmax(0, 1fr) auto;
-      gap: 6px 8px;
-  
-      padding-inline: 10px;
-    }
-  
-    .standings-team-logo {
-      width: 39px;
-      height: 39px;
-    }
-  
-    .standings-team-heading strong {
-      font-size: 0.7rem;
-    }
-  
-    .standings-team-heading > span {
-      font-size: 0.41rem;
-    }
-  
-    .standings-coach {
-      font-size: 0.52rem;
-    }
-  
-    .standings-status {
-      max-width: 130px;
-      font-size: 0.4rem;
-    }
-  
-    .standings-record strong {
-      font-size: 0.74rem;
-    }
-  
-    .standings-points {
-      margin-inline: -10px;
-      padding-inline: 10px;
-    }
+
+  .standings-row {
+    grid-template-columns: 36px 40px minmax(0, 1fr) auto;
+    gap: 6px 8px;
+
+    padding-inline: 10px;
   }
+
+  .standings-team-logo {
+    width: 39px;
+    height: 39px;
+  }
+
+  .standings-team-heading strong {
+    font-size: 0.7rem;
+  }
+
+  .standings-team-heading > span {
+    font-size: 0.41rem;
+  }
+
+  .standings-coach {
+    font-size: 0.52rem;
+  }
+
+  .standings-status {
+    max-width: 130px;
+    font-size: 0.4rem;
+  }
+
+  .standings-record strong {
+    font-size: 0.74rem;
+  }
+
+  .standings-points {
+    margin-inline: -10px;
+    padding-inline: 10px;
+  }
+}
+/* =========================================================
+ LIVE STANDINGS RECORD / STATUS POLISH
+========================================================= */
+
+.standings-record-lines {
+grid-area: record;
+align-self: start;
+display: flex;
+flex-direction: column;
+align-items: flex-end;
+gap: 5px;
+padding-top: 1px;
+}
+
+.standings-record-line {
+display: flex;
+align-items: baseline;
+justify-content: flex-end;
+gap: 7px;
+white-space: nowrap;
+}
+
+.standings-record-line small {
+font-size: 0.45rem;
+font-weight: 850;
+letter-spacing: 0.045em;
+text-transform: uppercase;
+color: var(--color-muted, #8fa0af);
+}
+
+.standings-record-line strong {
+font-size: 0.72rem;
+color: #dce5ec;
+}
+
+.standings-record-line-primary strong {
+font-size: 0.88rem;
+color: #ffffff;
+}
+
+.standings-points-status {
+grid-area: points;
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 10px;
+margin: 7px -13px 0;
+padding: 9px 13px;
+border-top: 1px solid rgba(255, 255, 255, 0.06);
+background: rgba(255, 255, 255, 0.025);
+}
+
+.standings-pf-value {
+display: inline-flex;
+align-items: center;
+gap: 7px;
+font-size: 0.64rem;
+font-weight: 800;
+color: #d6dee5;
+}
+
+.standings-pf-value small {
+font-size: 0.47rem;
+font-weight: 900;
+letter-spacing: 0.06em;
+color: var(--color-muted, #8192a2);
+}
+
+.standings-points-status .standings-status {
+margin-left: auto;
+flex: 0 1 auto;
+}
+
+@media (min-width: 760px) {
+.standings-record-lines {
+  align-self: center;
+  padding-top: 0;
+}
+
+.standings-points-status {
+  margin: 0;
+  padding: 0;
+  border-top: 0;
+  background: transparent;
+}
+}
+
+@media (max-width: 520px) {
+.standings-record-line {
+  gap: 5px;
+}
+
+.standings-record-line small {
+  font-size: 0.42rem;
+}
+
+.standings-record-line strong,
+.standings-record-line-primary strong {
+  font-size: 0.69rem;
+}
+
+.standings-points-status {
+  align-items: center;
+}
+}
+
+/* =========================================================
+ LINEAR RECORDS + FULL-WIDTH STATUS / PF FOOTER
+========================================================= */
+
+.standings-record-lines {
+align-self: center;
+min-width: 122px;
+gap: 4px;
+padding-top: 0;
+}
+
+.standings-record-line {
+width: 100%;
+display: flex;
+align-items: center;
+justify-content: flex-end;
+gap: 6px;
+line-height: 1.15;
+}
+
+.standings-record-line small {
+flex: 0 0 auto;
+font-size: 0.47rem;
+}
+
+.standings-record-line strong,
+.standings-record-line-primary strong {
+flex: 0 0 auto;
+font-size: 0.72rem;
+}
+
+.standings-record-line-primary strong {
+font-size: 0.78rem;
+}
+
+.standings-points-status {
+min-height: 34px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 12px;
+}
+
+.standings-points-status .standings-status {
+order: 1;
+margin: 0;
+flex: 0 1 auto;
+}
+
+.standings-pf-value {
+order: 2;
+margin-left: auto;
+gap: 5px;
+font-size: 0.58rem;
+}
+
+.standings-pf-value small {
+font-size: 0.43rem;
+}
+
+.standings-pf-value strong {
+font-size: 0.64rem;
+font-weight: 800;
+}
+
+@media (min-width: 700px) {
+.standings-row {
+  grid-template-columns: 48px 48px minmax(0, 1fr) 150px 34px;
+  grid-template-areas:
+    "rank logo team record action"
+    "points points points points points";
+  min-height: 104px;
+  padding: 12px 14px 0;
+}
+
+.standings-points-status {
+  margin: 8px -14px 0;
+  padding: 8px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.025);
+}
+}
+
+@media (min-width: 1050px) {
+.standings-list-columns {
+  grid-template-columns: 96px minmax(0, 1fr) 150px 120px;
+}
+
+.standings-row {
+  grid-template-columns: 48px 44px minmax(0, 1fr) 160px 34px;
+  grid-template-areas:
+    "rank logo team record action"
+    "points points points points points";
+  min-height: 106px;
+  padding: 12px 16px 0;
+}
+
+.standings-points-status {
+  margin: 8px -16px 0;
+  padding: 8px 16px;
+}
+}
+
+@media (max-width: 520px) {
+.standings-record-lines {
+  min-width: 108px;
+}
+
+.standings-record-line small {
+  font-size: 0.4rem;
+}
+
+.standings-record-line strong,
+.standings-record-line-primary strong {
+  font-size: 0.65rem;
+}
+
+.standings-pf-value strong {
+  font-size: 0.6rem;
+}
+}

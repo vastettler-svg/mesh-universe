@@ -190,7 +190,7 @@ function getStatus(team) {
 
   return {
     status: "neutral",
-    statusLabel: "In the Hunt",
+    statusLabel: "",
   };
 }
 

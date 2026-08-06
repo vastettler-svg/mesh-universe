@@ -1,5 +1,11 @@
+const PUBLISHED_SHEET_BASE_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRwZdqNhyvQxRhmmZu9jzUdFnzB6ZFnh7gYe2bgN6qwPl9SGwPf9dYyrhLk8_dFONmrL9Ibi3iXYEnc/pub";
+
 const TEAM_DATA_CSV_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRwZdqNhyvQxRhmmZu9jzUdFnzB6ZFnh7gYe2bgN6qwPl9SGwPf9dYyrhLk8_dFONmrL9Ibi3iXYEnc/pub?gid=1513820672&single=true&output=csv";
+  `${PUBLISHED_SHEET_BASE_URL}?gid=1513820672&single=true&output=csv`;
+
+const GAME_RESULTS_CSV_URL =
+  `${PUBLISHED_SHEET_BASE_URL}?gid=1867143153&single=true&output=csv`;
 
 function parseCsv(text) {
   const rows = [];
@@ -70,22 +76,36 @@ function csvRowsToObjects(csvRows) {
 
   const headers = csvRows[0].map(normalizeHeader);
 
-  return csvRows
-    .slice(1)
-    .map((row) => {
-      const result = {};
+  return csvRows.slice(1).map((row) => {
+    const result = {};
 
-      headers.forEach((header, index) => {
-        if (!header) {
-          return;
-        }
-
+    headers.forEach((header, index) => {
+      if (header) {
         result[header] = row[index] ?? "";
-      });
+      }
+    });
 
-      return result;
-    })
-    .filter((row) => String(row.Franchise_ID ?? "").trim());
+    return result;
+  });
+}
+
+async function fetchCsvRows(url, label) {
+  const response = await fetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(
+      `${label} request failed: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const csvText = await response.text();
+  const rows = csvRowsToObjects(parseCsv(csvText));
+
+  if (rows.length === 0) {
+    throw new Error(`${label} returned no rows.`);
+  }
+
+  return rows;
 }
 
 function toNumber(value, fallback = 0) {
@@ -99,8 +119,16 @@ function toNumber(value, fallback = 0) {
     .trim();
 
   const number = Number(cleanedValue);
-
   return Number.isFinite(number) ? number : fallback;
+}
+
+function toOptionalNumber(value) {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  const number = Number(String(value).replace(/,/g, "").trim());
+  return Number.isFinite(number) ? number : null;
 }
 
 function normalizeId(value) {
@@ -110,6 +138,18 @@ function normalizeId(value) {
     .replace(/&/g, "and")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function firstValue(row, names, fallback = "") {
+  for (const name of names) {
+    const value = row[name];
+
+    if (value !== undefined && value !== null && value !== "") {
+      return value;
+    }
+  }
+
+  return fallback;
 }
 
 function buildRecord(wins, losses, ties) {
@@ -122,42 +162,29 @@ function buildRecord(wins, losses, ties) {
     : `${winValue}–${lossValue}`;
 }
 
-function getStatus(team) {
+function getStandingsStatus(team) {
   const tier = String(team.Tier ?? "").trim().toUpperCase();
   const overallRank = toNumber(team.Overall_Rank, 999);
   const playoffSeed = toNumber(team.Playoff_Seed);
-  const playoffStatus = String(
-    team.Playoff_Status ?? "",
-  ).trim();
+  const playoffStatus = String(team.Playoff_Status ?? "").trim();
 
   if (tier === "NFL" && overallRank >= 29) {
-    return {
-      status: "relegation",
-      statusLabel: "Relegation Zone",
-    };
+    return { status: "relegation", statusLabel: "Relegation Zone" };
   }
 
   if (tier === "FBS" && overallRank >= 1 && overallRank <= 4) {
-    return {
-      status: "promotion",
-      statusLabel: "Promotion Position",
-    };
+    return { status: "promotion", statusLabel: "Promotion Position" };
   }
 
   if (tier === "FCS" && overallRank >= 1 && overallRank <= 8) {
-    return {
-      status: "promotion",
-      statusLabel: "Promotion Position",
-    };
+    return { status: "promotion", statusLabel: "Promotion Position" };
   }
 
   if (playoffSeed > 0) {
     return {
       status: "playoff",
       statusLabel:
-        playoffSeed === 1
-          ? "No. 1 Seed"
-          : `No. ${playoffSeed} Seed`,
+        playoffSeed === 1 ? "No. 1 Seed" : `No. ${playoffSeed} Seed`,
     };
   }
 
@@ -165,10 +192,7 @@ function getStatus(team) {
     const normalizedStatus = playoffStatus.toLowerCase();
 
     if (normalizedStatus.includes("eliminated")) {
-      return {
-        status: "warning",
-        statusLabel: playoffStatus,
-      };
+      return { status: "warning", statusLabel: playoffStatus };
     }
 
     if (
@@ -176,46 +200,28 @@ function getStatus(team) {
       normalizedStatus.includes("playoff") ||
       normalizedStatus.includes("bye")
     ) {
-      return {
-        status: "playoff",
-        statusLabel: playoffStatus,
-      };
+      return { status: "playoff", statusLabel: playoffStatus };
     }
 
-    return {
-      status: "neutral",
-      statusLabel: playoffStatus,
-    };
+    return { status: "neutral", statusLabel: playoffStatus };
   }
 
-  return {
-    status: "neutral",
-    statusLabel: "",
-  };
+  return { status: "neutral", statusLabel: "" };
 }
 
 async function fetchTeamDataRows() {
-  const response = await fetch(TEAM_DATA_CSV_URL, {
-    cache: "no-store",
-  });
+  const rows = await fetchCsvRows(TEAM_DATA_CSV_URL, "TEAM DATA");
+  const franchiseRows = rows.filter((row) =>
+    String(row.Franchise_ID ?? "").trim(),
+  );
 
-  if (!response.ok) {
+  if (franchiseRows.length === 0) {
     throw new Error(
-      `Google Sheets request failed: ${response.status} ${response.statusText}`,
+      "TEAM DATA returned no franchise rows. Confirm row 1 contains the headers.",
     );
   }
 
-  const csvText = await response.text();
-  const csvRows = parseCsv(csvText);
-  const objects = csvRowsToObjects(csvRows);
-
-  if (objects.length === 0) {
-    throw new Error(
-      "TEAM DATA returned no franchise rows. Confirm that the published sheet uses row 1 as its header row.",
-    );
-  }
-
-  return objects;
+  return franchiseRows;
 }
 
 export async function getStandingsData() {
@@ -223,87 +229,231 @@ export async function getStandingsData() {
 
   return rows.map((row) => {
     const tier = String(row.Tier ?? "").trim().toUpperCase();
-    const tierClass = tier.toLowerCase();
     const conference = String(row.Conference ?? "").trim();
     const division = String(row.Division ?? "").trim();
-
     const overallRank = toNumber(row.Overall_Rank, 999);
-    const conferenceRank = toNumber(
-      row.Conference_Rank,
-      overallRank,
-    );
-    const divisionRank = toNumber(
-      row.Division_Rank,
-      conferenceRank,
-    );
+    const conferenceRank = toNumber(row.Conference_Rank, overallRank);
+    const divisionRank = toNumber(row.Division_Rank, conferenceRank);
     const top25Rank = toNumber(row.Top25_Rank);
-    const previousRank = toNumber(
-      row.Previous_RPI_Rank,
-      overallRank,
-    );
+    const previousRank = toNumber(row.Previous_RPI_Rank, overallRank);
 
     return {
       id: String(row.Franchise_ID ?? "").trim(),
       franchiseId: String(row.Franchise_ID ?? "").trim(),
       coachId: String(row.Coach_ID ?? "").trim(),
-
       tier,
-      tierClass,
-
+      tierClass: tier.toLowerCase(),
       conference,
       conferenceId: normalizeId(conference),
-
       division,
       divisionId: normalizeId(division),
-
       team: String(row.Franchise_Name ?? "").trim(),
       coach: String(row.Coach_Name ?? "").trim(),
-
       overallRank,
       conferenceRank,
       divisionRank,
       top25Rank,
-
       playoffSeed: toNumber(row.Playoff_Seed),
-      playoffStatus: String(
-        row.Playoff_Status ?? "",
-      ).trim(),
+      playoffStatus: String(row.Playoff_Status ?? "").trim(),
       seasonResult: String(row.Season_Result ?? "").trim(),
-
       tierStandingsRecord: buildRecord(
         row.Tier_Standings_Wins,
         row.Tier_Standings_Losses,
         row.Tier_Standings_Ties,
       ),
-
       regularSeasonRecord: buildRecord(
         row.Regular_Season_Wins,
         row.Regular_Season_Losses,
         row.Regular_Season_Ties,
       ),
-
       overallSeasonRecord: buildRecord(
         row.Overall_Season_Wins,
         row.Overall_Season_Losses,
         row.Overall_Season_Ties,
       ),
-
       record: buildRecord(
         row.Tier_Standings_Wins,
         row.Tier_Standings_Losses,
         row.Tier_Standings_Ties,
       ),
-
       regularSeasonPF: toNumber(row.Regular_Season_PF),
       overallSeasonPF: toNumber(row.Overall_Season_PF),
       pointsFor: toNumber(row.Regular_Season_PF),
-
       movement: previousRank - overallRank,
       top25: top25Rank >= 1 && top25Rank <= 25,
-
       streak: String(row.Streak ?? "").trim(),
-
-      ...getStatus(row),
+      ...getStandingsStatus(row),
     };
   });
+}
+
+function normalizeGameStatus(value) {
+  const status = String(value ?? "").trim().toLowerCase();
+
+  if (status === "in progress" || status === "live") {
+    return { status: "live", statusLabel: "In Progress" };
+  }
+
+  if (status === "final" || status === "complete") {
+    return { status: "final", statusLabel: "Final" };
+  }
+
+  return { status: "upcoming", statusLabel: "Scheduled" };
+}
+
+function buildGameLabel(row) {
+  const gameCategory = String(row.Game_Category ?? "").trim();
+  const gameType = String(row.Game_Type ?? "").trim();
+  const bowlName = String(row.Bowl_Name ?? "").trim();
+
+  if (bowlName) {
+    return bowlName;
+  }
+
+  if (gameType && gameType.toLowerCase() !== "regular season") {
+    return gameType;
+  }
+
+  return gameCategory || "Regular Season";
+}
+
+function createTeamLookup(rows) {
+  return new Map(
+    rows.map((row) => {
+      const franchiseId = String(row.Franchise_ID ?? "").trim();
+      const tier = String(row.Tier ?? "").trim().toUpperCase();
+      const top25Rank = toNumber(row.Top25_Rank);
+
+      return [
+        franchiseId,
+        {
+          franchiseId,
+          name: String(row.Franchise_Name ?? "").trim(),
+          conference: String(row.Conference ?? "").trim(),
+          conferenceId: normalizeId(row.Conference),
+          tier,
+          tierClass: tier.toLowerCase(),
+          record: buildRecord(
+            row.Overall_Season_Wins,
+            row.Overall_Season_Losses,
+            row.Overall_Season_Ties,
+          ),
+          top25Rank,
+          top25: top25Rank >= 1 && top25Rank <= 25,
+        },
+      ];
+    }),
+  );
+}
+
+export async function getGameResults() {
+  const [gameRows, teamRows] = await Promise.all([
+    fetchCsvRows(GAME_RESULTS_CSV_URL, "GAME_RESULTS"),
+    fetchTeamDataRows(),
+  ]);
+
+  const teamLookup = createTeamLookup(teamRows);
+
+  return gameRows
+    .filter((row) => {
+      const gameId = String(row.Game_ID ?? "").trim();
+      const team1Id = String(
+        firstValue(row, ["Team1_Franchise_ID", "Franchise1_ID"]),
+      ).trim();
+      const team2Id = String(
+        firstValue(row, ["Team2_Franchise_ID", "Franchise2_ID"]),
+      ).trim();
+
+      return gameId && team1Id && team2Id;
+    })
+    .map((row) => {
+      const team1Id = String(
+        firstValue(row, ["Team1_Franchise_ID", "Franchise1_ID"]),
+      ).trim();
+      const team2Id = String(
+        firstValue(row, ["Team2_Franchise_ID", "Franchise2_ID"]),
+      ).trim();
+
+      const team1 = teamLookup.get(team1Id) ?? {};
+      const team2 = teamLookup.get(team2Id) ?? {};
+      const tier = String(row.Tier || team1.tier || team2.tier || "")
+        .trim()
+        .toUpperCase();
+      const statusData = normalizeGameStatus(row.Game_Status);
+      const team1Score = toOptionalNumber(
+        firstValue(row, ["Team1_Score", "Franchise1_Score"]),
+      );
+      const team2Score = toOptionalNumber(
+        firstValue(row, ["Team2_Score", "Franchise2_Score"]),
+      );
+      const winnerId = String(row.Winner_Franchise_ID ?? "").trim();
+      const gameCategory = String(row.Game_Category ?? "").trim();
+      const gameType = String(row.Game_Type ?? "").trim();
+
+      return {
+        id: String(row.Game_ID ?? "").trim(),
+        gameId: String(row.Game_ID ?? "").trim(),
+        season: toNumber(row.Season),
+        week: toNumber(firstValue(row, ["Week", "Schedule_Week"])),
+        gameNumber: toNumber(
+          firstValue(row, ["Game_Number", "Week_Game_Number"]),
+          1,
+        ),
+        tier,
+        tierClass: tier.toLowerCase(),
+        gameCategory,
+        gameCategoryId: normalizeId(gameCategory),
+        gameType,
+        label: buildGameLabel(row),
+        notes: String(row.Notes ?? "").trim(),
+        bowlName: String(row.Bowl_Name ?? "").trim(),
+        ...statusData,
+        team1Id,
+        team1Team:
+          team1.name || String(row.Team1_Franchise_Name ?? "").trim(),
+        team1Initial: String(
+          team1.name || row.Team1_Franchise_Name || "?",
+        )
+          .trim()
+          .charAt(0)
+          .toUpperCase(),
+        team1Conference: team1.conference || "",
+        team1ConferenceId: team1.conferenceId || "",
+        team1Record: team1.record || "0–0",
+        team1Top25Rank: team1.top25Rank || 0,
+        team1Top25: Boolean(team1.top25),
+        team1Score,
+        team2Id,
+        team2Team:
+          team2.name || String(row.Team2_Franchise_Name ?? "").trim(),
+        team2Initial: String(
+          team2.name || row.Team2_Franchise_Name || "?",
+        )
+          .trim()
+          .charAt(0)
+          .toUpperCase(),
+        team2Conference: team2.conference || "",
+        team2ConferenceId: team2.conferenceId || "",
+        team2Record: team2.record || "0–0",
+        team2Top25Rank: team2.top25Rank || 0,
+        team2Top25: Boolean(team2.top25),
+        team2Score,
+        winnerId,
+        top25: Boolean(team1.top25 || team2.top25),
+        conferenceIds: [team1.conferenceId, team2.conferenceId].filter(
+          Boolean,
+        ),
+      };
+    })
+    .sort((firstGame, secondGame) => {
+      if (firstGame.week !== secondGame.week) {
+        return firstGame.week - secondGame.week;
+      }
+
+      if (firstGame.tier !== secondGame.tier) {
+        return firstGame.tier.localeCompare(secondGame.tier);
+      }
+
+      return firstGame.id.localeCompare(secondGame.id);
+    });
 }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Activity,
   ChevronLeft,
@@ -312,6 +313,14 @@ function ScoreCard({ game, featured = false, featuredPosition = 0 }) {
           isLoser={hasFinalWinner && !team2Winner}
         />
       </div>
+
+      <Link
+        className="score-game-center-button"
+        to={`/scores/${encodeURIComponent(game.gameId)}`}
+      >
+        View Game Center
+        <ChevronRight size={15} />
+      </Link>
     </article>
   );
 }

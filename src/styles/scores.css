@@ -1036,7 +1036,10 @@
   text-transform: none;
 }
 
-.score-team-row.winner .score-team-info > strong,
+.score-team-row.winner .score-team-info > strong {
+  color: #ffffff;
+}
+
 .score-team-row.winner .score-team-numbers > strong {
   color: #54dc8e;
 }
@@ -1230,3 +1233,4 @@
     font-size: 0.58rem !important;
   }
 }
+

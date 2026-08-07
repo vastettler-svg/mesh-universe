@@ -9,6 +9,7 @@ import League from "./pages/League";
 import Stats from "./pages/Stats";
 import More from "./pages/More";
 import History from "./pages/History";
+import GameCenter from "./pages/GameCenter";
 
 function App() {
   return (
@@ -16,10 +17,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/scores" element={<Scores />} />
+        <Route path="/scores/:gameId" element={<GameCenter />} />
         <Route path="/standings" element={<Standings />} />
-
         <Route path="/league" element={<League />} />
-
         <Route path="/stats" element={<Stats />} />
         <Route path="/more" element={<More />} />
         <Route path="/history" element={<History />} />

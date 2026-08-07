@@ -457,6 +457,19 @@ export async function getGameResults() {
       const gameCategory = String(row.Game_Category ?? "").trim();
       const gameType = String(row.Game_Type ?? "").trim();
 
+      /*
+       * Historical ranking snapshot:
+       * GAME_RESULTS stores the Top 25 rank each franchise held
+       * when this matchup occurred. Current records and coach/team
+       * information still come from TEAM DATA.
+       */
+      const team1GameRank = toNumber(row.Team1_Game_Rank);
+      const team2GameRank = toNumber(row.Team2_Game_Rank);
+
+      const gameRanks = [team1GameRank, team2GameRank].filter(
+        (rank) => rank >= 1 && rank <= 25,
+      );
+
       return {
         id: String(row.Game_ID ?? "").trim(),
         gameId: String(row.Game_ID ?? "").trim(),
@@ -490,8 +503,10 @@ export async function getGameResults() {
         team1ConferenceId: team1.conferenceId || "",
         team1OverallRecord: team1.overallRecord || "0–0",
         team1ConferenceRecord: team1.conferenceRecord || "0–0",
-        team1Top25Rank: team1.top25Rank || 0,
-        team1Top25: Boolean(team1.top25),
+        team1Top25Rank: team1GameRank,
+        team1GameRank,
+        team1CurrentTop25Rank: team1.top25Rank || 0,
+        team1Top25: team1GameRank >= 1 && team1GameRank <= 25,
         team1Score,
         team1Projection,
         team2Id,
@@ -508,18 +523,22 @@ export async function getGameResults() {
         team2ConferenceId: team2.conferenceId || "",
         team2OverallRecord: team2.overallRecord || "0–0",
         team2ConferenceRecord: team2.conferenceRecord || "0–0",
-        team2Top25Rank: team2.top25Rank || 0,
-        team2Top25: Boolean(team2.top25),
+        team2Top25Rank: team2GameRank,
+        team2GameRank,
+        team2CurrentTop25Rank: team2.top25Rank || 0,
+        team2Top25: team2GameRank >= 1 && team2GameRank <= 25,
         team2Score,
         team2Projection,
         winnerId,
-        top25: Boolean(team1.top25 || team2.top25),
-        bestTop25Rank: Math.min(
-          ...[team1.top25Rank, team2.top25Rank].filter(
-            (rank) => rank >= 1 && rank <= 25,
-          ),
-          999,
-        ),
+
+        /*
+         * Historical Top 25 filtering uses the saved matchup ranks.
+         * A past week's Top 25 view therefore stays historically correct.
+         */
+        top25: gameRanks.length > 0,
+        bestTop25Rank:
+          gameRanks.length > 0 ? Math.min(...gameRanks) : 999,
+
         conferenceIds: [team1.conferenceId, team2.conferenceId].filter(
           Boolean,
         ),
@@ -536,4 +555,27 @@ export async function getGameResults() {
 
       return firstGame.id.localeCompare(secondGame.id);
     });
+}
+
+
+/**
+ * Returns one permanent MESH game by Game_ID.
+ * Game-specific facts come from GAME_RESULTS while current
+ * franchise/coach/record context continues to come from TEAM DATA.
+ */
+export async function getGameById(gameId) {
+  const normalizedGameId = String(gameId ?? "").trim();
+
+  if (!normalizedGameId) {
+    throw new Error("A Game_ID is required.");
+  }
+
+  const games = await getGameResults();
+  const game = games.find((item) => item.gameId === normalizedGameId);
+
+  if (!game) {
+    throw new Error(`Game not found: ${normalizedGameId}`);
+  }
+
+  return game;
 }

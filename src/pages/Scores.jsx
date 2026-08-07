@@ -10,12 +10,16 @@ import {
 } from "lucide-react";
 
 import PageHeader from "../components/PageHeader";
-import { getGameResults } from "../services/googleSheets";
+import {
+  getAppSettings,
+  getGameResults,
+} from "../services/googleSheets";
 import meshShield from "../assets/logos/mfl-shield.png";
 
 import "../styles/scores.css";
 
 const MAX_WEEK = 17;
+const NFL_DOUBLE_MATCHUP_WEEKS = new Set([3, 6, 9, 12]);
 
 const primaryFilters = [
   { id: "featured", label: "Featured" },
@@ -82,6 +86,44 @@ function chooseInitialWeek(games) {
   );
 
   return latestWeek;
+}
+
+function formatTierEventLabel(appSettings, tier, week) {
+  if (!appSettings || !tier || tier === "FEATURED") {
+    return "MESH Week";
+  }
+
+  const event = appSettings.tierEvents?.find(
+    (item) => item.tier === tier && item.week === week,
+  );
+
+  if (!event) {
+    return "Schedule";
+  }
+
+  const phase = String(event.phase || "").trim();
+  const eventLabel = String(event.eventLabel || "").trim();
+  const normalizedPhase = phase.toLowerCase();
+
+  if (normalizedPhase === "regular season") {
+    if (eventLabel && !/^week\s+\d+$/i.test(eventLabel)) {
+      return eventLabel;
+    }
+
+    return "Regular Season";
+  }
+
+  if (normalizedPhase === "playoffs") {
+    if (tier === "NFL") {
+      return eventLabel ? `NFL Playoffs • ${eventLabel}` : "NFL Playoffs";
+    }
+
+    if (tier === "FCS") {
+      return eventLabel ? `FCS Playoffs • ${eventLabel}` : "FCS Playoffs";
+    }
+  }
+
+  return eventLabel || phase || "Schedule";
 }
 
 function TierBadge({ tier, tierClass }) {
@@ -171,7 +213,7 @@ function TeamRow({
           </span>
         ) : (
           <span className="score-team-records">
-            <span>REC: {overallRecord || "0–0"}</span>
+            <span>{overallRecord || "0–0"}</span>
           </span>
         )}
       </div>
@@ -321,6 +363,7 @@ function FeaturedTierSection({ tierClass, tier, games, onViewAll }) {
 
 function Scores() {
   const [scoreData, setScoreData] = useState([]);
+  const [appSettings, setAppSettings] = useState(null);
   const [scoresLoading, setScoresLoading] = useState(true);
   const [scoresError, setScoresError] = useState("");
   const [selectedWeek, setSelectedWeek] = useState(1);
@@ -328,6 +371,7 @@ function Scores() {
     useState("featured");
   const [selectedSecondaryFilter, setSelectedSecondaryFilter] =
     useState("all");
+  const [selectedNflMatchup, setSelectedNflMatchup] = useState(1);
 
   useEffect(() => {
     let isMounted = true;
@@ -337,11 +381,25 @@ function Scores() {
         setScoresLoading(true);
         setScoresError("");
 
-        const games = await getGameResults();
+        const [games, settings] = await Promise.all([
+          getGameResults(),
+          getAppSettings().catch((settingsError) => {
+            console.warn("Unable to load APP_SETTINGS:", settingsError);
+            return null;
+          }),
+        ]);
 
         if (isMounted) {
           setScoreData(games);
-          setSelectedWeek(chooseInitialWeek(games));
+          setAppSettings(settings);
+
+          const configuredWeek = Number(settings?.currentWeek);
+          const initialWeek =
+            configuredWeek >= 1 && configuredWeek <= MAX_WEEK
+              ? configuredWeek
+              : chooseInitialWeek(games);
+
+          setSelectedWeek(initialWeek);
         }
       } catch (error) {
         console.error("Unable to load scores:", error);
@@ -377,11 +435,24 @@ function Scores() {
     [scoreData, selectedWeek],
   );
 
+  const configuredCurrentWeek = Number(appSettings?.currentWeek);
+  const currentWeek =
+    configuredCurrentWeek >= 0 && configuredCurrentWeek <= MAX_WEEK
+      ? configuredCurrentWeek
+      : chooseInitialWeek(scoreData);
+
+  const isFutureWeek = selectedWeek > currentWeek;
+  const isNflDoubleMatchupWeek =
+    selectedPrimaryFilter === "nfl" &&
+    NFL_DOUBLE_MATCHUP_WEEKS.has(selectedWeek);
+
   const featuredGroups = useMemo(() => {
     return ["nfl", "fbs", "fcs"].map((tierClass) => ({
       tierClass,
       tier: tierClass.toUpperCase(),
-      games: selectedWeekGames
+      games: isFutureWeek
+        ? []
+        : selectedWeekGames
         .filter((game) => game.tierClass === tierClass)
         .sort((firstGame, secondGame) => {
           const firstFeatured = firstGame.featuredRank || 999;
@@ -399,7 +470,7 @@ function Scores() {
         })
         .slice(0, 3),
     }));
-  }, [selectedWeekGames]);
+  }, [selectedWeekGames, isFutureWeek]);
 
   const visibleTierGames = useMemo(() => {
     if (selectedPrimaryFilter === "featured") return [];
@@ -407,6 +478,21 @@ function Scores() {
     return selectedWeekGames
       .filter((game) => {
         if (game.tierClass !== selectedPrimaryFilter) return false;
+
+        if (isNflDoubleMatchupWeek) {
+          const category = String(game.gameCategoryId || "");
+          const isConferenceGame = category === "conference";
+          const isNonConferenceGame = category === "non-conference";
+
+          if (selectedNflMatchup === 1 && !isConferenceGame) {
+            return false;
+          }
+
+          if (selectedNflMatchup === 2 && !isNonConferenceGame) {
+            return false;
+          }
+        }
+
         if (selectedSecondaryFilter === "all") return true;
         if (selectedSecondaryFilter === "top-25") return game.top25;
         return conferenceMatches(game, selectedSecondaryFilter);
@@ -424,6 +510,8 @@ function Scores() {
     selectedWeekGames,
     selectedPrimaryFilter,
     selectedSecondaryFilter,
+    selectedNflMatchup,
+    isNflDoubleMatchupWeek,
   ]);
 
   const activeSecondaryFilters =
@@ -438,19 +526,21 @@ function Scores() {
     )?.label ?? "";
 
   const phaseLabel = useMemo(() => {
-    const types = new Set(
-      selectedWeekGames.map((game) => game.gameType).filter(Boolean),
-    );
+    if (selectedPrimaryFilter === "featured") {
+      return "MESH Week";
+    }
 
-    if (types.size === 1) return [...types][0];
-    if (types.has("Regular Season")) return "Regular Season";
-    if (types.size > 0) return "Postseason";
-    return "Schedule";
-  }, [selectedWeekGames]);
+    return formatTierEventLabel(
+      appSettings,
+      selectedPrimaryFilter.toUpperCase(),
+      selectedWeek,
+    );
+  }, [appSettings, selectedPrimaryFilter, selectedWeek]);
 
   const goToPreviousWeek = () => {
     if (currentWeekIndex > 0) {
       setSelectedWeek(availableWeeks[currentWeekIndex - 1]);
+      setSelectedNflMatchup(1);
     }
   };
 
@@ -460,11 +550,13 @@ function Scores() {
       currentWeekIndex < availableWeeks.length - 1
     ) {
       setSelectedWeek(availableWeeks[currentWeekIndex + 1]);
+      setSelectedNflMatchup(1);
     }
   };
 
   const selectPrimaryFilter = (filterId) => {
     setSelectedPrimaryFilter(filterId);
+    setSelectedNflMatchup(1);
 
     if (filterId === "fbs" || filterId === "fcs") {
       setSelectedSecondaryFilter("top-25");
@@ -476,6 +568,7 @@ function Scores() {
   const viewAllTierGames = (tierClass) => {
     setSelectedPrimaryFilter(tierClass);
     setSelectedSecondaryFilter("all");
+    setSelectedNflMatchup(1);
 
     window.requestAnimationFrame(() => {
       document.querySelector(".scores-controls")?.scrollIntoView({
@@ -548,8 +641,41 @@ function Scores() {
           className={`scores-secondary-filter scores-secondary-filter-${selectedPrimaryFilter}`}
         >
           <div className="scores-secondary-filter-heading">
-            <span>Filter {activePrimaryLabel}</span>
-            <strong>{activeSecondaryLabel}</strong>
+            <div className="scores-secondary-heading-copy">
+              <span>Filter {activePrimaryLabel}</span>
+              <strong>{activeSecondaryLabel}</strong>
+            </div>
+
+            {isNflDoubleMatchupWeek ? (
+              <div
+                className="scores-nfl-matchup-switch"
+                aria-label="Choose NFL matchup set"
+              >
+                <button
+                  type="button"
+                  className={
+                    selectedNflMatchup === 1
+                      ? "scores-nfl-matchup-button active"
+                      : "scores-nfl-matchup-button"
+                  }
+                  onClick={() => setSelectedNflMatchup(1)}
+                >
+                  Matchup 1
+                </button>
+
+                <button
+                  type="button"
+                  className={
+                    selectedNflMatchup === 2
+                      ? "scores-nfl-matchup-button active"
+                      : "scores-nfl-matchup-button"
+                  }
+                  onClick={() => setSelectedNflMatchup(2)}
+                >
+                  Matchup 2
+                </button>
+              </div>
+            ) : null}
           </div>
 
           <div
@@ -596,15 +722,26 @@ function Scores() {
             </p>
           </div>
 
-          {featuredGroups.map((group) => (
-            <FeaturedTierSection
-              key={group.tierClass}
-              tierClass={group.tierClass}
-              tier={group.tier}
-              games={group.games}
-              onViewAll={viewAllTierGames}
-            />
-          ))}
+          {isFutureWeek ? (
+            <div className="scores-empty-state">
+              <Sparkles size={28} />
+              <h3>Featured matchups not selected yet</h3>
+              <p>
+                Games of the Week and Featured Matchups are selected during
+                the current game week.
+              </p>
+            </div>
+          ) : (
+            featuredGroups.map((group) => (
+              <FeaturedTierSection
+                key={group.tierClass}
+                tierClass={group.tierClass}
+                tier={group.tier}
+                games={group.games}
+                onViewAll={viewAllTierGames}
+              />
+            ))
+          )}
         </section>
       ) : (
         <section

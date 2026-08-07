@@ -7,6 +7,9 @@ const TEAM_DATA_CSV_URL =
 const GAME_RESULTS_CSV_URL =
   `${PUBLISHED_SHEET_BASE_URL}?gid=1867143153&single=true&output=csv`;
 
+const APP_SETTINGS_CSV_URL =
+  `${PUBLISHED_SHEET_BASE_URL}?gid=121795657&single=true&output=csv`;
+
 function parseCsv(text) {
   const rows = [];
   let row = [];
@@ -285,6 +288,50 @@ export async function getStandingsData() {
       ...getStandingsStatus(row),
     };
   });
+}
+
+export async function getAppSettings() {
+  const rows = await fetchCsvRows(APP_SETTINGS_CSV_URL, "APP_SETTINGS");
+
+  const globalSettings = {};
+
+  rows.forEach((row) => {
+    const setting = String(row.Setting ?? "").trim();
+
+    if (setting) {
+      globalSettings[setting] = row.Value;
+    }
+  });
+
+  const tierEvents = rows
+    .filter((row) => {
+      const tier = String(row.Tier ?? "").trim().toUpperCase();
+      const week = toNumber(row.Week, -1);
+      return ["NFL", "FBS", "FCS"].includes(tier) && week >= 0;
+    })
+    .map((row) => ({
+      tier: String(row.Tier ?? "").trim().toUpperCase(),
+      week: toNumber(row.Week),
+      phase: String(row.Phase ?? "").trim(),
+      eventLabel: String(row.Event_Label ?? "").trim(),
+      standingsMode: String(row.Standings_Mode ?? "").trim(),
+      isPostseason: String(row.Is_Postseason ?? "")
+        .trim()
+        .toLowerCase() === "true",
+      notes: String(row.Notes ?? "").trim(),
+    }));
+
+  return {
+    currentSeason: toNumber(globalSettings.Current_Season),
+    currentWeek: toNumber(globalSettings.Current_Week),
+    scoresState: String(globalSettings.Scores_State ?? "").trim(),
+    appVersion: String(globalSettings.App_Version ?? "").trim(),
+    lastUpdated: globalSettings.Last_Updated ?? "",
+    defaultStandingsView: String(
+      globalSettings.Default_Standings_View ?? "",
+    ).trim(),
+    tierEvents,
+  };
 }
 
 function normalizeGameStatus(value) {

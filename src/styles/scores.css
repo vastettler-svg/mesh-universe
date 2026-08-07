@@ -1102,3 +1102,131 @@
     font-size: 0.46rem;
   }
 }
+
+/* =========================================================
+   SCORES POLISH V2 — FILTERS, TYPOGRAPHY, NEUTRAL CARDS
+   ========================================================= */
+
+/* Keep the filter panel crisp and neutral in every tier/view. */
+.scores-secondary-filter,
+.scores-secondary-filter-nfl,
+.scores-secondary-filter-fbs,
+.scores-secondary-filter-fcs {
+  border-color: rgba(255, 255, 255, 0.09);
+  background: rgba(8, 18, 30, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.scores-secondary-filter-heading {
+  align-items: center;
+}
+
+.scores-secondary-heading-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.scores-secondary-heading-copy > span {
+  font-size: 0.54rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted, #93a3b3);
+}
+
+.scores-secondary-heading-copy > strong {
+  font-size: 0.64rem;
+  color: #ffffff;
+}
+
+.scores-nfl-matchup-switch {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.scores-nfl-matchup-button {
+  min-height: 30px;
+  padding: 6px 9px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font: inherit;
+  font-size: 0.53rem;
+  font-weight: 850;
+  white-space: nowrap;
+  color: var(--color-muted, #98a8b7);
+  background: transparent;
+  cursor: pointer;
+}
+
+.scores-nfl-matchup-button:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.scores-nfl-matchup-button.active {
+  color: #d8f8e7;
+  border-color: rgba(31, 178, 101, 0.25);
+  background: rgba(31, 178, 101, 0.13);
+}
+
+/* Remove the bright tier stripe from each individual game card. */
+.score-card::before,
+.score-card-nfl::before,
+.score-card-fbs::before,
+.score-card-fcs::before {
+  background: rgba(210, 219, 228, 0.2);
+}
+
+/* Slightly darker/crisper card surface across every filter. */
+.score-card {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(20, 38, 58, 0.98),
+      rgba(7, 18, 31, 0.995)
+    );
+}
+
+/* Improve readability without making the card feel oversized. */
+.score-team-info > strong {
+  font-size: 0.84rem;
+  line-height: 1.18;
+}
+
+.score-team-coach {
+  font-size: 0.63rem !important;
+  line-height: 1.2;
+}
+
+@media (max-width: 560px) {
+  .scores-secondary-filter-heading {
+    gap: 8px;
+  }
+
+  .scores-nfl-matchup-switch {
+    gap: 3px;
+    padding: 3px;
+  }
+
+  .scores-nfl-matchup-button {
+    min-height: 28px;
+    padding: 5px 7px;
+    font-size: 0.49rem;
+  }
+
+  .score-team-info > strong {
+    font-size: 0.78rem;
+  }
+
+  .score-team-coach {
+    font-size: 0.58rem !important;
+  }
+}

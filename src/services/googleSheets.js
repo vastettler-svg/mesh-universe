@@ -329,14 +329,20 @@ function createTeamLookup(rows) {
         {
           franchiseId,
           name: String(row.Franchise_Name ?? "").trim(),
+          coach: String(row.Coach_Name ?? "").trim(),
           conference: String(row.Conference ?? "").trim(),
           conferenceId: normalizeId(row.Conference),
           tier,
           tierClass: tier.toLowerCase(),
-          record: buildRecord(
+          overallRecord: buildRecord(
             row.Overall_Season_Wins,
             row.Overall_Season_Losses,
             row.Overall_Season_Ties,
+          ),
+          conferenceRecord: buildRecord(
+            row.Tier_Standings_Wins,
+            row.Tier_Standings_Losses,
+            row.Tier_Standings_Ties,
           ),
           top25Rank,
           top25: top25Rank >= 1 && top25Rank <= 25,
@@ -386,6 +392,20 @@ export async function getGameResults() {
       const team2Score = toOptionalNumber(
         firstValue(row, ["Team2_Score", "Franchise2_Score"]),
       );
+      const team1Projection = toOptionalNumber(
+        firstValue(row, [
+          "Team1_Projected_Score",
+          "Team1_Projected",
+          "Franchise1_Projected_Score",
+        ]),
+      );
+      const team2Projection = toOptionalNumber(
+        firstValue(row, [
+          "Team2_Projected_Score",
+          "Team2_Projected",
+          "Franchise2_Projected_Score",
+        ]),
+      );
       const winnerId = String(row.Winner_Franchise_ID ?? "").trim();
       const gameCategory = String(row.Game_Category ?? "").trim();
       const gameType = String(row.Game_Type ?? "").trim();
@@ -399,6 +419,7 @@ export async function getGameResults() {
           firstValue(row, ["Game_Number", "Week_Game_Number"]),
           1,
         ),
+        featuredRank: toNumber(row.Featured_Rank),
         tier,
         tierClass: tier.toLowerCase(),
         gameCategory,
@@ -417,12 +438,15 @@ export async function getGameResults() {
           .trim()
           .charAt(0)
           .toUpperCase(),
+        team1Coach: team1.coach || "",
         team1Conference: team1.conference || "",
         team1ConferenceId: team1.conferenceId || "",
-        team1Record: team1.record || "0–0",
+        team1OverallRecord: team1.overallRecord || "0–0",
+        team1ConferenceRecord: team1.conferenceRecord || "0–0",
         team1Top25Rank: team1.top25Rank || 0,
         team1Top25: Boolean(team1.top25),
         team1Score,
+        team1Projection,
         team2Id,
         team2Team:
           team2.name || String(row.Team2_Franchise_Name ?? "").trim(),
@@ -432,14 +456,23 @@ export async function getGameResults() {
           .trim()
           .charAt(0)
           .toUpperCase(),
+        team2Coach: team2.coach || "",
         team2Conference: team2.conference || "",
         team2ConferenceId: team2.conferenceId || "",
-        team2Record: team2.record || "0–0",
+        team2OverallRecord: team2.overallRecord || "0–0",
+        team2ConferenceRecord: team2.conferenceRecord || "0–0",
         team2Top25Rank: team2.top25Rank || 0,
         team2Top25: Boolean(team2.top25),
         team2Score,
+        team2Projection,
         winnerId,
         top25: Boolean(team1.top25 || team2.top25),
+        bestTop25Rank: Math.min(
+          ...[team1.top25Rank, team2.top25Rank].filter(
+            (rank) => rank >= 1 && rank <= 25,
+          ),
+          999,
+        ),
         conferenceIds: [team1.conferenceId, team2.conferenceId].filter(
           Boolean,
         ),

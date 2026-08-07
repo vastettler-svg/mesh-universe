@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Activity,
-  CalendarDays,
   ChevronLeft,
   ChevronRight,
   Clock3,
@@ -15,6 +14,8 @@ import { getGameResults } from "../services/googleSheets";
 import meshShield from "../assets/logos/mfl-shield.png";
 
 import "../styles/scores.css";
+
+const MAX_WEEK = 17;
 
 const primaryFilters = [
   { id: "featured", label: "Featured" },
@@ -30,8 +31,8 @@ const secondaryFilters = {
     { id: "nfc", label: "NFC" },
   ],
   fbs: [
-    { id: "all", label: "All FBS" },
     { id: "top-25", label: "Top 25" },
+    { id: "all", label: "All FBS" },
     { id: "acc", label: "ACC" },
     { id: "big-ten", label: "Big Ten" },
     { id: "big-12", label: "Big 12" },
@@ -41,8 +42,8 @@ const secondaryFilters = {
     { id: "sun-belt", label: "Sun Belt" },
   ],
   fcs: [
-    { id: "all", label: "All FCS" },
     { id: "top-25", label: "Top 25" },
+    { id: "all", label: "All FCS" },
     { id: "big-sky", label: "Big Sky" },
     { id: "coastal", label: "Coastal" },
     { id: "ivy", label: "Ivy" },
@@ -66,20 +67,21 @@ function conferenceMatches(game, filterId) {
 
 function chooseInitialWeek(games) {
   const liveWeek = games.find((game) => game.status === "live")?.week;
-  if (liveWeek) return liveWeek;
+  if (liveWeek >= 1 && liveWeek <= MAX_WEEK) return liveWeek;
 
   const scheduledWeek = games.find(
     (game) => game.status === "upcoming",
   )?.week;
-  if (scheduledWeek) return scheduledWeek;
+  if (scheduledWeek >= 1 && scheduledWeek <= MAX_WEEK) {
+    return scheduledWeek;
+  }
 
-  return Math.max(...games.map((game) => game.week), 1);
-}
+  const latestWeek = Math.max(
+    ...games.map((game) => game.week).filter((week) => week <= MAX_WEEK),
+    1,
+  );
 
-function statusPriority(status) {
-  if (status === "live") return 0;
-  if (status === "final") return 1;
-  return 2;
+  return latestWeek;
 }
 
 function TierBadge({ tier, tierClass }) {
@@ -115,18 +117,41 @@ function formatScore(score, status) {
   return Number(score).toFixed(1);
 }
 
+function formatProjection(projection) {
+  if (projection === null || projection === undefined) {
+    return "";
+  }
+
+  return `Proj: ${Number(projection).toFixed(1)}`;
+}
+
 function TeamRow({
   team,
+  coach,
   initial,
-  record,
+  overallRecord,
+  conferenceRecord,
   score,
+  projection,
   rank,
+  tier,
   tierClass,
   status,
   isWinner,
+  isLoser,
 }) {
+  const isCollege = tier === "FBS" || tier === "FCS";
+
   return (
-    <div className={`score-team-row${isWinner ? " winner" : ""}`}>
+    <div
+      className={[
+        "score-team-row",
+        isWinner ? "winner" : "",
+        isLoser ? "loser" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <div className={`score-team-logo score-team-logo-${tierClass}`}>
         {initial}
       </div>
@@ -136,22 +161,42 @@ function TeamRow({
           {rank > 0 && rank <= 25 ? `#${rank} ` : ""}
           {team || "TBD"}
         </strong>
-        <span>{record || "0–0"}</span>
+
+        {coach ? <span className="score-team-coach">{coach}</span> : null}
+
+        {isCollege ? (
+          <span className="score-team-records">
+            <span>OVR: {overallRecord || "0–0"}</span>
+            <span>CONF: {conferenceRecord || "0–0"}</span>
+          </span>
+        ) : (
+          <span className="score-team-records">
+            <span>REC: {overallRecord || "0–0"}</span>
+          </span>
+        )}
       </div>
 
       <div className="score-team-numbers">
         <strong>{formatScore(score, status)}</strong>
-        <span>{status === "upcoming" ? "SCHEDULED" : "SCORE"}</span>
+        {status !== "final" && projection !== null ? (
+          <span>{formatProjection(projection)}</span>
+        ) : null}
       </div>
     </div>
   );
 }
 
-function ScoreCard({ game, featured = false }) {
+function ScoreCard({ game, featured = false, featuredPosition = 0 }) {
   const team1Winner =
     game.status === "final" && game.winnerId === game.team1Id;
   const team2Winner =
     game.status === "final" && game.winnerId === game.team2Id;
+
+  const hasFinalWinner =
+    game.status === "final" && Boolean(game.winnerId);
+
+  const featureLabel =
+    featuredPosition === 0 ? "Game of the Week" : "Featured Matchup";
 
   return (
     <article
@@ -172,9 +217,18 @@ function ScoreCard({ game, featured = false }) {
             <span className="score-league-name">{game.label}</span>
 
             {featured ? (
-              <span className="score-featured-label">
+              <span
+                className={[
+                  "score-featured-label",
+                  featuredPosition === 0
+                    ? "score-featured-label-game-of-week"
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
                 <Sparkles size={10} />
-                Featured matchup
+                {featureLabel}
               </span>
             ) : null}
           </div>
@@ -183,35 +237,37 @@ function ScoreCard({ game, featured = false }) {
         <StatusBadge status={game.status} label={game.statusLabel} />
       </div>
 
-      <div className="score-card-time">
-        <CalendarDays size={13} />
-        <span>
-          Week {game.week}
-          {game.gameNumber > 1 ? ` • Game ${game.gameNumber}` : ""}
-        </span>
-      </div>
-
       <div className="score-team-list">
         <TeamRow
           team={game.team1Team}
+          coach={game.team1Coach}
           initial={game.team1Initial}
-          record={game.team1Record}
+          overallRecord={game.team1OverallRecord}
+          conferenceRecord={game.team1ConferenceRecord}
           score={game.team1Score}
+          projection={game.team1Projection}
           rank={game.team1Top25Rank}
+          tier={game.tier}
           tierClass={game.tierClass}
           status={game.status}
           isWinner={team1Winner}
+          isLoser={hasFinalWinner && !team1Winner}
         />
 
         <TeamRow
           team={game.team2Team}
+          coach={game.team2Coach}
           initial={game.team2Initial}
-          record={game.team2Record}
+          overallRecord={game.team2OverallRecord}
+          conferenceRecord={game.team2ConferenceRecord}
           score={game.team2Score}
+          projection={game.team2Projection}
           rank={game.team2Top25Rank}
+          tier={game.tier}
           tierClass={game.tierClass}
           status={game.status}
           isWinner={team2Winner}
+          isLoser={hasFinalWinner && !team2Winner}
         />
       </div>
     </article>
@@ -234,8 +290,13 @@ function FeaturedTierSection({ tierClass, tier, games, onViewAll }) {
 
       {games.length > 0 ? (
         <div className="scores-grid">
-          {games.map((game) => (
-            <ScoreCard key={game.id} game={game} featured />
+          {games.map((game, index) => (
+            <ScoreCard
+              key={game.id}
+              game={game}
+              featured
+              featuredPosition={index}
+            />
           ))}
         </div>
       ) : (
@@ -305,11 +366,8 @@ function Scores() {
   }, []);
 
   const availableWeeks = useMemo(
-    () =>
-      [...new Set(scoreData.map((game) => game.week))]
-        .filter((week) => week > 0)
-        .sort((a, b) => a - b),
-    [scoreData],
+    () => Array.from({ length: MAX_WEEK }, (_, index) => index + 1),
+    [],
   );
 
   const currentWeekIndex = availableWeeks.indexOf(selectedWeek);
@@ -319,20 +377,6 @@ function Scores() {
     [scoreData, selectedWeek],
   );
 
-  const scoreTotals = useMemo(() => {
-    const live = selectedWeekGames.filter(
-      (game) => game.status === "live",
-    ).length;
-    const upcoming = selectedWeekGames.filter(
-      (game) => game.status === "upcoming",
-    ).length;
-    const final = selectedWeekGames.filter(
-      (game) => game.status === "final",
-    ).length;
-
-    return { live, upcoming, final };
-  }, [selectedWeekGames]);
-
   const featuredGroups = useMemo(() => {
     return ["nfl", "fbs", "fcs"].map((tierClass) => ({
       tierClass,
@@ -340,13 +384,15 @@ function Scores() {
       games: selectedWeekGames
         .filter((game) => game.tierClass === tierClass)
         .sort((firstGame, secondGame) => {
-          const statusDifference =
-            statusPriority(firstGame.status) -
-            statusPriority(secondGame.status);
+          const firstFeatured = firstGame.featuredRank || 999;
+          const secondFeatured = secondGame.featuredRank || 999;
 
-          if (statusDifference !== 0) return statusDifference;
-          if (firstGame.top25 !== secondGame.top25) {
-            return firstGame.top25 ? -1 : 1;
+          if (firstFeatured !== secondFeatured) {
+            return firstFeatured - secondFeatured;
+          }
+
+          if (firstGame.bestTop25Rank !== secondGame.bestTop25Rank) {
+            return firstGame.bestTop25Rank - secondGame.bestTop25Rank;
           }
 
           return firstGame.id.localeCompare(secondGame.id);
@@ -366,11 +412,12 @@ function Scores() {
         return conferenceMatches(game, selectedSecondaryFilter);
       })
       .sort((firstGame, secondGame) => {
-        const statusDifference =
-          statusPriority(firstGame.status) -
-          statusPriority(secondGame.status);
+        if (selectedSecondaryFilter === "top-25") {
+          if (firstGame.bestTop25Rank !== secondGame.bestTop25Rank) {
+            return firstGame.bestTop25Rank - secondGame.bestTop25Rank;
+          }
+        }
 
-        if (statusDifference !== 0) return statusDifference;
         return firstGame.id.localeCompare(secondGame.id);
       });
   }, [
@@ -397,7 +444,8 @@ function Scores() {
 
     if (types.size === 1) return [...types][0];
     if (types.has("Regular Season")) return "Regular Season";
-    return "Postseason";
+    if (types.size > 0) return "Postseason";
+    return "Schedule";
   }, [selectedWeekGames]);
 
   const goToPreviousWeek = () => {
@@ -417,7 +465,12 @@ function Scores() {
 
   const selectPrimaryFilter = (filterId) => {
     setSelectedPrimaryFilter(filterId);
-    setSelectedSecondaryFilter("all");
+
+    if (filterId === "fbs" || filterId === "fcs") {
+      setSelectedSecondaryFilter("top-25");
+    } else {
+      setSelectedSecondaryFilter("all");
+    }
   };
 
   const viewAllTierGames = (tierClass) => {
@@ -431,14 +484,6 @@ function Scores() {
       });
     });
   };
-
-  const shownCount =
-    selectedPrimaryFilter === "featured"
-      ? featuredGroups.reduce(
-          (total, group) => total + group.games.length,
-          0,
-        )
-      : visibleTierGames.length;
 
   return (
     <main className="scores-page">
@@ -471,10 +516,7 @@ function Scores() {
           <button
             type="button"
             onClick={goToNextWeek}
-            disabled={
-              currentWeekIndex === -1 ||
-              currentWeekIndex >= availableWeeks.length - 1
-            }
+            disabled={currentWeekIndex >= availableWeeks.length - 1}
             aria-label="Next week"
           >
             <ChevronRight size={19} />
@@ -532,40 +574,6 @@ function Scores() {
         </section>
       ) : null}
 
-      <section className="scores-summary-bar">
-        <div className="scores-summary-item scores-summary-live">
-          <Radio size={16} />
-          <div>
-            <strong>{scoreTotals.live}</strong>
-            <span>Live</span>
-          </div>
-        </div>
-
-        <div className="scores-summary-item">
-          <Clock3 size={16} />
-          <div>
-            <strong>{scoreTotals.upcoming}</strong>
-            <span>Scheduled</span>
-          </div>
-        </div>
-
-        <div className="scores-summary-item">
-          <Trophy size={16} />
-          <div>
-            <strong>{scoreTotals.final}</strong>
-            <span>Final</span>
-          </div>
-        </div>
-
-        <div className="scores-summary-item">
-          <Activity size={16} />
-          <div>
-            <strong>{shownCount}</strong>
-            <span>Shown</span>
-          </div>
-        </div>
-      </section>
-
       {scoresLoading ? (
         <div className="scores-empty-state">
           <Activity size={28} />
@@ -584,8 +592,7 @@ function Scores() {
             <span>Weekly scoreboard</span>
             <h2>Featured Matchups</h2>
             <p>
-              Three games from each tier, prioritizing live action and
-              Top 25 matchups.
+              Three games from each tier, led by the MESH Game of the Week.
             </p>
           </div>
 

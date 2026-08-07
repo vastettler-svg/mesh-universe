@@ -992,3 +992,113 @@
     padding-left: 9px;
   }
 }
+/* =========================================================
+   SCORES POLISH — LIVE DATA CARD REFINEMENTS
+   ========================================================= */
+
+.score-team-info {
+  gap: 2px;
+}
+
+.score-team-info > strong {
+  color: #ffffff;
+}
+
+.score-team-coach {
+  overflow: hidden;
+  font-size: 0.57rem !important;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: rgba(218, 227, 235, 0.82) !important;
+}
+
+.score-team-records {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  gap: 4px 10px !important;
+  font-size: 0.53rem !important;
+  font-weight: 750;
+  letter-spacing: 0.015em;
+  color: var(--color-muted, #94a4b3) !important;
+}
+
+.score-team-numbers {
+  min-width: 70px;
+}
+
+.score-team-numbers > strong {
+  font-size: 1rem;
+}
+
+.score-team-numbers > span {
+  font-size: 0.5rem;
+  text-transform: none;
+}
+
+.score-team-row.winner .score-team-info > strong,
+.score-team-row.winner .score-team-numbers > strong {
+  color: #54dc8e;
+}
+
+.score-team-row.loser .score-team-info > strong,
+.score-team-row.loser .score-team-coach,
+.score-team-row.loser .score-team-records,
+.score-team-row.loser .score-team-numbers > strong,
+.score-team-row.loser .score-team-numbers > span {
+  color: rgba(172, 184, 195, 0.58) !important;
+}
+
+.score-featured-label-game-of-week {
+  color: #ffd76a;
+  font-weight: 950;
+}
+
+@media (max-width: 560px) {
+  .score-card {
+    padding: 13px;
+  }
+
+  .score-card-header {
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .score-team-row {
+    grid-template-columns: 34px minmax(0, 1fr) 70px;
+    gap: 8px;
+    min-height: 70px;
+    padding: 8px 0;
+  }
+
+  .score-team-logo {
+    width: 32px;
+    height: 32px;
+    font-size: 0.66rem;
+  }
+
+  .score-team-info > strong {
+    font-size: 0.72rem;
+  }
+
+  .score-team-coach {
+    font-size: 0.53rem !important;
+  }
+
+  .score-team-records {
+    gap: 3px 7px !important;
+    font-size: 0.49rem !important;
+  }
+
+  .score-team-numbers {
+    min-width: 62px;
+  }
+
+  .score-team-numbers > strong {
+    font-size: 0.9rem;
+  }
+
+  .score-team-numbers > span {
+    font-size: 0.46rem;
+  }
+}

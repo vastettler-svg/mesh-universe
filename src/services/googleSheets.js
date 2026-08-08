@@ -377,6 +377,16 @@ function createTeamLookup(rows) {
           franchiseId,
           name: String(row.Franchise_Name ?? "").trim(),
           coach: String(row.Coach_Name ?? "").trim(),
+          logo: String(
+            firstValue(row, [
+              "Logo_URL",
+              "Franchise_Logo_URL",
+              "Franchise_Logo",
+              "Team_Logo_URL",
+              "Team_Logo",
+              "Logo",
+            ]) ?? "",
+          ).trim(),
           conference: String(row.Conference ?? "").trim(),
           conferenceId: normalizeId(row.Conference),
           tier,
@@ -453,6 +463,40 @@ export async function getGameResults() {
           "Franchise2_Projected_Score",
         ]),
       );
+
+      const team1WinProbabilityRaw = toOptionalNumber(
+        firstValue(row, [
+          "Team1_Win_Probability",
+          "Team1_Win_Prob",
+          "Franchise1_Win_Probability",
+        ]),
+      );
+
+      const team2WinProbabilityRaw = toOptionalNumber(
+        firstValue(row, [
+          "Team2_Win_Probability",
+          "Team2_Win_Prob",
+          "Franchise2_Win_Probability",
+        ]),
+      );
+
+      let team1WinProbability = team1WinProbabilityRaw;
+      let team2WinProbability = team2WinProbabilityRaw;
+
+      if (
+        team1WinProbability !== null &&
+        team2WinProbability === null
+      ) {
+        team2WinProbability = 100 - team1WinProbability;
+      }
+
+      if (
+        team2WinProbability !== null &&
+        team1WinProbability === null
+      ) {
+        team1WinProbability = 100 - team2WinProbability;
+      }
+
       const winnerId = String(row.Winner_Franchise_ID ?? "").trim();
       const gameCategory = String(row.Game_Category ?? "").trim();
       const gameType = String(row.Game_Type ?? "").trim();
@@ -499,6 +543,7 @@ export async function getGameResults() {
           .charAt(0)
           .toUpperCase(),
         team1Coach: team1.coach || "",
+        team1Logo: team1.logo || "",
         team1Conference: team1.conference || "",
         team1ConferenceId: team1.conferenceId || "",
         team1OverallRecord: team1.overallRecord || "0–0",
@@ -509,6 +554,7 @@ export async function getGameResults() {
         team1Top25: team1GameRank >= 1 && team1GameRank <= 25,
         team1Score,
         team1Projection,
+        team1WinProbability,
         team2Id,
         team2Team:
           team2.name || String(row.Team2_Franchise_Name ?? "").trim(),
@@ -519,6 +565,7 @@ export async function getGameResults() {
           .charAt(0)
           .toUpperCase(),
         team2Coach: team2.coach || "",
+        team2Logo: team2.logo || "",
         team2Conference: team2.conference || "",
         team2ConferenceId: team2.conferenceId || "",
         team2OverallRecord: team2.overallRecord || "0–0",
@@ -529,6 +576,7 @@ export async function getGameResults() {
         team2Top25: team2GameRank >= 1 && team2GameRank <= 25,
         team2Score,
         team2Projection,
+        team2WinProbability,
         winnerId,
 
         /*
@@ -578,4 +626,47 @@ export async function getGameById(gameId) {
   }
 
   return game;
+}
+
+
+/**
+ * Returns prior meetings between the same two permanent franchises.
+ * Uses every GAME_RESULTS season currently available in the published sheet.
+ */
+export async function getHeadToHeadHistory(
+  team1Id,
+  team2Id,
+  excludeGameId = "",
+) {
+  const firstId = String(team1Id ?? "").trim();
+  const secondId = String(team2Id ?? "").trim();
+  const excludedId = String(excludeGameId ?? "").trim();
+
+  if (!firstId || !secondId) {
+    return [];
+  }
+
+  const games = await getGameResults();
+
+  return games
+    .filter((game) => {
+      if (excludedId && game.gameId === excludedId) {
+        return false;
+      }
+
+      const sameDirection =
+        game.team1Id === firstId && game.team2Id === secondId;
+
+      const oppositeDirection =
+        game.team1Id === secondId && game.team2Id === firstId;
+
+      return sameDirection || oppositeDirection;
+    })
+    .sort((a, b) => {
+      if (a.season !== b.season) {
+        return b.season - a.season;
+      }
+
+      return b.week - a.week;
+    });
 }

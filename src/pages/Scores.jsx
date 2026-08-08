@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   Activity,
   ChevronLeft,
@@ -229,7 +229,7 @@ function TeamRow({
   );
 }
 
-function ScoreCard({ game, featured = false, featuredPosition = 0 }) {
+function ScoreCard({ game, featured = false, featuredPosition = 0, scoresView }) {
   const team1Winner =
     game.status === "final" && game.winnerId === game.team1Id;
   const team2Winner =
@@ -317,6 +317,7 @@ function ScoreCard({ game, featured = false, featuredPosition = 0 }) {
       <Link
         className="score-game-center-button"
         to={`/scores/${encodeURIComponent(game.gameId)}`}
+        state={{ scoresView }}
       >
         View Game Center
         <ChevronRight size={15} />
@@ -325,7 +326,13 @@ function ScoreCard({ game, featured = false, featuredPosition = 0 }) {
   );
 }
 
-function FeaturedTierSection({ tierClass, tier, games, onViewAll }) {
+function FeaturedTierSection({
+  tierClass,
+  tier,
+  games,
+  onViewAll,
+  scoresView,
+}) {
   return (
     <section
       className={`featured-tier-section featured-tier-section-${tierClass}`}
@@ -347,6 +354,7 @@ function FeaturedTierSection({ tierClass, tier, games, onViewAll }) {
               game={game}
               featured
               featuredPosition={index}
+              scoresView={scoresView}
             />
           ))}
         </div>
@@ -371,16 +379,25 @@ function FeaturedTierSection({ tierClass, tier, games, onViewAll }) {
 }
 
 function Scores() {
+  const location = useLocation();
+  const restoredView = location.state?.restoreScores ?? null;
+
   const [scoreData, setScoreData] = useState([]);
   const [appSettings, setAppSettings] = useState(null);
   const [scoresLoading, setScoresLoading] = useState(true);
   const [scoresError, setScoresError] = useState("");
-  const [selectedWeek, setSelectedWeek] = useState(1);
-  const [selectedPrimaryFilter, setSelectedPrimaryFilter] =
-    useState("featured");
-  const [selectedSecondaryFilter, setSelectedSecondaryFilter] =
-    useState("all");
-  const [selectedNflMatchup, setSelectedNflMatchup] = useState(1);
+  const [selectedWeek, setSelectedWeek] = useState(
+    restoredView?.selectedWeek ?? 1,
+  );
+  const [selectedPrimaryFilter, setSelectedPrimaryFilter] = useState(
+    restoredView?.selectedPrimaryFilter ?? "featured",
+  );
+  const [selectedSecondaryFilter, setSelectedSecondaryFilter] = useState(
+    restoredView?.selectedSecondaryFilter ?? "all",
+  );
+  const [selectedNflMatchup, setSelectedNflMatchup] = useState(
+    restoredView?.selectedNflMatchup ?? 1,
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -402,11 +419,15 @@ function Scores() {
           setScoreData(games);
           setAppSettings(settings);
 
+          const restoredWeek = Number(restoredView?.selectedWeek);
           const configuredWeek = Number(settings?.currentWeek);
+
           const initialWeek =
-            configuredWeek >= 1 && configuredWeek <= MAX_WEEK
-              ? configuredWeek
-              : chooseInitialWeek(games);
+            restoredWeek >= 1 && restoredWeek <= MAX_WEEK
+              ? restoredWeek
+              : configuredWeek >= 1 && configuredWeek <= MAX_WEEK
+                ? configuredWeek
+                : chooseInitialWeek(games);
 
           setSelectedWeek(initialWeek);
         }
@@ -587,6 +608,13 @@ function Scores() {
     });
   };
 
+  const scoresView = {
+    selectedWeek,
+    selectedPrimaryFilter,
+    selectedSecondaryFilter,
+    selectedNflMatchup,
+  };
+
   return (
     <main className="scores-page">
       <PageHeader
@@ -748,6 +776,7 @@ function Scores() {
                 tier={group.tier}
                 games={group.games}
                 onViewAll={viewAllTierGames}
+                scoresView={scoresView}
               />
             ))
           )}
@@ -771,7 +800,11 @@ function Scores() {
           {visibleTierGames.length > 0 ? (
             <div className="scores-grid">
               {visibleTierGames.map((game) => (
-                <ScoreCard key={game.id} game={game} />
+                <ScoreCard
+                  key={game.id}
+                  game={game}
+                  scoresView={scoresView}
+                />
               ))}
             </div>
           ) : (

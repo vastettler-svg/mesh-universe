@@ -187,22 +187,13 @@ function getStandingsStatus(team) {
   if (
     tier === "FBS" &&
     overallRank !== null &&
-    overallRank >= 1 &&
-    overallRank <= 4
+    overallRank >= 95 &&
+    overallRank <= 98
   ) {
-    return { status: "promotion", statusLabel: "Promotion Position" };
+    return { status: "relegation", statusLabel: "Relegation Zone" };
   }
 
-  if (
-    tier === "FCS" &&
-    overallRank !== null &&
-    overallRank >= 1 &&
-    overallRank <= 8
-  ) {
-    return { status: "promotion", statusLabel: "Promotion Position" };
-  }
-
-  if (playoffSeed > 0) {
+  if (tier === "NFL" && playoffSeed > 0) {
     return {
       status: "playoff",
       statusLabel:
@@ -210,7 +201,7 @@ function getStandingsStatus(team) {
     };
   }
 
-  if (playoffStatus) {
+  if (tier === "NFL" && playoffStatus && playoffStatus !== "#N/A") {
     const normalizedStatus = playoffStatus.toLowerCase();
 
     if (normalizedStatus.includes("eliminated")) {
@@ -342,6 +333,9 @@ export async function getStandingsData() {
         row.Regular_Season_Losses,
         row.Regular_Season_Ties,
       ),
+      regularSeasonWins: toNumber(row.Regular_Season_Wins),
+      regularSeasonLosses: toNumber(row.Regular_Season_Losses),
+      regularSeasonTies: toNumber(row.Regular_Season_Ties),
       overallSeasonRecord: buildRecord(
         row.Overall_Season_Wins,
         row.Overall_Season_Losses,

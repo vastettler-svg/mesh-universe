@@ -35,8 +35,8 @@ const secondaryFilters = {
     { id: "nfc", label: "NFC" },
   ],
   fbs: [
-    { id: "overall", label: "Overall" },
     { id: "top-25", label: "Top 25" },
+    { id: "overall", label: "Overall" },
     { id: "acc", label: "ACC" },
     { id: "big-ten", label: "Big Ten" },
     { id: "big-12", label: "Big 12" },
@@ -46,8 +46,8 @@ const secondaryFilters = {
     { id: "sun-belt", label: "Sun Belt" },
   ],
   fcs: [
-    { id: "overall", label: "Overall" },
     { id: "top-25", label: "Top 25" },
+    { id: "overall", label: "Overall" },
     { id: "big-sky", label: "Big Sky" },
     { id: "coastal", label: "Coastal" },
     { id: "ivy", label: "Ivy" },
@@ -213,6 +213,12 @@ function StandingsRow({ team, isTop25View = false }) {
     teamStyle["--team-secondary"] = team.secondaryColor;
   }
 
+  const shortRecordLabel = (label) => {
+    if (label === "Overall") return "OVR";
+    if (label === "Conference") return "CONF";
+    return label === "Record" ? "RECORD" : String(label || "").toUpperCase();
+  };
+
   return (
     <article
       className={[
@@ -248,28 +254,32 @@ function StandingsRow({ team, isTop25View = false }) {
       </div>
 
       <div className="standings-team-info">
-        <div className="standings-team-heading">
-          <strong>{teamName}</strong>
-          <span>{team.conference}</span>
+        <strong className="standings-team-name">{teamName}</strong>
+        <span className="standings-coach">
+          {team.coach || "Coach unavailable"}
+        </span>
+
+        <div className="standings-inline-records">
+          {team.recordLines.map((line) => (
+            <span key={`${team.id}-${line.label}`}>
+              <small>{shortRecordLabel(line.label)}</small>
+              <strong>{line.value || "0–0"}</strong>
+            </span>
+          ))}
         </div>
-        <span className="standings-coach">{team.coach || "Coach unavailable"}</span>
       </div>
 
-      <div className="standings-record-lines">
-        {team.recordLines.map((line) => (
-          <span
-            key={`${team.id}-${line.label}`}
-            className={
-              line.primary
-                ? "standings-record-line standings-record-line-primary"
-                : "standings-record-line"
-            }
-          >
-            <small>{line.label}:</small>
-            <strong>{line.value || "0–0"}</strong>
-          </span>
-        ))}
-      </div>
+      <span className="standings-conference-badge">
+        {team.conference || team.tier}
+      </span>
+
+      <button
+        type="button"
+        className="standings-row-action"
+        aria-label={`View ${teamName}`}
+      >
+        <ChevronRight size={17} />
+      </button>
 
       <div className="standings-points-status">
         {team.statusLabel ? (
@@ -285,10 +295,6 @@ function StandingsRow({ team, isTop25View = false }) {
           <strong>{formatPoints(team.pointsFor)}</strong>
         </span>
       </div>
-
-      <button type="button" className="standings-row-action" aria-label={`View ${teamName}`}>
-        <ChevronRight size={17} />
-      </button>
     </article>
   );
 }
@@ -311,8 +317,8 @@ function StandingsList({
   showTierLines = true,
   isTop25View = false,
 }) {
-  const promotionCutoff = tierClass === "fbs" ? 4 : tierClass === "fcs" ? 8 : null;
-  const relegationStart = tierClass === "nfl" ? 29 : tierClass === "fbs" ? 91 : null;
+  const relegationStart =
+    tierClass === "nfl" ? 29 : tierClass === "fbs" ? 95 : null;
 
   return (
     <div className="standings-list">
@@ -325,14 +331,6 @@ function StandingsList({
 
       {teams.map((team, index) => (
         <div key={team.id}>
-          {showTierLines &&
-          promotionCutoff &&
-          index > 0 &&
-          teams[index - 1].rank <= promotionCutoff &&
-          team.rank > promotionCutoff ? (
-            <StandingsLine type="promotion" label="Promotion Line" />
-          ) : null}
-
           {showTierLines &&
           relegationStart &&
           index > 0 &&
@@ -400,6 +398,49 @@ function Standings() {
   const activeSecondaryLabel = activeSecondaryFilters.find((filter) => filter.id === selectedSecondaryFilter)?.label ?? "Overall";
   const activeNflDivisionFilters = nflDivisionFilters[selectedSecondaryFilter] ?? [];
   const activeNflDivisionLabel = activeNflDivisionFilters.find((filter) => filter.id === selectedNflDivisionFilter)?.label ?? "";
+
+  /*
+   * Current CFP field:
+   * 7 current FBS conference leaders + the next 5 highest-ranked
+   * at-large teams. The field stays blank during preseason until
+   * at least one FBS game has been recorded.
+   */
+  const cfpFranchiseIds = useMemo(() => {
+    const fbsTeams = standingsData.filter((team) => team.tierClass === "fbs");
+
+    const seasonHasStarted = fbsTeams.some(
+      (team) =>
+        Number(team.regularSeasonWins) > 0 ||
+        Number(team.regularSeasonLosses) > 0 ||
+        Number(team.regularSeasonTies) > 0,
+    );
+
+    if (!seasonHasStarted) {
+      return new Set();
+    }
+
+    const conferenceLeaders = fbsTeams
+      .filter((team) => Number(team.conferenceRank) === 1)
+      .sort((a, b) => (a.top25Rank || 999) - (b.top25Rank || 999));
+
+    const selectedIds = new Set(
+      conferenceLeaders.map((team) => team.franchiseId),
+    );
+
+    const atLarge = fbsTeams
+      .filter(
+        (team) =>
+          !selectedIds.has(team.franchiseId) &&
+          Number(team.top25Rank) >= 1 &&
+          Number(team.top25Rank) <= 25,
+      )
+      .sort((a, b) => a.top25Rank - b.top25Rank)
+      .slice(0, 5);
+
+    atLarge.forEach((team) => selectedIds.add(team.franchiseId));
+
+    return selectedIds;
+  }, [standingsData]);
 
   const visibleStandings = useMemo(() => {
     if (selectedPrimaryFilter === "overview") return [];
@@ -502,9 +543,46 @@ function Standings() {
         ];
       }
 
-      return { ...team, rank, pointsFor, recordLines };
+      let status = team.status;
+      let statusLabel = team.statusLabel;
+
+      if (team.tierClass === "fbs") {
+        if (Number(team.overallRank) >= 95 && Number(team.overallRank) <= 98) {
+          status = "relegation";
+          statusLabel = "Relegation Zone";
+        } else if (cfpFranchiseIds.has(team.franchiseId)) {
+          status = "cfp";
+          statusLabel = "CFP Position";
+        } else if (Number(team.regularSeasonWins) >= 6) {
+          status = "bowl";
+          statusLabel = "Bowl Eligible";
+        } else {
+          status = "neutral";
+          statusLabel = "";
+        }
+      }
+
+      if (team.tierClass === "fcs" && status === "promotion") {
+        status = "neutral";
+        statusLabel = "";
+      }
+
+      return {
+        ...team,
+        rank,
+        pointsFor,
+        recordLines,
+        status,
+        statusLabel,
+      };
     });
-  }, [visibleStandings, selectedPrimaryFilter, selectedSecondaryFilter, selectedNflDivisionFilter]);
+  }, [
+    visibleStandings,
+    selectedPrimaryFilter,
+    selectedSecondaryFilter,
+    selectedNflDivisionFilter,
+    cfpFranchiseIds,
+  ]);
 
   const showTierLines = ["all", "overall"].includes(selectedSecondaryFilter);
   const isTop25View =
@@ -517,7 +595,13 @@ function Standings() {
   const selectPrimaryFilter = (filterId) => {
     setSelectedPrimaryFilter(filterId);
     setSelectedNflDivisionFilter("all");
-    setSelectedSecondaryFilter(filterId === "nfl" ? "all" : "overall");
+    setSelectedSecondaryFilter(
+      filterId === "nfl"
+        ? "all"
+        : filterId === "fbs" || filterId === "fcs"
+          ? "top-25"
+          : "overall",
+    );
   };
 
   const selectSecondaryFilter = (filterId) => {
@@ -674,7 +758,6 @@ function Standings() {
         <section className={`standings-tier-view standings-tier-view-${selectedPrimaryFilter}`}>
           <div className="standings-section-heading">
             <div>
-              <span>{standingsLoading ? "Loading teams" : `${displayStandings.length} teams shown`}</span>
               <h2>{standingsHeading}</h2>
             </div>
             <TierBadge tier={activePrimaryLabel} tierClass={selectedPrimaryFilter} />

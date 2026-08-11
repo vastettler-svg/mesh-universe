@@ -1234,3 +1234,15 @@
   }
 }
 
+
+
+/* =========================================================
+   V7 SCORE CARD PROJECTIONS
+========================================================= */
+
+/* Team projections now come from LIVE_PLAYER_SCORES.
+   Keep them easy to scan directly beneath the actual score. */
+.score-team-numbers > span {
+  font-size: 0.52rem;
+  font-weight: 800;
+}

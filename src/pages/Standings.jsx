@@ -163,7 +163,15 @@ function TierBadge({ tier, tierClass }) {
   );
 }
 
-function MovementIndicator({ movement }) {
+function MovementIndicator({ movement, isNew = false }) {
+  if (isNew) {
+    return (
+      <span className="standings-movement standings-movement-new">
+        NEW
+      </span>
+    );
+  }
+
   if (movement > 0) {
     return (
       <span className="standings-movement standings-movement-up">
@@ -189,18 +197,54 @@ function MovementIndicator({ movement }) {
   );
 }
 
-function StandingsRow({ team }) {
+function StandingsRow({ team, isTop25View = false }) {
   const teamName = team.team || "Unnamed Franchise";
+  const hasRank = Number(team.rank) > 0 && Number(team.rank) < 999;
+  const movement = isTop25View ? team.top25Movement : team.movement;
+  const isNew = isTop25View ? team.isNewTop25 : false;
+
+  const teamStyle = {};
+
+  if (team.primaryColor) {
+    teamStyle["--team-primary"] = team.primaryColor;
+  }
+
+  if (team.secondaryColor) {
+    teamStyle["--team-secondary"] = team.secondaryColor;
+  }
 
   return (
-    <article className={`standings-row standings-row-${team.status} standings-row-${team.tierClass}`}>
+    <article
+      className={[
+        "standings-row",
+        `standings-row-${team.status}`,
+        `standings-row-${team.tierClass}`,
+        team.logo ? "standings-row-branded" : "",
+        isTop25View ? "standings-row-top25" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      style={teamStyle}
+    >
       <div className="standings-rank">
-        <strong>{team.rank || "—"}</strong>
-        <MovementIndicator movement={team.movement} />
+        <strong>{hasRank ? team.rank : "—"}</strong>
+        <MovementIndicator movement={movement} isNew={isNew} />
       </div>
 
-      <div className={`standings-team-logo standings-team-logo-${team.tierClass}`}>
-        {teamName.charAt(0).toUpperCase()}
+      <div
+        className={`standings-team-logo standings-team-logo-${team.tierClass}`}
+        title={teamName}
+      >
+        {team.logo ? (
+          <img
+            src={team.logo}
+            alt={`${teamName} logo`}
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <span>{teamName.charAt(0).toUpperCase()}</span>
+        )}
       </div>
 
       <div className="standings-team-info">
@@ -261,7 +305,12 @@ function StandingsLine({ type, label }) {
   );
 }
 
-function StandingsList({ teams, tierClass, showTierLines = true }) {
+function StandingsList({
+  teams,
+  tierClass,
+  showTierLines = true,
+  isTop25View = false,
+}) {
   const promotionCutoff = tierClass === "fbs" ? 4 : tierClass === "fcs" ? 8 : null;
   const relegationStart = tierClass === "nfl" ? 29 : tierClass === "fbs" ? 91 : null;
 
@@ -292,7 +341,7 @@ function StandingsList({ teams, tierClass, showTierLines = true }) {
             <StandingsLine type="relegation" label="Relegation Line" />
           ) : null}
 
-          <StandingsRow team={team} />
+          <StandingsRow team={team} isTop25View={isTop25View} />
         </div>
       ))}
     </div>
@@ -457,7 +506,10 @@ function Standings() {
     });
   }, [visibleStandings, selectedPrimaryFilter, selectedSecondaryFilter, selectedNflDivisionFilter]);
 
-  const showTierLines = ["all", "overall", "top-25"].includes(selectedSecondaryFilter);
+  const showTierLines = ["all", "overall"].includes(selectedSecondaryFilter);
+  const isTop25View =
+    selectedPrimaryFilter !== "nfl" &&
+    selectedSecondaryFilter === "top-25";
   const isNflPlayoffPicture = selectedPrimaryFilter === "nfl" && selectedSecondaryFilter === "playoff-picture";
   const isNflConferenceView = selectedPrimaryFilter === "nfl" && ["afc", "nfc"].includes(selectedSecondaryFilter);
   const standingsHeading = isNflConferenceView ? activeNflDivisionLabel : activeSecondaryLabel;
@@ -504,7 +556,12 @@ function Standings() {
                   <TierBadge tier="NFL" tierClass="nfl" />
                 </div>
                 {conferenceTeams.length > 0 ? (
-                  <StandingsList teams={conferenceTeams} tierClass="nfl" showTierLines={false} />
+                  <StandingsList
+                    teams={conferenceTeams}
+                    tierClass="nfl"
+                    showTierLines={false}
+                    isTop25View={false}
+                  />
                 ) : (
                   <div className="standings-empty-state"><Medal size={30} /><h3>No playoff data found</h3><p>Playoff teams will appear once seeds are available in TEAM DATA.</p></div>
                 )}
@@ -516,7 +573,14 @@ function Standings() {
     }
 
     if (displayStandings.length > 0) {
-      return <StandingsList teams={displayStandings} tierClass={selectedPrimaryFilter} showTierLines={showTierLines} />;
+      return (
+        <StandingsList
+          teams={displayStandings}
+          tierClass={selectedPrimaryFilter}
+          showTierLines={showTierLines}
+          isTop25View={isTop25View}
+        />
+      );
     }
 
     return <div className="standings-empty-state"><Medal size={30} /><h3>No standings found</h3><p>No teams currently match this tier, conference, and division filter.</p></div>;

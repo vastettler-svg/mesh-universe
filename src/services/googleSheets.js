@@ -1,8 +1,12 @@
+const LIVE_PLAYER_SCORES_GID = "1339342815";
 const PUBLISHED_SHEET_BASE_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRwZdqNhyvQxRhmmZu9jzUdFnzB6ZFnh7gYe2bgN6qwPl9SGwPf9dYyrhLk8_dFONmrL9Ibi3iXYEnc/pub";
 
 const TEAM_DATA_CSV_URL =
   `${PUBLISHED_SHEET_BASE_URL}?gid=1513820672&single=true&output=csv`;
+
+const FRANCHISE_DIRECTORY_CSV_URL =
+  `${PUBLISHED_SHEET_BASE_URL}?gid=1358798530&single=true&output=csv`;
 
 const GAME_RESULTS_CSV_URL =
   `${PUBLISHED_SHEET_BASE_URL}?gid=1867143153&single=true&output=csv`;
@@ -167,19 +171,34 @@ function buildRecord(wins, losses, ties) {
 
 function getStandingsStatus(team) {
   const tier = String(team.Tier ?? "").trim().toUpperCase();
-  const overallRank = toNumber(team.Overall_Rank, 999);
+  const overallRank = toOptionalNumber(team.Overall_Rank);
   const playoffSeed = toNumber(team.Playoff_Seed);
   const playoffStatus = String(team.Playoff_Status ?? "").trim();
 
-  if (tier === "NFL" && overallRank >= 29) {
+  if (
+    tier === "NFL" &&
+    overallRank !== null &&
+    overallRank >= 29 &&
+    overallRank <= 32
+  ) {
     return { status: "relegation", statusLabel: "Relegation Zone" };
   }
 
-  if (tier === "FBS" && overallRank >= 1 && overallRank <= 4) {
+  if (
+    tier === "FBS" &&
+    overallRank !== null &&
+    overallRank >= 1 &&
+    overallRank <= 4
+  ) {
     return { status: "promotion", statusLabel: "Promotion Position" };
   }
 
-  if (tier === "FCS" && overallRank >= 1 && overallRank <= 8) {
+  if (
+    tier === "FCS" &&
+    overallRank !== null &&
+    overallRank >= 1 &&
+    overallRank <= 8
+  ) {
     return { status: "promotion", statusLabel: "Promotion Position" };
   }
 
@@ -227,22 +246,70 @@ async function fetchTeamDataRows() {
   return franchiseRows;
 }
 
+async function fetchFranchiseDirectoryRows() {
+  const rows = await fetchCsvRows(
+    FRANCHISE_DIRECTORY_CSV_URL,
+    "FRANCHISE_DIRECTORY",
+  );
+
+  const franchiseRows = rows.filter((row) =>
+    String(row.Franchise_ID ?? "").trim(),
+  );
+
+  if (franchiseRows.length === 0) {
+    throw new Error(
+      "FRANCHISE_DIRECTORY returned no franchise rows. Confirm row 1 contains the headers.",
+    );
+  }
+
+  return franchiseRows;
+}
+
+function createFranchiseBrandingLookup(rows) {
+  return new Map(
+    rows.map((row) => {
+      const franchiseId = String(row.Franchise_ID ?? "").trim();
+
+      return [
+        franchiseId,
+        {
+          logo: String(row.Logo_URL ?? "").trim(),
+          primaryColor: String(row.Primary_Color ?? "").trim(),
+          secondaryColor: String(row.Secondary_Color ?? "").trim(),
+        },
+      ];
+    }),
+  );
+}
+
 export async function getStandingsData() {
-  const rows = await fetchTeamDataRows();
+  const [rows, franchiseDirectoryRows] = await Promise.all([
+    fetchTeamDataRows(),
+    fetchFranchiseDirectoryRows(),
+  ]);
+
+  const brandingLookup = createFranchiseBrandingLookup(
+    franchiseDirectoryRows,
+  );
 
   return rows.map((row) => {
     const tier = String(row.Tier ?? "").trim().toUpperCase();
     const conference = String(row.Conference ?? "").trim();
     const division = String(row.Division ?? "").trim();
-    const overallRank = toNumber(row.Overall_Rank, 999);
-    const conferenceRank = toNumber(row.Conference_Rank, overallRank);
-    const divisionRank = toNumber(row.Division_Rank, conferenceRank);
+    const overallRank = toOptionalNumber(row.Overall_Rank) ?? 0;
+    const conferenceRank =
+      toOptionalNumber(row.Conference_Rank) ?? overallRank;
+    const divisionRank =
+      toOptionalNumber(row.Division_Rank) ?? conferenceRank;
     const top25Rank = toNumber(row.Top25_Rank);
-    const previousRank = toNumber(row.Previous_RPI_Rank, overallRank);
+    const previousRank = toOptionalNumber(row.Previous_RPI_Rank) ?? overallRank;
+    const previousTop25Rank = toNumber(row.Previous_Week_Top25_Rank);
+    const franchiseId = String(row.Franchise_ID ?? "").trim();
+    const branding = brandingLookup.get(franchiseId) ?? {};
 
     return {
-      id: String(row.Franchise_ID ?? "").trim(),
-      franchiseId: String(row.Franchise_ID ?? "").trim(),
+      id: franchiseId,
+      franchiseId,
       coachId: String(row.Coach_ID ?? "").trim(),
       tier,
       tierClass: tier.toLowerCase(),
@@ -252,6 +319,12 @@ export async function getStandingsData() {
       divisionId: normalizeId(division),
       team: String(row.Franchise_Name ?? "").trim(),
       coach: String(row.Coach_Name ?? "").trim(),
+
+      logo: branding.logo || "",
+      logoUrl: branding.logo || "",
+      primaryColor: branding.primaryColor || "",
+      secondaryColor: branding.secondaryColor || "",
+
       overallRank,
       conferenceRank,
       divisionRank,
@@ -282,7 +355,22 @@ export async function getStandingsData() {
       regularSeasonPF: toNumber(row.Regular_Season_PF),
       overallSeasonPF: toNumber(row.Overall_Season_PF),
       pointsFor: toNumber(row.Regular_Season_PF),
-      movement: previousRank - overallRank,
+      movement:
+        overallRank > 0 && previousRank > 0
+          ? previousRank - overallRank
+          : 0,
+      previousTop25Rank,
+      top25Movement:
+        top25Rank >= 1 &&
+        top25Rank <= 25 &&
+        previousTop25Rank >= 1 &&
+        previousTop25Rank <= 25
+          ? previousTop25Rank - top25Rank
+          : 0,
+      isNewTop25:
+        top25Rank >= 1 &&
+        top25Rank <= 25 &&
+        !(previousTop25Rank >= 1 && previousTop25Rank <= 25),
       top25: top25Rank >= 1 && top25Rank <= 25,
       streak: String(row.Streak ?? "").trim(),
       ...getStandingsStatus(row),
@@ -410,12 +498,37 @@ function createTeamLookup(rows) {
 }
 
 export async function getGameResults() {
-  const [gameRows, teamRows] = await Promise.all([
+  const [gameRows, teamRows, livePlayerRows] = await Promise.all([
     fetchCsvRows(GAME_RESULTS_CSV_URL, "GAME_RESULTS"),
     fetchTeamDataRows(),
+    getLivePlayerScores().catch((error) => {
+      console.warn(
+        "LIVE_PLAYER_SCORES unavailable; score cards will fall back to GAME_RESULTS projections.",
+        error,
+      );
+      return [];
+    }),
   ]);
 
   const teamLookup = createTeamLookup(teamRows);
+
+  /*
+   * LIVE_PLAYER_SCORES repeats the team totals/projections on every
+   * player row. Build one lookup per Week + Franchise_ID so Scores can
+   * use the same team projection totals already shown in Game Center.
+   */
+  const liveTeamLookup = new Map();
+
+  livePlayerRows.forEach((row) => {
+    const key = `${Number(row.week)}|${String(row.franchiseId || "").trim()}`;
+
+    if (!liveTeamLookup.has(key)) {
+      liveTeamLookup.set(key, {
+        teamTotalPoints: row.teamTotalPoints,
+        teamProjectedPoints: row.teamProjectedPoints,
+      });
+    }
+  });
 
   return gameRows
     .filter((row) => {
@@ -449,20 +562,42 @@ export async function getGameResults() {
       const team2Score = toOptionalNumber(
         firstValue(row, ["Team2_Score", "Franchise2_Score"]),
       );
-      const team1Projection = toOptionalNumber(
-        firstValue(row, [
-          "Team1_Projected_Score",
-          "Team1_Projected",
-          "Franchise1_Projected_Score",
-        ]),
+      const gameWeek = toNumber(
+        firstValue(row, ["Week", "Schedule_Week"]),
       );
-      const team2Projection = toOptionalNumber(
-        firstValue(row, [
-          "Team2_Projected_Score",
-          "Team2_Projected",
-          "Franchise2_Projected_Score",
-        ]),
-      );
+
+      const team1Live = liveTeamLookup.get(
+        `${gameWeek}|${team1Id}`,
+      ) ?? {};
+
+      const team2Live = liveTeamLookup.get(
+        `${gameWeek}|${team2Id}`,
+      ) ?? {};
+
+      /*
+       * Prefer the projection generated from LIVE_PLAYER_SCORES.
+       * Fall back to a GAME_RESULTS projection field if one is ever
+       * populated there.
+       */
+      const team1Projection =
+        toOptionalNumber(team1Live.teamProjectedPoints) ??
+        toOptionalNumber(
+          firstValue(row, [
+            "Team1_Projected_Score",
+            "Team1_Projected",
+            "Franchise1_Projected_Score",
+          ]),
+        );
+
+      const team2Projection =
+        toOptionalNumber(team2Live.teamProjectedPoints) ??
+        toOptionalNumber(
+          firstValue(row, [
+            "Team2_Projected_Score",
+            "Team2_Projected",
+            "Franchise2_Projected_Score",
+          ]),
+        );
 
       const team1WinProbabilityRaw = toOptionalNumber(
         firstValue(row, [
@@ -518,7 +653,7 @@ export async function getGameResults() {
         id: String(row.Game_ID ?? "").trim(),
         gameId: String(row.Game_ID ?? "").trim(),
         season: toNumber(row.Season),
-        week: toNumber(firstValue(row, ["Week", "Schedule_Week"])),
+        week: gameWeek,
         gameNumber: toNumber(
           firstValue(row, ["Game_Number", "Week_Game_Number"]),
           1,
@@ -669,4 +804,195 @@ export async function getHeadToHeadHistory(
 
       return b.week - a.week;
     });
+}
+
+
+const LIVE_PLAYER_SCORES_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRwZdqNhyvQxRhmmZu9jzUdFnzB6ZFnh7gYe2bgN6qwPl9SGwPf9dYyrhLk8_dFONmrL9Ibi3iXYEnc/pub?gid=" +
+  LIVE_PLAYER_SCORES_GID +
+  "&single=true&output=csv";
+
+function parseSimpleCsv_(text) {
+  const rows = [];
+  let row = [];
+  let field = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i];
+    const next = text[i + 1];
+
+    if (char === '"') {
+      if (inQuotes && next === '"') {
+        field += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === "," && !inQuotes) {
+      row.push(field);
+      field = "";
+      continue;
+    }
+
+    if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && next === "\n") {
+        i += 1;
+      }
+
+      row.push(field);
+      field = "";
+
+      if (row.some((value) => String(value).trim() !== "")) {
+        rows.push(row);
+      }
+
+      row = [];
+      continue;
+    }
+
+    field += char;
+  }
+
+  row.push(field);
+
+  if (row.some((value) => String(value).trim() !== "")) {
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+function csvRowsToObjects_(rows) {
+  if (!rows.length) return [];
+
+  const headers = rows[0].map((header) => String(header || "").trim());
+
+  return rows.slice(1).map((row) => {
+    const object = {};
+
+    headers.forEach((header, index) => {
+      object[header] = row[index] ?? "";
+    });
+
+    return object;
+  });
+}
+
+export async function getLivePlayerScores() {
+  const response = await fetch(LIVE_PLAYER_SCORES_CSV_URL);
+
+  if (!response.ok) {
+    throw new Error(
+      `LIVE_PLAYER_SCORES request failed: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const text = await response.text();
+  const rows = parseSimpleCsv_(text);
+
+  return csvRowsToObjects_(rows).map((row) => ({
+    season: Number(row.Season) || 0,
+    week: Number(row.Week) || 0,
+    franchiseId: String(row.Franchise_ID || "").trim(),
+    franchiseName: String(row.Franchise_Name || "").trim(),
+    sleeperLeagueId: String(row.Sleeper_League_ID || "").trim(),
+    sleeperRosterId: Number(row.Sleeper_Roster_ID) || 0,
+    sleeperMatchupId: String(row.Sleeper_Matchup_ID || "").trim(),
+    playerId: String(row.Player_ID || "").trim(),
+    playerName: String(row.Player_Name || "").trim(),
+    position: String(row.Position || "").trim(),
+    nflTeam: String(row.NFL_Team || "").trim(),
+    lineupPosition: String(row.Lineup_Position || "").trim(),
+    isStarter:
+      String(row.Is_Starter || "").trim().toUpperCase() === "TRUE",
+    playerPoints:
+      row.Player_Points === "" ? null : Number(row.Player_Points),
+    projectedPoints:
+      row.Projected_Points === "" ? null : Number(row.Projected_Points),
+    teamTotalPoints:
+      row.Team_Total_Points === "" ? null : Number(row.Team_Total_Points),
+    teamProjectedPoints:
+      row.Team_Projected_Points === ""
+        ? null
+        : Number(row.Team_Projected_Points),
+    updatedAt: String(row.Updated_At || "").trim(),
+  }));
+}
+
+export async function getGameRosterPlayers(game) {
+  if (!game) return { team1: [], team2: [] };
+
+  const rows = await getLivePlayerScores();
+
+  const currentWeekRows = rows.filter(
+    (row) => row.week === Number(game.week),
+  );
+
+  const sortStarters = (players) =>
+    players
+      .filter((player) => player.isStarter)
+      .sort((a, b) => {
+        const order = [
+          "QB",
+          "RB",
+          "WR",
+          "TE",
+          "FLEX",
+          "W/R/T",
+          "SUPER_FLEX",
+          "SUPER FLEX",
+          "K",
+          "DEF",
+          "DL",
+          "LB",
+          "DB",
+        ];
+
+        const aIndex = order.indexOf(a.lineupPosition.toUpperCase());
+        const bIndex = order.indexOf(b.lineupPosition.toUpperCase());
+
+        if (aIndex !== bIndex) {
+          return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+        }
+
+        return a.playerName.localeCompare(b.playerName);
+      });
+
+  const team1Rows = currentWeekRows.filter(
+    (row) => row.franchiseId === String(game.team1Id || ""),
+  );
+
+  const team2Rows = currentWeekRows.filter(
+    (row) => row.franchiseId === String(game.team2Id || ""),
+  );
+
+  const firstNumericValue = (rows, key) => {
+    const match = rows.find(
+      (row) =>
+        row[key] !== null &&
+        row[key] !== undefined &&
+        Number.isFinite(Number(row[key])),
+    );
+
+    return match ? Number(match[key]) : null;
+  };
+
+  return {
+    team1: sortStarters(team1Rows),
+    team2: sortStarters(team2Rows),
+    team1TotalPoints: firstNumericValue(team1Rows, "teamTotalPoints"),
+    team2TotalPoints: firstNumericValue(team2Rows, "teamTotalPoints"),
+    team1ProjectedPoints: firstNumericValue(
+      team1Rows,
+      "teamProjectedPoints",
+    ),
+    team2ProjectedPoints: firstNumericValue(
+      team2Rows,
+      "teamProjectedPoints",
+    ),
+  };
 }

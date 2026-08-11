@@ -1,15 +1,13 @@
 /* =========================================================
-   MESH FOOTBALL — GAME CENTER V3
-   Matchup card intentionally mirrors the HOME Game of the Week card.
+   MESH FOOTBALL — GAME CENTER V4
+   V1-style expanded matchup + V3 expanded content below.
 ========================================================= */
 
 .game-center-page {
   width: 100%;
   max-width: 1120px;
   margin: 0 auto;
-  padding:
-    18px
-    clamp(12px, 3vw, 34px)
+  padding: 18px clamp(12px, 3vw, 34px)
     calc(110px + env(safe-area-inset-bottom));
   color: #ffffff;
 }
@@ -29,9 +27,7 @@
   cursor: pointer;
 }
 
-.game-center-back:hover {
-  color: #ffffff;
-}
+.game-center-back:hover { color: #ffffff; }
 
 .game-center-message {
   min-height: 260px;
@@ -40,367 +36,266 @@
   align-items: center;
   justify-content: center;
   padding: 28px;
-  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border: 1px dashed rgba(255,255,255,.12);
   border-radius: 16px;
   text-align: center;
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(255,255,255,.025);
 }
 
-/* =========================================================
-   HOME-STYLE MATCHUP CARD
-========================================================= */
-
-.gc-home-card {
+.game-center-hero {
   position: relative;
   margin-top: 20px;
   overflow: hidden;
-  padding: 15px 16px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(25, 45, 67, 0.99),
-      rgba(12, 28, 45, 0.995)
-    );
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255,255,255,.10);
+  border-left: 3px solid transparent;
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(22,39,58,.99), rgba(9,21,35,.995));
+  box-shadow: 0 18px 42px rgba(0,0,0,.22);
 }
 
-.gc-home-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 3px;
-}
+.game-center-hero-nfl { border-left-color: #24b86d; }
+.game-center-hero-fbs { border-left-color: #4287ff; }
+.game-center-hero-fcs { border-left-color: #a068ff; }
 
-.gc-home-card-nfl::before {
-  background: #24b86d;
-}
-
-.gc-home-card-fbs::before {
-  background: #4287ff;
-}
-
-.gc-home-card-fcs::before {
-  background: #a068ff;
-}
-
-.gc-home-card-top {
-  display: flex;
+.game-center-hero-top {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
+  padding: 14px 15px 11px;
+  border-bottom: 1px solid rgba(255,255,255,.065);
 }
+
+.game-center-hero-top h2 {
+  margin: 0;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: .72rem;
+  font-weight: 400;
+  letter-spacing: .04em;
+  text-align: center;
+}
+
+.game-center-hero-top .gc-home-tier-pill { justify-self: end; }
 
 .gc-home-state-pill,
 .gc-home-tier-pill {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  min-height: 22px;
+  width: fit-content;
   padding: 5px 9px;
   border-radius: 999px;
-  font-size: 0.52rem;
+  font-size: .52rem;
   font-weight: 900;
-  letter-spacing: 0.055em;
+  letter-spacing: .055em;
   line-height: 1;
   text-transform: uppercase;
 }
 
-.gc-home-state-pill-live {
-  color: #ffffff;
-  background: #f02238;
-}
+.gc-home-state-pill-live { color:#fff; background:#f02238; }
+.gc-home-state-pill-upcoming { color:#aebdca; background:rgba(255,255,255,.075); }
+.gc-home-state-pill-final { color:#d4dde5; background:rgba(255,255,255,.08); }
+.gc-home-tier-pill-nfl { color:#d8f8e7; border:1px solid rgba(31,178,101,.28); background:rgba(31,178,101,.18); }
+.gc-home-tier-pill-fbs { color:#dceaff; border:1px solid rgba(55,128,255,.28); background:rgba(55,128,255,.18); }
+.gc-home-tier-pill-fcs { color:#eedfff; border:1px solid rgba(155,89,255,.28); background:rgba(155,89,255,.18); }
 
-.gc-home-state-pill-upcoming {
-  color: #aebdca;
-  background: rgba(255, 255, 255, 0.075);
-}
-
-.gc-home-state-pill-final {
-  color: #d4dde5;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.gc-home-tier-pill-nfl {
-  color: #d8f8e7;
-  border: 1px solid rgba(31, 178, 101, 0.28);
-  background: rgba(31, 178, 101, 0.18);
-}
-
-.gc-home-tier-pill-fbs {
-  color: #dceaff;
-  border: 1px solid rgba(55, 128, 255, 0.28);
-  background: rgba(55, 128, 255, 0.18);
-}
-
-.gc-home-tier-pill-fcs {
-  color: #eedfff;
-  border: 1px solid rgba(155, 89, 255, 0.28);
-  background: rgba(155, 89, 255, 0.18);
-}
-
-.gc-home-title {
-  margin: 12px 0 13px;
-  text-align: center;
-  font-family: var(--heading-font, "Graduate", serif);
-  font-size: clamp(0.72rem, 2.5vw, 0.94rem);
-  font-weight: 400;
-  letter-spacing: 0.025em;
-  color: #ffffff;
-}
-
-.gc-home-matchup {
+.game-center-matchup-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(86px, 0.72fr) minmax(0, 1fr);
-  align-items: center;
-  gap: 6px;
+  grid-template-columns: minmax(0,1fr) 42px minmax(0,1fr);
+  align-items: stretch;
+  min-height: 255px;
 }
 
-.gc-home-team {
+.game-center-team-side {
   min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 20px 12px 17px;
   text-align: center;
 }
 
-.gc-home-logo {
-  width: clamp(48px, 11vw, 66px);
-  height: clamp(48px, 11vw, 66px);
+.game-center-logo {
+  width: clamp(54px, 12vw, 76px);
+  height: clamp(54px, 12vw, 76px);
+  flex: 0 0 auto;
   display: grid;
   place-items: center;
   overflow: hidden;
-  margin-bottom: 7px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  margin-bottom: 11px;
+  border: 1px solid rgba(255,255,255,.13);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.045);
+  background: rgba(255,255,255,.045);
 }
 
-.gc-home-card-nfl .gc-home-logo {
-  border-color: rgba(36, 184, 109, 0.62);
-}
-
-.gc-home-card-fbs .gc-home-logo {
-  border-color: rgba(66, 135, 255, 0.62);
-}
-
-.gc-home-card-fcs .gc-home-logo {
-  border-color: rgba(160, 104, 255, 0.62);
-}
-
-.gc-home-logo img {
+.game-center-logo img {
   width: 84%;
   height: 84%;
   object-fit: contain;
 }
 
-.gc-home-logo-placeholder {
+.game-center-logo-placeholder {
   font-family: var(--heading-font, "Graduate", serif);
   font-size: 1rem;
 }
 
-.gc-home-team-name {
-  min-width: 0;
+.game-center-team-side-copy {
   width: 100%;
+  min-width: 0;
 }
 
-.gc-home-team-name strong {
+.game-center-team-name {
   display: flex;
   align-items: baseline;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 4px;
-  max-width: 100%;
-  overflow: hidden;
-  font-size: clamp(0.7rem, 2.8vw, 0.88rem);
-  line-height: 1.2;
-  white-space: nowrap;
-  color: #ffffff;
+  margin: 0;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: clamp(.76rem, 3.1vw, 1.05rem);
+  font-weight: 400;
+  line-height: 1.3;
+  color: #fff;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
-.gc-home-team-name strong > span:last-child {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.gc-home-rank {
+.game-center-inline-rank {
   flex: 0 0 auto;
-  font-size: 0.58rem;
+  font-family: inherit;
+  font-size: .68em;
   font-weight: 900;
   color: #f1cc61;
 }
 
-.gc-home-coach {
-  display: block;
-  max-width: 100%;
-  margin-top: 3px;
-  overflow: hidden;
-  font-size: clamp(0.51rem, 2vw, 0.62rem);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: #aebdca;
+.game-center-coach {
+  margin: 6px 0 0;
+  font-size: clamp(.58rem,2.3vw,.69rem);
+  font-weight: 750;
+  color: #c6d0d9;
+  overflow-wrap: anywhere;
 }
 
-.gc-home-record {
+.game-center-records {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 2px 7px;
-  margin-top: 4px;
-  font-size: clamp(0.48rem, 1.9vw, 0.57rem);
-  color: #9eafbd;
+  flex-wrap: wrap;
+  gap: 3px 8px;
+  margin-top: 6px;
+  font-size: clamp(.49rem,2vw,.59rem);
+  font-weight: 850;
+  color: #a9b7c4;
 }
 
-.gc-home-conference {
+.game-center-conference {
   display: block;
-  margin-top: 4px;
-  font-size: clamp(0.46rem, 1.8vw, 0.54rem);
-  font-weight: 800;
-  letter-spacing: 0.035em;
+  margin-top: 5px;
+  font-size: clamp(.47rem,1.9vw,.55rem);
+  font-weight: 850;
+  letter-spacing: .045em;
   text-transform: uppercase;
   color: #7f91a2;
 }
 
-.gc-home-team.loser {
-  opacity: 0.58;
-}
-
-.gc-home-team.winner .gc-home-team-name strong {
-  color: #ffffff;
-}
-
-.gc-home-center {
-  min-width: 0;
+.game-center-side-score {
+  margin-top: auto;
+  padding-top: 13px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-}
-
-.gc-home-score-line {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 4px;
-  white-space: nowrap;
 }
 
-.gc-home-score-line strong {
-  font-size: clamp(0.9rem, 4vw, 1.25rem);
-  color: #ffffff;
+.game-center-side-score strong {
+  font-size: clamp(1.18rem,5vw,1.7rem);
+  line-height: 1;
+  color: #fff;
 }
 
-.gc-home-score-line > span {
-  font-size: 0.55rem;
+.game-center-side-score span {
+  font-size: .52rem;
   font-weight: 800;
-  color: #7f91a2;
+  color: #8999a8;
 }
 
-.gc-home-card-final .gc-home-team.winner + .gc-home-center .gc-home-score-line strong:first-child,
-.gc-home-card-final .gc-home-center:has(+ .gc-home-team.winner) .gc-home-score-line strong:last-child {
-  color: #54dc8e;
+.game-center-team-side.winner .game-center-side-score strong { color:#54dc8e; }
+.game-center-team-side.winner .game-center-team-name { color:#fff; }
+.game-center-team-side.loser { opacity:.58; }
+
+.game-center-middle {
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
-.gc-home-proj-label {
-  font-size: 0.46rem !important;
-  letter-spacing: 0.04em;
+.game-center-vs {
+  font-family:var(--heading-font,"Graduate",serif);
+  font-size:.62rem;
+  letter-spacing:.08em;
+  color:#77899a;
 }
 
-.gc-home-vs-large {
-  font-family: var(--heading-font, "Graduate", serif);
-  font-size: 0.75rem !important;
-  color: #8394a4 !important;
-}
-
-.gc-home-projection-line {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  margin-top: 3px;
-  font-size: 0.48rem;
-  font-weight: 800;
-  color: #7f91a2;
-}
-
-.gc-home-center-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  margin-top: 5px;
-  font-size: 0.5rem;
-  font-weight: 900;
-  letter-spacing: 0.055em;
-  text-transform: uppercase;
-}
-
-.gc-home-center-status-live {
-  color: #f0253b;
-}
-
-.gc-home-center-status-final {
-  color: #c4cfd8;
-}
-
-.gc-home-center-status-upcoming {
-  color: #8fa0b0;
-}
-
-.gc-home-probability {
-  margin-top: 15px;
+.game-center-v1-probability {
+  margin: 0 16px 15px;
   padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.075);
+  border-top: 1px solid rgba(255,255,255,.075);
 }
 
-.gc-home-probability-title {
-  display: block;
-  margin-bottom: 8px;
-  text-align: center;
-  font-size: 0.52rem;
-  font-weight: 900;
-  letter-spacing: 0.085em;
-  text-transform: uppercase;
-  color: #8ea1b2;
+.game-center-v1-probability-title {
+  display:block;
+  margin-bottom:8px;
+  text-align:center;
+  font-size:.52rem;
+  font-weight:900;
+  letter-spacing:.085em;
+  text-transform:uppercase;
+  color:#8ea1b2;
 }
 
-.gc-home-probability-values {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 5px;
-  font-size: 0.58rem;
+.game-center-v1-probability-values {
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:5px;
+  font-size:.58rem;
 }
 
-.gc-home-probability-track {
-  height: 8px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.11);
+.game-center-v1-probability-track {
+  height:8px;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(255,255,255,.11);
 }
 
-.gc-home-probability-fill {
-  height: 100%;
-  border-radius: inherit;
+.game-center-v1-probability-fill { height:100%; border-radius:inherit; }
+.game-center-v1-probability-fill-nfl { background:#24b86d; }
+.game-center-v1-probability-fill-fbs { background:#4287ff; }
+.game-center-v1-probability-fill-fcs { background:#a068ff; }
+
+.game-center-v1-probability-unavailable {
+  padding:7px 10px;
+  border-radius:8px;
+  text-align:center;
+  color:#778a9a;
+  background:rgba(255,255,255,.025);
+  font-size:.52rem;
 }
 
-.gc-home-probability-fill-nfl {
-  background: linear-gradient(90deg, #18854f, #39d98a);
+@media (min-width:700px) {
+  .game-center-page { padding-top:28px; }
+  .game-center-matchup-row {
+    grid-template-columns:minmax(0,1fr) 70px minmax(0,1fr);
+    min-height:300px;
+  }
+  .game-center-team-side { padding:26px 22px 20px; }
 }
 
-.gc-home-probability-fill-fbs {
-  background: linear-gradient(90deg, #2455aa, #4c91ff);
-}
-
-.gc-home-probability-fill-fcs {
-  background: linear-gradient(90deg, #6132a6, #ae78ff);
-}
-
-.gc-home-probability-unavailable {
-  padding: 7px 10px;
-  border-radius: 8px;
-  text-align: center;
-  color: #778a9a;
-  background: rgba(255, 255, 255, 0.025);
-  font-size: 0.52rem;
+@media (max-width:430px) {
+  .game-center-page { padding-inline:10px; }
+  .game-center-hero-top { padding-inline:10px; }
+  .game-center-matchup-row {
+    grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr);
+  }
+  .game-center-team-side { padding-inline:7px; }
 }
 
 /* =========================================================
@@ -665,4 +560,191 @@
   .game-center-history-row {
     grid-template-columns: 1fr;
   }
+}
+
+
+/* =========================================================
+   LIVE ROSTER / PLAYER SCORING
+========================================================= */
+
+.game-center-roster-table {
+  width: 100%;
+}
+
+.game-center-roster-table-head,
+.game-center-player-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 48px;
+  gap: 7px;
+  align-items: center;
+}
+
+.game-center-roster-table-head {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+  background: rgba(255, 255, 255, 0.018);
+  color: #718495;
+  font-size: 0.45rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.game-center-roster-table-head span:last-child {
+  text-align: right;
+}
+
+.game-center-player-row {
+  min-height: 46px;
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+}
+
+.game-center-player-row:last-child {
+  border-bottom: 0;
+}
+
+.game-center-lineup-position {
+  font-size: 0.49rem;
+  font-weight: 900;
+  color: #8fa1b2;
+}
+
+.game-center-player-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.game-center-player-copy strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.59rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #e5ebf0;
+}
+
+.game-center-player-copy span {
+  font-size: 0.46rem;
+  color: #748797;
+}
+
+.game-center-player-points {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.game-center-player-points strong {
+  font-size: 0.63rem;
+  color: #ffffff;
+}
+
+.game-center-player-points span {
+  font-size: 0.43rem;
+  color: #7f91a1;
+}
+
+.game-center-roster-empty {
+  padding: 16px 12px;
+  color: #8294a4;
+  font-size: 0.55rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+@media (max-width: 430px) {
+  .game-center-roster-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================================================
+   TEAM PROJECTION SUMMARY
+========================================================= */
+
+.game-center-team-projection-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 16px 12px;
+  padding: 9px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.065);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.game-center-team-projection-summary > span {
+  font-size: 0.5rem;
+  font-weight: 900;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+  color: #7f91a2;
+}
+
+.game-center-team-projection-summary > strong {
+  font-size: 0.72rem;
+  color: #dce5ec;
+}
+
+.game-center-team-projection-summary small {
+  font-size: 0.5rem;
+  font-weight: 800;
+  color: #6f8191;
+}
+
+
+/* V6.1: quieter actual score; projection remains directly beneath it. */
+.game-center-side-score strong {
+  font-size: clamp(1rem, 4vw, 1.35rem);
+}
+
+
+/* =========================================================
+   V6.2 FINAL SCORE TYPOGRAPHY
+========================================================= */
+
+/* Actual score: one more step down in visual weight. */
+.game-center-side-score strong {
+  font-size: clamp(0.9rem, 3.5vw, 1.15rem);
+}
+
+/* Projection: one step up so it remains easy to scan. */
+.game-center-side-projection {
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.game-center-side-projection strong {
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+
+/* =========================================================
+   V7.1 BIDIRECTIONAL WIN PROBABILITY
+========================================================= */
+
+.game-center-v1-probability-track {
+  position: relative;
+}
+
+.game-center-v1-probability-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.game-center-v1-probability-fill-left {
+  left: 0;
+  right: auto;
+}
+
+.game-center-v1-probability-fill-right {
+  right: 0;
+  left: auto;
 }

@@ -13,6 +13,7 @@ import {
 import PageHeader from "../components/PageHeader";
 import {
   getGameById,
+  getGameRosterPlayers,
   getHeadToHeadHistory,
 } from "../services/googleSheets";
 import meshShield from "../assets/logos/mfl-shield.png";
@@ -59,125 +60,82 @@ function centerStatusLabel(game) {
 function TeamLogo({ src, initial, team }) {
   if (src) {
     return (
-      <div className="gc-home-logo">
+      <div className="game-center-logo">
         <img src={src} alt={`${team} logo`} />
       </div>
     );
   }
 
   return (
-    <div className="gc-home-logo gc-home-logo-placeholder">
+    <div className="game-center-logo game-center-logo-placeholder">
       {initial || "?"}
     </div>
   );
 }
 
-function HomeStyleTeam({
+function TeamSide({
   side,
   team,
   coach,
-  logo,
-  initial,
-  rank,
+  conference,
   overallRecord,
   conferenceRecord,
-  conference,
+  rank,
+  score,
+  projection,
+  logo,
+  initial,
   tier,
+  status,
   isWinner,
   isLoser,
 }) {
   const isCollege = tier === "FBS" || tier === "FCS";
 
   return (
-    <div
+    <section
       className={[
-        "gc-home-team",
-        `gc-home-team-${side}`,
+        "game-center-team-side",
+        `game-center-team-side-${side}`,
         isWinner ? "winner" : "",
         isLoser ? "loser" : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      ].filter(Boolean).join(" ")}
     >
       <TeamLogo src={logo} initial={initial} team={team || "TBD"} />
 
-      <div className="gc-home-team-name">
-        <strong>
+      <div className="game-center-team-side-copy">
+        <h2 className="game-center-team-name">
           {rank >= 1 && rank <= 25 ? (
-            <span className="gc-home-rank">#{rank}</span>
+            <span className="game-center-inline-rank">#{rank}</span>
           ) : null}
           <span>{team || "TBD"}</span>
-        </strong>
-      </div>
+        </h2>
 
-      {coach ? <span className="gc-home-coach">{coach}</span> : null}
+        {coach ? <p className="game-center-coach">{coach}</p> : null}
 
-      <div className="gc-home-record">
-        {isCollege ? (
-          <>
-            <span>OVR: {overallRecord || "0–0"}</span>
-            <span>CONF: {conferenceRecord || "0–0"}</span>
-          </>
-        ) : (
-          <span>{overallRecord || "0–0"}</span>
-        )}
-      </div>
-
-      {conference ? (
-        <span className="gc-home-conference">{conference}</span>
-      ) : null}
-    </div>
-  );
-}
-
-function HomeStyleCenter({ game }) {
-  const team1Projection = formatProjection(game.team1Projection);
-  const team2Projection = formatProjection(game.team2Projection);
-
-  const hasScores =
-    game.team1Score !== null &&
-    game.team1Score !== undefined &&
-    game.team2Score !== null &&
-    game.team2Score !== undefined;
-
-  const hasProjections =
-    team1Projection !== null && team2Projection !== null;
-
-  return (
-    <div className="gc-home-center">
-      <div className="gc-home-score-line">
-        {hasScores ? (
-          <>
-            <strong>{formatScore(game.team1Score, game.status)}</strong>
-            <span>vs</span>
-            <strong>{formatScore(game.team2Score, game.status)}</strong>
-          </>
-        ) : hasProjections ? (
-          <>
-            <strong>{team1Projection}</strong>
-            <span className="gc-home-proj-label">PROJ</span>
-            <strong>{team2Projection}</strong>
-          </>
-        ) : (
-          <span className="gc-home-vs-large">VS</span>
-        )}
-      </div>
-
-      {hasScores && hasProjections && game.status !== "final" ? (
-        <div className="gc-home-projection-line">
-          <span>PROJ {team1Projection}</span>
-          <span>•</span>
-          <span>{team2Projection}</span>
+        <div className="game-center-records">
+          {isCollege ? (
+            <>
+              <span>OVR: {overallRecord || "0–0"}</span>
+              <span>CONF: {conferenceRecord || "0–0"}</span>
+            </>
+          ) : (
+            <span>{overallRecord || "0–0"}</span>
+          )}
         </div>
-      ) : null}
 
-      <span className={`gc-home-center-status gc-home-center-status-${game.status}`}>
-        {game.status === "live" ? <Radio size={9} /> : null}
-        {game.status === "upcoming" && hasProjections
-          ? "Projected"
-          : centerStatusLabel(game)}
-      </span>
-    </div>
+        {conference ? (
+          <span className="game-center-conference">{conference}</span>
+        ) : null}
+      </div>
+
+      <div className="game-center-side-score">
+        <strong>{formatScore(score, status)}</strong>
+        {status !== "final" && projection !== null && projection !== undefined ? (
+          <span>Proj: {Number(projection).toFixed(1)}</span>
+        ) : null}
+      </div>
+    </section>
   );
 }
 
@@ -187,9 +145,9 @@ function WinProbability({ game }) {
 
   if (firstRaw === null && secondRaw === null) {
     return (
-      <div className="gc-home-probability">
-        <span className="gc-home-probability-title">Win Probability</span>
-        <div className="gc-home-probability-unavailable">
+      <div className="game-center-v1-probability">
+        <span className="game-center-v1-probability-title">Win Probability</span>
+        <div className="game-center-v1-probability-unavailable">
           Win probability will appear once the Sleeper probability feed is connected.
         </div>
       </div>
@@ -199,26 +157,32 @@ function WinProbability({ game }) {
   const first = firstRaw !== null ? firstRaw : 100 - secondRaw;
   const second = secondRaw !== null ? secondRaw : 100 - first;
 
-  return (
-    <div className="gc-home-probability">
-      <span className="gc-home-probability-title">Win Probability</span>
+  const favoredSide = first >= second ? "left" : "right";
+  const favoredProbability = Math.max(first, second);
 
-      <div className="gc-home-probability-values">
+  return (
+    <div className="game-center-v1-probability">
+      <span className="game-center-v1-probability-title">Win Probability</span>
+      <div className="game-center-v1-probability-values">
         <strong>{Math.round(first)}%</strong>
         <strong>{Math.round(second)}%</strong>
       </div>
 
-      <div className="gc-home-probability-track">
+      <div className="game-center-v1-probability-track">
         <div
-          className={`gc-home-probability-fill gc-home-probability-fill-${game.tierClass}`}
-          style={{ width: `${first}%` }}
+          className={[
+            "game-center-v1-probability-fill",
+            `game-center-v1-probability-fill-${game.tierClass}`,
+            `game-center-v1-probability-fill-${favoredSide}`,
+          ].join(" ")}
+          style={{ width: `${favoredProbability}%` }}
         />
       </div>
     </div>
   );
 }
 
-function MatchupCard({ game, winnerState }) {
+function MatchupCard({ game, winnerState, rosters }) {
   const normalizedType = String(
     game.gameType || game.gameCategory || "",
   ).toLowerCase();
@@ -234,55 +198,61 @@ function MatchupCard({ game, winnerState }) {
       : "REGULAR SEASON";
 
   return (
-    <section
-      className={[
-        "gc-home-card",
-        `gc-home-card-${game.tierClass}`,
-        `gc-home-card-${game.status}`,
-      ].join(" ")}
-    >
-      <div className="gc-home-card-top">
+    <section className={`game-center-hero game-center-hero-${game.tierClass}`}>
+      <div className="game-center-hero-top">
         <span className={`gc-home-state-pill gc-home-state-pill-${game.status}`}>
           {game.status === "live" ? <Radio size={10} /> : null}
           {matchupStatusLabel(game)}
         </span>
+
+        <h2>{title}</h2>
 
         <span className={`gc-home-tier-pill gc-home-tier-pill-${game.tierClass}`}>
           {game.tier}
         </span>
       </div>
 
-      <h2 className="gc-home-title">{title}</h2>
-
-      <div className="gc-home-matchup">
-        <HomeStyleTeam
+      <div className="game-center-matchup-row">
+        <TeamSide
           side="one"
           team={game.team1Team}
           coach={game.team1Coach}
-          logo={game.team1Logo}
-          initial={game.team1Initial}
-          rank={game.team1Top25Rank}
+          conference={game.team1Conference}
           overallRecord={game.team1OverallRecord}
           conferenceRecord={game.team1ConferenceRecord}
-          conference={game.team1Conference}
+          rank={game.team1Top25Rank}
+          score={game.team1Score}
+          projection={
+            rosters.team1ProjectedPoints ?? game.team1Projection
+          }
+          logo={game.team1Logo}
+          initial={game.team1Initial}
           tier={game.tier}
+          status={game.status}
           isWinner={winnerState.team1Winner}
           isLoser={winnerState.hasWinner && !winnerState.team1Winner}
         />
 
-        <HomeStyleCenter game={game} />
+        <div className="game-center-middle">
+          <span className="game-center-vs">VS</span>
+        </div>
 
-        <HomeStyleTeam
+        <TeamSide
           side="two"
           team={game.team2Team}
           coach={game.team2Coach}
-          logo={game.team2Logo}
-          initial={game.team2Initial}
-          rank={game.team2Top25Rank}
+          conference={game.team2Conference}
           overallRecord={game.team2OverallRecord}
           conferenceRecord={game.team2ConferenceRecord}
-          conference={game.team2Conference}
+          rank={game.team2Top25Rank}
+          score={game.team2Score}
+          projection={
+            rosters.team2ProjectedPoints ?? game.team2Projection
+          }
+          logo={game.team2Logo}
+          initial={game.team2Initial}
           tier={game.tier}
+          status={game.status}
           isWinner={winnerState.team2Winner}
           isLoser={winnerState.hasWinner && !winnerState.team2Winner}
         />
@@ -293,7 +263,23 @@ function MatchupCard({ game, winnerState }) {
   );
 }
 
-function RosterPlaceholder({ team, side }) {
+function formatPlayerScore(value) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+    return "—";
+  }
+
+  return Number(value).toFixed(1);
+}
+
+function formatTeamProjection(value) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+    return null;
+  }
+
+  return Number(value).toFixed(1);
+}
+
+function RosterPanel({ team, players, side }) {
   return (
     <div className={`game-center-roster-panel game-center-roster-panel-${side}`}>
       <div className="game-center-roster-panel-heading">
@@ -301,17 +287,43 @@ function RosterPlaceholder({ team, side }) {
         <strong>{team || "TBD"}</strong>
       </div>
 
-      <div className="game-center-roster-placeholder-table">
-        <div>
+      <div className="game-center-roster-table">
+        <div className="game-center-roster-table-head">
           <span>POS</span>
           <span>PLAYER</span>
           <span>PTS</span>
         </div>
-        <div>
-          <span>—</span>
-          <strong>Starter scoring will populate from Sleeper</strong>
-          <span>—</span>
-        </div>
+
+        {players.length > 0 ? (
+          players.map((player) => (
+            <div className="game-center-player-row" key={player.playerId}>
+              <span className="game-center-lineup-position">
+                {player.lineupPosition || player.position || "—"}
+              </span>
+
+              <div className="game-center-player-copy">
+                <strong>{player.playerName || player.playerId}</strong>
+                <span>
+                  {[player.position, player.nflTeam]
+                    .filter(Boolean)
+                    .join(" • ")}
+                </span>
+              </div>
+
+              <div className="game-center-player-points">
+                <strong>{formatPlayerScore(player.playerPoints)}</strong>
+
+                {player.projectedPoints !== null ? (
+                  <span>Proj {formatPlayerScore(player.projectedPoints)}</span>
+                ) : null}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="game-center-roster-empty">
+            No starters found for this franchise and week.
+          </div>
+        )}
       </div>
     </div>
   );
@@ -350,6 +362,14 @@ function GameCenter() {
 
   const [game, setGame] = useState(null);
   const [history, setHistory] = useState([]);
+  const [rosters, setRosters] = useState({
+    team1: [],
+    team2: [],
+    team1TotalPoints: null,
+    team2TotalPoints: null,
+    team1ProjectedPoints: null,
+    team2ProjectedPoints: null,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -362,15 +382,20 @@ function GameCenter() {
         setError("");
 
         const result = await getGameById(decodeURIComponent(gameId || ""));
-        const priorMeetings = await getHeadToHeadHistory(
-          result.team1Id,
-          result.team2Id,
-          result.gameId,
-        );
+
+        const [priorMeetings, rosterPlayers] = await Promise.all([
+          getHeadToHeadHistory(
+            result.team1Id,
+            result.team2Id,
+            result.gameId,
+          ),
+          getGameRosterPlayers(result),
+        ]);
 
         if (isMounted) {
           setGame(result);
           setHistory(priorMeetings);
+          setRosters(rosterPlayers);
         }
       } catch (loadError) {
         console.error("Unable to load Game Center:", loadError);
@@ -473,7 +498,11 @@ function GameCenter() {
         size="compact"
       />
 
-      <MatchupCard game={game} winnerState={winnerState} />
+      <MatchupCard
+        game={game}
+        winnerState={winnerState}
+        rosters={rosters}
+      />
 
       <section className="game-center-rosters">
         <div className="game-center-section-heading">
@@ -482,8 +511,16 @@ function GameCenter() {
         </div>
 
         <div className="game-center-roster-grid">
-          <RosterPlaceholder team={game.team1Team} side="one" />
-          <RosterPlaceholder team={game.team2Team} side="two" />
+          <RosterPanel
+            team={game.team1Team}
+            players={rosters.team1}
+            side="one"
+          />
+          <RosterPanel
+            team={game.team2Team}
+            players={rosters.team2}
+            side="two"
+          />
         </div>
       </section>
 

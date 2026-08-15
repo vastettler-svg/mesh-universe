@@ -187,7 +187,7 @@ function getStandingsStatus(team) {
   if (
     tier === "FBS" &&
     overallRank !== null &&
-    overallRank >= 95 &&
+    overallRank >= 91 &&
     overallRank <= 98
   ) {
     return { status: "relegation", statusLabel: "Relegation Zone" };
@@ -320,6 +320,7 @@ export async function getStandingsData() {
       conferenceRank,
       divisionRank,
       top25Rank,
+      rpi: toOptionalNumber(row.RPI),
       playoffSeed: toNumber(row.Playoff_Seed),
       playoffStatus: String(row.Playoff_Status ?? "").trim(),
       seasonResult: String(row.Season_Result ?? "").trim(),

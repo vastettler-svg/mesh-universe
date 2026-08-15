@@ -197,7 +197,11 @@ function MovementIndicator({ movement, isNew = false }) {
   );
 }
 
-function StandingsRow({ team, isTop25View = false }) {
+function StandingsRow({
+  team,
+  isTop25View = false,
+  showTop25Prefix = false,
+}) {
   const teamName = team.team || "Unnamed Franchise";
   const hasRank = Number(team.rank) > 0 && Number(team.rank) < 999;
   const movement = isTop25View ? team.top25Movement : team.movement;
@@ -254,7 +258,13 @@ function StandingsRow({ team, isTop25View = false }) {
       </div>
 
       <div className="standings-team-info">
-        <strong className="standings-team-name">{teamName}</strong>
+        <strong className="standings-team-name">
+          {showTop25Prefix &&
+          Number(team.top25Rank) >= 1 &&
+          Number(team.top25Rank) <= 25
+            ? `#${team.top25Rank} ${teamName}`
+            : teamName}
+        </strong>
         <span className="standings-coach">
           {team.coach || "Coach unavailable"}
         </span>
@@ -266,6 +276,17 @@ function StandingsRow({ team, isTop25View = false }) {
               <strong>{line.value || "0–0"}</strong>
             </span>
           ))}
+
+          {isTop25View ? (
+            <span className="standings-rpi">
+              <small>RPI</small>
+              <strong>
+                {Number.isFinite(Number(team.rpi))
+                  ? Number(team.rpi).toFixed(3)
+                  : "—"}
+              </strong>
+            </span>
+          ) : null}
         </div>
       </div>
 
@@ -316,6 +337,7 @@ function StandingsList({
   tierClass,
   showTierLines = true,
   isTop25View = false,
+  showTop25Prefix = false,
 }) {
   const relegationStart =
     tierClass === "nfl" ? 29 : tierClass === "fbs" ? 95 : null;
@@ -339,7 +361,11 @@ function StandingsList({
             <StandingsLine type="relegation" label="Relegation Line" />
           ) : null}
 
-          <StandingsRow team={team} isTop25View={isTop25View} />
+          <StandingsRow
+            team={team}
+            isTop25View={isTop25View}
+            showTop25Prefix={showTop25Prefix}
+          />
         </div>
       ))}
     </div>
@@ -500,7 +526,7 @@ function Standings() {
   }, [standingsData, selectedPrimaryFilter, selectedSecondaryFilter, selectedNflDivisionFilter]);
 
   const displayStandings = useMemo(() => {
-    return visibleStandings.map((team) => {
+    return visibleStandings.map((team, index) => {
       const isNflConferenceView =
         selectedPrimaryFilter === "nfl" &&
         (selectedSecondaryFilter === "afc" || selectedSecondaryFilter === "nfc");
@@ -528,7 +554,12 @@ function Standings() {
       } else if (isPlayoffPicture) {
         rank = team.playoffSeed || team.overallRank;
       } else if (isCollegeConferenceView) {
-        rank = team.conferenceRank;
+        /*
+         * Conference tabs are always ranked locally 1-14 (or the
+         * conference's actual team count), regardless of how the source
+         * sheet numbers Conference_Rank across the tier.
+         */
+        rank = index + 1;
         pointsFor = team.regularSeasonPF;
         recordLines = [
           { label: "Conference", value: team.tierStandingsRecord, primary: true },
@@ -547,7 +578,7 @@ function Standings() {
       let statusLabel = team.statusLabel;
 
       if (team.tierClass === "fbs") {
-        if (Number(team.overallRank) >= 95 && Number(team.overallRank) <= 98) {
+        if (Number(team.overallRank) >= 91 && Number(team.overallRank) <= 98) {
           status = "relegation";
           statusLabel = "Relegation Zone";
         } else if (cfpFranchiseIds.has(team.franchiseId)) {
@@ -588,6 +619,12 @@ function Standings() {
   const isTop25View =
     selectedPrimaryFilter !== "nfl" &&
     selectedSecondaryFilter === "top-25";
+
+  const showTop25Prefix =
+    selectedPrimaryFilter !== "nfl" &&
+    selectedSecondaryFilter !== "overall" &&
+    selectedSecondaryFilter !== "top-25";
+
   const isNflPlayoffPicture = selectedPrimaryFilter === "nfl" && selectedSecondaryFilter === "playoff-picture";
   const isNflConferenceView = selectedPrimaryFilter === "nfl" && ["afc", "nfc"].includes(selectedSecondaryFilter);
   const standingsHeading = isNflConferenceView ? activeNflDivisionLabel : activeSecondaryLabel;
@@ -663,6 +700,7 @@ function Standings() {
           tierClass={selectedPrimaryFilter}
           showTierLines={showTierLines}
           isTop25View={isTop25View}
+          showTop25Prefix={showTop25Prefix}
         />
       );
     }

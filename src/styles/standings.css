@@ -1771,3 +1771,20 @@ font-weight: 800;
     grid-template-columns: 54px 58px minmax(0, 1fr) 120px 34px;
   }
 }
+
+
+/* =========================================================
+   STEP 3B — RPI / CONFERENCE RANK POLISH
+========================================================= */
+
+.standings-rpi {
+  padding-left: 2px;
+}
+
+.standings-rpi strong {
+  color: #dceaff;
+}
+
+.standings-row-top25 .standings-inline-records {
+  row-gap: 5px;
+}

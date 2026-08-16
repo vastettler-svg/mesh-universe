@@ -1788,3 +1788,187 @@ font-weight: 800;
 .standings-row-top25 .standings-inline-records {
   row-gap: 5px;
 }
+
+
+/* =========================================================
+   STEP 3C — TEAM NAME / FOOTER / LOGO VISIBILITY POLISH
+========================================================= */
+
+/*
+ * Only the chevron remains on the right side of the main card body.
+ * This gives long franchise names substantially more horizontal room.
+ */
+.standings-row {
+  padding-right: 48px;
+}
+
+/* All franchise names stay on one line. */
+.standings-team-name {
+  width: 100%;
+  overflow: hidden;
+
+  font-size: 0.72rem;
+  line-height: 1.18;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-wrap: normal;
+}
+
+/*
+ * Slightly brighter neutral logo well. This keeps the same official
+ * logo URLs while making dark/navy/black marks easier to see.
+ */
+.standings-team-logo,
+.standings-row-branded .standings-team-logo-nfl,
+.standings-row-branded .standings-team-logo-fbs,
+.standings-row-branded .standings-team-logo-fcs {
+  border-color: rgba(225, 231, 237, 0.52);
+
+  background:
+    radial-gradient(
+      circle at 50% 44%,
+      rgba(255, 255, 255, 0.14),
+      rgba(255, 255, 255, 0.055) 72%
+    );
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+}
+
+/* Chevron is the only upper-right element now. */
+.standings-row-action {
+  top: 42px;
+  right: 10px;
+}
+
+/*
+ * Footer now has one clear job:
+ * Conference (left) | Playoff/status (center) | PF (right)
+ */
+.standings-points-status {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+
+  margin-right: -48px;
+}
+
+.standings-conference-badge {
+  position: static;
+
+  justify-self: start;
+
+  max-width: 88px;
+  padding: 4px 7px;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+
+  font-size: 0.41rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color: #b9c4ce;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.standings-footer-status {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.standings-footer-status .standings-status {
+  max-width: 118px;
+  margin: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  text-align: center;
+}
+
+.standings-pf-value {
+  justify-self: end;
+}
+
+/* Small phones keep the one-line identity without sacrificing logo size. */
+@media (max-width: 390px) {
+  .standings-row {
+    padding-right: 44px;
+  }
+
+  .standings-team-name {
+    font-size: 0.68rem;
+  }
+
+  .standings-row-action {
+    right: 8px;
+  }
+
+  .standings-points-status {
+    margin-right: -44px;
+  }
+
+  .standings-conference-badge {
+    max-width: 76px;
+    padding-inline: 6px;
+    font-size: 0.39rem;
+  }
+
+  .standings-footer-status .standings-status {
+    max-width: 102px;
+    font-size: 0.39rem;
+  }
+}
+
+/*
+ * Tablet/desktop footer stays a three-part footer instead of moving the
+ * conference tag back into the upper-right.
+ */
+@media (min-width: 700px) {
+  .standings-row {
+    grid-template-columns: 48px 56px minmax(0, 1fr) 210px 34px;
+    grid-template-areas: "rank logo team points action";
+  }
+
+  .standings-conference-badge {
+    position: static;
+    grid-column: auto;
+    grid-row: auto;
+    justify-self: start;
+    align-self: center;
+  }
+
+  .standings-points-status {
+    grid-area: points;
+
+    width: 100%;
+    margin: 0;
+    padding: 0;
+
+    grid-template-columns: auto minmax(0, 1fr) auto;
+
+    border-top: 0;
+    background: transparent;
+  }
+
+  .standings-points-status .standings-status {
+    display: inline-flex;
+  }
+
+  .standings-pf-value {
+    display: inline-flex;
+  }
+}

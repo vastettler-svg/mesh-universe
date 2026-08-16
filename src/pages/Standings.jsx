@@ -155,6 +155,24 @@ function formatPoints(value) {
   return Number.isFinite(number) ? number.toFixed(1) : "0.0";
 }
 
+function formatConferenceTag(value) {
+  const label = String(value ?? "").trim();
+
+  const displayLabels = {
+    "Mountain West": "Mtn West",
+    "Missouri Valley": "MVC",
+    "Missouri Valley Conference": "MVC",
+    "Coastal Athletic Association": "CAA",
+    Coastal: "CAA",
+    Northeast: "NEC",
+    "Northeast Conference": "NEC",
+    Southland: "SLC",
+    "Southland Conference": "SLC",
+  };
+
+  return displayLabels[label] || label;
+}
+
 function TierBadge({ tier, tierClass }) {
   return (
     <span className={`standings-tier-badge standings-tier-badge-${tierClass}`}>
@@ -290,10 +308,6 @@ function StandingsRow({
         </div>
       </div>
 
-      <span className="standings-conference-badge">
-        {team.conference || team.tier}
-      </span>
-
       <button
         type="button"
         className="standings-row-action"
@@ -303,13 +317,17 @@ function StandingsRow({
       </button>
 
       <div className="standings-points-status">
-        {team.statusLabel ? (
-          <span className={`standings-status standings-status-${team.status}`}>
-            {team.statusLabel}
-          </span>
-        ) : (
-          <span aria-hidden="true" />
-        )}
+        <span className="standings-conference-badge">
+          {formatConferenceTag(team.conference || team.tier)}
+        </span>
+
+        <div className="standings-footer-status">
+          {team.statusLabel ? (
+            <span className={`standings-status standings-status-${team.status}`}>
+              {team.statusLabel}
+            </span>
+          ) : null}
+        </div>
 
         <span className="standings-pf-value">
           <small>PF</small>
@@ -340,7 +358,7 @@ function StandingsList({
   showTop25Prefix = false,
 }) {
   const relegationStart =
-    tierClass === "nfl" ? 29 : tierClass === "fbs" ? 95 : null;
+    tierClass === "nfl" ? 29 : tierClass === "fbs" ? 91 : null;
 
   return (
     <div className="standings-list">

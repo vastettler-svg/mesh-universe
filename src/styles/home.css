@@ -1269,3 +1269,933 @@
     white-space: normal;
   }
 }
+
+/* =========================================================
+   HOME V1 — LIVE GAMES OF THE WEEK
+========================================================= */
+
+.home-text-button {
+  text-decoration: none;
+}
+
+.home-loading-card {
+  padding: 18px;
+
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+
+  font-size: .72rem;
+  text-align: center;
+
+  color: #94a5b5;
+  background: rgba(255,255,255,.025);
+}
+
+.game-card {
+  display: block;
+
+  color: inherit;
+  text-decoration: none;
+
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+
+.game-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.16);
+}
+
+.game-card-tier-identity {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.game-card-tier-patch {
+  width: 34px;
+  height: 34px;
+
+  display: block;
+  object-fit: contain;
+
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,.28));
+}
+
+/* Transparent official team logos — same MESH standard. */
+.game-team-logo,
+.game-team-logo-nfl,
+.game-team-logo-fbs,
+.game-team-logo-fcs {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.game-team-logo img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+  object-fit: contain;
+
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.22));
+}
+
+.game-team-logo > span {
+  width: 100%;
+  height: 100%;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid rgba(225,231,237,.34);
+  border-radius: 50%;
+
+  background: rgba(255,255,255,.045);
+}
+
+.game-team-coach {
+  max-width: 100%;
+  overflow: hidden;
+
+  font-size: .57rem !important;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #8fa1b2 !important;
+}
+
+.game-projection-line {
+  width: 100%;
+
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+
+  font-size: .52rem;
+  font-weight: 800;
+
+  color: #899aaa;
+}
+
+.game-card-footer {
+  margin-top: 13px;
+  padding-top: 10px;
+
+  border-top: 1px solid rgba(255,255,255,.065);
+
+  font-size: .52rem;
+  font-weight: 900;
+  letter-spacing: .055em;
+  text-align: center;
+  text-transform: uppercase;
+
+  color: #9badbd;
+}
+
+@media (max-width: 420px) {
+  .game-card-tier-patch {
+    width: 30px;
+    height: 30px;
+  }
+
+  .game-team strong {
+    font-size: .7rem;
+  }
+
+  .game-team-coach {
+    font-size: .52rem !important;
+  }
+
+  .game-projection-line {
+    font-size: .47rem;
+  }
+}
+
+
+/* =========================================================
+   HOME V1B — FUNCTIONAL WEEK DROPDOWN
+========================================================= */
+
+.home-week-menu {
+  position: relative;
+  z-index: 30;
+}
+
+.home-week-selector svg {
+  transition: transform 150ms ease;
+}
+
+.home-week-chevron-open {
+  transform: rotate(180deg);
+}
+
+.home-week-options {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+
+  width: min(210px, calc(100vw - 28px));
+  max-height: 320px;
+  overflow-y: auto;
+
+  padding: 6px;
+
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 13px;
+
+  background: rgba(10,24,41,.985);
+  box-shadow: 0 18px 42px rgba(0,0,0,.34);
+
+  backdrop-filter: blur(14px);
+}
+
+.home-week-option {
+  width: 100%;
+  min-height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  padding: 7px 9px;
+
+  border: 0;
+  border-radius: 8px;
+
+  font: inherit;
+  font-size: .68rem;
+  font-weight: 800;
+  text-align: left;
+
+  color: #dce5ed;
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.home-week-option:hover {
+  background: rgba(255,255,255,.06);
+}
+
+.home-week-option-active {
+  color: #fff;
+  background: rgba(255,255,255,.08);
+}
+
+.home-week-option-current small {
+  padding: 2px 5px;
+
+  border-radius: 999px;
+
+  font-size: .42rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+
+  color: #d8f8e7;
+  background: rgba(31,178,101,.16);
+}
+
+@media (max-width: 420px) {
+  .home-week-options {
+    width: min(190px, calc(100vw - 22px));
+  }
+}
+
+
+/* =========================================================
+   HOME V2 — AUTOMATED MESH HEADLINES
+========================================================= */
+
+.headline-card-link {
+  color: inherit;
+  text-decoration: none;
+
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+
+.headline-card-link:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.15);
+}
+
+.headline-meta-tier {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.headline-tier-patch {
+  width: 28px;
+  height: 28px;
+
+  display: block;
+  object-fit: contain;
+
+  filter: drop-shadow(0 2px 5px rgba(0,0,0,.25));
+}
+
+.headline-body h3 {
+  min-height: 2.7em;
+}
+
+.headline-body p {
+  min-height: 3.1em;
+}
+
+.headline-footer {
+  margin-top: 12px;
+  padding-top: 9px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  border-top: 1px solid rgba(255,255,255,.055);
+
+  font-size: .52rem;
+}
+
+.headline-footer span {
+  min-width: 0;
+  overflow: hidden;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #7f91a2;
+}
+
+.headline-footer strong {
+  flex: 0 0 auto;
+
+  font-size: .5rem;
+  font-weight: 900;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+
+  color: #aebdca;
+}
+
+@media (max-width: 420px) {
+  .headline-tier-patch {
+    width: 25px;
+    height: 25px;
+  }
+
+  .headline-body h3,
+  .headline-body p {
+    min-height: 0;
+  }
+}
+
+
+/* =========================================================
+   HOME V2B — COLLEGE RECORDS + BIDIRECTIONAL WIN PROBABILITY
+========================================================= */
+
+.game-team-records {
+  max-width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+
+  font-size: .55rem !important;
+  line-height: 1.25;
+
+  color: #91a2b2 !important;
+}
+
+.game-team-records > span {
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Match the Game Center behavior:
+   favored team fills inward from its own side. */
+.game-probability-track {
+  position: relative;
+}
+
+.game-probability-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.game-probability-fill-left {
+  left: 0;
+  right: auto;
+}
+
+.game-probability-fill-right {
+  right: 0;
+  left: auto;
+}
+
+@media (max-width: 420px) {
+  .game-team-records {
+    gap: 1px 4px;
+    font-size: .49rem !important;
+  }
+}
+
+
+/* =========================================================
+   HOME V2C — STORY-STYLE MESH HEADLINES
+========================================================= */
+
+.headline-card {
+  color: inherit;
+}
+
+.headline-teaser {
+  margin-bottom: 0 !important;
+}
+
+.headline-full-story {
+  margin-top: 11px;
+  padding-top: 10px;
+
+  border-top: 1px solid rgba(255,255,255,.055);
+}
+
+.headline-full-story p {
+  min-height: 0 !important;
+  margin: 0 0 8px;
+
+  font-size: .69rem;
+  line-height: 1.52;
+
+  color: #9eacb8;
+}
+
+.headline-full-story p:last-child {
+  margin-bottom: 0;
+}
+
+.headline-more-button {
+  flex: 0 0 auto;
+
+  padding: 4px 0;
+  border: 0;
+
+  font: inherit;
+  font-size: .52rem;
+  font-weight: 900;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+
+  color: #c0ced9;
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.headline-more-button:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* Retire the old Game Center CTA treatment from the headline footer. */
+.headline-footer > strong {
+  display: none;
+}
+
+
+/* =========================================================
+   HOME V2D — DISTINCT WEEK 1 STORY VOICES
+========================================================= */
+
+.headline-body h3,
+.headline-body p {
+  min-height: 0;
+}
+
+
+/* =========================================================
+   HOME V3 — WEEKLY HIGH SCORER AWARDS
+========================================================= */
+
+.weekly-award-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.weekly-award-card {
+  position: relative;
+  padding: 15px;
+}
+
+.weekly-award-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+}
+
+.weekly-award-card-nfl::before { background: #24b86d; }
+.weekly-award-card-fbs::before { background: #4287ff; }
+.weekly-award-card-fcs::before { background: #a068ff; }
+
+.weekly-award-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.075);
+}
+
+.weekly-award-identity {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.weekly-award-patch {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 7px rgba(0,0,0,.28));
+}
+
+.weekly-award-identity > div { min-width: 0; }
+
+.weekly-award-identity span {
+  display: block;
+  margin-bottom: 2px;
+  font-size: .48rem;
+  font-weight: 900;
+  letter-spacing: .065em;
+  text-transform: uppercase;
+  color: #8fa1b1;
+}
+
+.weekly-award-identity h3 {
+  margin: 0;
+  font-size: .88rem;
+  line-height: 1.25;
+  color: #fff;
+}
+
+.weekly-award-winner {
+  display: grid;
+  grid-template-columns: 58px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 11px;
+}
+
+.weekly-award-logo {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+}
+
+.weekly-award-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.22));
+}
+
+.weekly-award-logo > span {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 50%;
+  font-family: var(--heading-font, "Graduate", serif);
+  background: rgba(255,255,255,.045);
+}
+
+.weekly-award-team {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.weekly-award-team strong {
+  overflow: hidden;
+  font-size: .78rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.weekly-award-team span {
+  overflow: hidden;
+  font-size: .61rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #95a6b5;
+}
+
+.weekly-award-points {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.weekly-award-points strong {
+  font-size: 1.08rem;
+  line-height: 1;
+  color: #f1cf72;
+}
+
+.weekly-award-points span {
+  margin-top: 3px;
+  font-size: .45rem;
+  font-weight: 900;
+  letter-spacing: .065em;
+  color: #8798a8;
+}
+
+.weekly-award-result {
+  margin-top: 12px;
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(244,206,101,.12);
+  border-radius: 9px;
+  font-size: .59rem;
+  line-height: 1.35;
+  color: #d7e0e7;
+  background: rgba(244,206,101,.045);
+}
+
+.weekly-award-result svg {
+  flex: 0 0 auto;
+  color: #f2ca5d;
+}
+
+.weekly-award-career {
+  margin-top: 9px;
+  padding-top: 9px;
+  display: grid;
+  gap: 5px;
+  border-top: 1px solid rgba(255,255,255,.055);
+}
+
+.weekly-award-career span {
+  font-size: .48rem;
+  font-weight: 800;
+  line-height: 1.4;
+  color: #8fa0af;
+}
+
+.weekly-award-career-pending { opacity: .7; }
+
+.weekly-award-empty {
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  text-align: center;
+  color: #8fa0af;
+}
+
+.weekly-award-empty svg { color: #f2ca5d; }
+.weekly-award-empty strong { font-size: .76rem; color: #fff; }
+
+.weekly-award-empty span {
+  max-width: 280px;
+  font-size: .62rem;
+  line-height: 1.45;
+}
+
+.weekly-award-empty small {
+  max-width: 290px;
+  font-size: .52rem;
+  line-height: 1.4;
+  color: #758695;
+}
+
+.prestige-standalone-grid { display: grid; }
+
+@media (min-width: 700px) {
+  .weekly-award-grid {
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    align-items: stretch;
+  }
+
+  .weekly-award-card { padding: 17px; }
+}
+
+@media (max-width: 420px) {
+  .weekly-award-card { padding: 13px; }
+  .weekly-award-patch { width: 40px; height: 40px; }
+
+  .weekly-award-winner {
+    grid-template-columns: 50px minmax(0,1fr) auto;
+    gap: 8px;
+  }
+
+  .weekly-award-logo { width: 50px; height: 50px; }
+  .weekly-award-points strong { font-size: .96rem; }
+}
+
+
+/* =========================================================
+   HOME V3C — PRESTIGE LEADERS UI ONLY (SAFE FIX)
+========================================================= */
+
+.prestige-tier-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.prestige-tier-card {
+  position: relative;
+  padding: 15px;
+}
+
+.prestige-tier-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+}
+
+.prestige-tier-card-nfl::before { background: #24b86d; }
+.prestige-tier-card-fbs::before { background: #4287ff; }
+.prestige-tier-card-fcs::before { background: #a068ff; }
+
+.prestige-tier-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 13px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.075);
+}
+
+.prestige-tier-identity {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.prestige-tier-patch {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.prestige-tier-identity span {
+  display: block;
+  margin-bottom: 2px;
+  font-size: .47rem;
+  font-weight: 900;
+  letter-spacing: .065em;
+  text-transform: uppercase;
+  color: #8fa1b1;
+}
+
+.prestige-tier-identity h3 {
+  margin: 0;
+  font-size: .9rem;
+  color: #fff;
+}
+
+.prestige-leader-block + .prestige-leader-block {
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+
+.prestige-leader-block-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: .5rem;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: #91a2b2;
+}
+
+.prestige-leader-block-title svg { color: #f1cf72; }
+
+.prestige-leader-row {
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: 24px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 2px;
+  border-bottom: 1px solid rgba(255,255,255,.045);
+}
+
+.prestige-leader-row:last-child { border-bottom: 0; }
+
+.prestige-leader-rank {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: .56rem;
+  font-weight: 900;
+  color: #a9b7c4;
+  background: rgba(255,255,255,.055);
+}
+
+.prestige-leader-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.prestige-leader-copy strong {
+  overflow: hidden;
+  font-size: .68rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.prestige-leader-copy span {
+  font-size: .5rem;
+  color: #8293a3;
+}
+
+.prestige-leader-points {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.prestige-leader-points strong {
+  font-size: .74rem;
+  color: #f1cf72;
+}
+
+.prestige-leader-points span {
+  font-size: .4rem;
+  font-weight: 900;
+  color: #7f90a0;
+}
+
+@media (min-width: 700px) {
+  .prestige-tier-grid {
+    grid-template-columns: repeat(3, minmax(0,1fr));
+  }
+
+  .prestige-tier-card { padding: 17px; }
+}
+
+
+/* HOME V3F — CLICKABLE PRESTIGE CARDS */
+.prestige-tier-card {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+
+.prestige-tier-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.16);
+}
+
+.prestige-tier-card:focus-visible {
+  outline: 2px solid rgba(255,255,255,.7);
+  outline-offset: 3px;
+}
+
+
+/* =========================================================
+   HOME V4C — TOP PERFORMERS + PRESTIGE STYLE RESTORE
+========================================================= */
+
+/*
+  The source order is intentionally:
+  QB, DL, RB, LB, WR, DB, TE, K
+  so the two-column grid reads:
+  QB | DL
+  RB | LB
+  WR | DB
+  TE | K
+*/
+.performers-grid-eight {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.performer-card-live {
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+}
+
+.performer-empty-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.performer-empty-copy strong {
+  font-size: .72rem;
+  color: #dce4eb;
+}
+
+.performer-empty-copy span {
+  font-size: .56rem;
+  color: #8495a5;
+}
+
+/* Keep the offense/defense pairing on larger screens too. */
+@media (min-width: 700px) {
+  .performers-grid-eight {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1050px) {
+  .performers-grid-eight {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .performer-card-live {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+  }
+
+  .performer-card-live .performer-position {
+    grid-row: auto;
+  }
+
+  .performer-card-live .performer-points {
+    grid-column: auto;
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 0;
+  }
+}

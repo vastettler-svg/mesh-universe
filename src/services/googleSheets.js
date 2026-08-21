@@ -1,9 +1,13 @@
+import { getTeamLogoOverride } from "../assets/logos/overrides/teamLogoOverrides";
+
 const LIVE_PLAYER_SCORES_GID = "1339342815";
 const PUBLISHED_SHEET_BASE_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRwZdqNhyvQxRhmmZu9jzUdFnzB6ZFnh7gYe2bgN6qwPl9SGwPf9dYyrhLk8_dFONmrL9Ibi3iXYEnc/pub";
 
 const TEAM_DATA_CSV_URL =
   `${PUBLISHED_SHEET_BASE_URL}?gid=1513820672&single=true&output=csv`;
+
+const CURRENT_SEASON = 2026;
 
 const FRANCHISE_DIRECTORY_CSV_URL =
   `${PUBLISHED_SHEET_BASE_URL}?gid=1358798530&single=true&output=csv`;
@@ -311,8 +315,14 @@ export async function getStandingsData() {
       team: String(row.Franchise_Name ?? "").trim(),
       coach: String(row.Coach_Name ?? "").trim(),
 
-      logo: branding.logo || "",
-      logoUrl: branding.logo || "",
+      logo:
+        getTeamLogoOverride(String(row.Franchise_Name ?? "").trim()) ||
+        branding.logo ||
+        "",
+      logoUrl:
+        getTeamLogoOverride(String(row.Franchise_Name ?? "").trim()) ||
+        branding.logo ||
+        "",
       primaryColor: branding.primaryColor || "",
       secondaryColor: branding.secondaryColor || "",
 
@@ -447,12 +457,13 @@ function buildGameLabel(row) {
   return gameCategory || "Regular Season";
 }
 
-function createTeamLookup(rows) {
+function createTeamLookup(rows, brandingLookup = new Map()) {
   return new Map(
     rows.map((row) => {
       const franchiseId = String(row.Franchise_ID ?? "").trim();
       const tier = String(row.Tier ?? "").trim().toUpperCase();
       const top25Rank = toNumber(row.Top25_Rank);
+      const branding = brandingLookup.get(franchiseId) ?? {};
 
       return [
         franchiseId,
@@ -460,16 +471,19 @@ function createTeamLookup(rows) {
           franchiseId,
           name: String(row.Franchise_Name ?? "").trim(),
           coach: String(row.Coach_Name ?? "").trim(),
-          logo: String(
-            firstValue(row, [
-              "Logo_URL",
-              "Franchise_Logo_URL",
-              "Franchise_Logo",
-              "Team_Logo_URL",
-              "Team_Logo",
-              "Logo",
-            ]) ?? "",
-          ).trim(),
+          logo:
+            getTeamLogoOverride(String(row.Franchise_Name ?? "").trim()) ||
+            branding.logo ||
+            String(
+              firstValue(row, [
+                "Logo_URL",
+                "Franchise_Logo_URL",
+                "Franchise_Logo",
+                "Team_Logo_URL",
+                "Team_Logo",
+                "Logo",
+              ]) ?? "",
+            ).trim(),
           conference: String(row.Conference ?? "").trim(),
           conferenceId: normalizeId(row.Conference),
           tier,
@@ -493,19 +507,24 @@ function createTeamLookup(rows) {
 }
 
 export async function getGameResults() {
-  const [gameRows, teamRows, livePlayerRows] = await Promise.all([
-    fetchCsvRows(GAME_RESULTS_CSV_URL, "GAME_RESULTS"),
-    fetchTeamDataRows(),
-    getLivePlayerScores().catch((error) => {
+  const [gameRows, teamRows, franchiseDirectoryRows, livePlayerRows] =
+    await Promise.all([
+      fetchCsvRows(GAME_RESULTS_CSV_URL, "GAME_RESULTS"),
+      fetchTeamDataRows(),
+      fetchFranchiseDirectoryRows(),
+      getLivePlayerScores().catch((error) => {
       console.warn(
         "LIVE_PLAYER_SCORES unavailable; score cards will fall back to GAME_RESULTS projections.",
         error,
       );
-      return [];
-    }),
-  ]);
+        return [];
+      }),
+    ]);
 
-  const teamLookup = createTeamLookup(teamRows);
+  const brandingLookup = createFranchiseBrandingLookup(
+    franchiseDirectoryRows,
+  );
+  const teamLookup = createTeamLookup(teamRows, brandingLookup);
 
   /*
    * LIVE_PLAYER_SCORES repeats the team totals/projections on every
@@ -527,6 +546,14 @@ export async function getGameResults() {
 
   return gameRows
     .filter((row) => {
+      const rowSeason = Number(
+        firstValue(row, ["Season", "season", "Year", "YEAR"]),
+      );
+
+      if (Number.isFinite(rowSeason) && rowSeason !== CURRENT_SEASON) {
+        return false;
+      }
+
       const gameId = String(row.Game_ID ?? "").trim();
       const team1Id = String(
         firstValue(row, ["Team1_Franchise_ID", "Franchise1_ID"]),
@@ -550,11 +577,11 @@ export async function getGameResults() {
       const tier = String(row.Tier || team1.tier || team2.tier || "")
         .trim()
         .toUpperCase();
-      const statusData = normalizeGameStatus(row.Game_Status);
-      const team1Score = toOptionalNumber(
+      let statusData = normalizeGameStatus(row.Game_Status);
+      let team1Score = toOptionalNumber(
         firstValue(row, ["Team1_Score", "Franchise1_Score"]),
       );
-      const team2Score = toOptionalNumber(
+      let team2Score = toOptionalNumber(
         firstValue(row, ["Team2_Score", "Franchise2_Score"]),
       );
       const gameWeek = toNumber(
@@ -568,6 +595,30 @@ export async function getGameResults() {
       const team2Live = liveTeamLookup.get(
         `${gameWeek}|${team2Id}`,
       ) ?? {};
+
+      const team1LiveActual = toOptionalNumber(team1Live.teamTotalPoints);
+      const team2LiveActual = toOptionalNumber(team2Live.teamTotalPoints);
+
+      const hasActualScoring =
+        (team1LiveActual !== null && team1LiveActual > 0) ||
+        (team2LiveActual !== null && team2LiveActual > 0);
+
+      /*
+       * During preseason/build testing, GAME_RESULTS can still contain
+       * old copied test scores/statuses. LIVE_PLAYER_SCORES is our
+       * authoritative signal that real scoring has actually begun.
+       *
+       * If no player scoring exists yet, render the matchup exactly like
+       * the FBS/FCS scheduled cards: dash for score + projection beneath.
+       */
+      if (!hasActualScoring) {
+        statusData = {
+          status: "upcoming",
+          statusLabel: "Scheduled",
+        };
+        team1Score = null;
+        team2Score = null;
+      }
 
       /*
        * Prefer the projection generated from LIVE_PLAYER_SCORES.
@@ -627,7 +678,9 @@ export async function getGameResults() {
         team1WinProbability = 100 - team2WinProbability;
       }
 
-      const winnerId = String(row.Winner_Franchise_ID ?? "").trim();
+      const winnerId = hasActualScoring
+        ? String(row.Winner_Franchise_ID ?? "").trim()
+        : "";
       const gameCategory = String(row.Game_Category ?? "").trim();
       const gameType = String(row.Game_Type ?? "").trim();
 
@@ -650,7 +703,11 @@ export async function getGameResults() {
         season: toNumber(row.Season),
         week: gameWeek,
         gameNumber: toNumber(
-          firstValue(row, ["Game_Number", "Week_Game_Number"]),
+          firstValue(row, [
+            "Game_Numer",
+            "Game_Number",
+            "Week_Game_Number",
+          ]),
           1,
         ),
         featuredRank: toNumber(row.Featured_Rank),
@@ -776,31 +833,107 @@ export async function getHeadToHeadHistory(
     return [];
   }
 
-  const games = await getGameResults();
+  /*
+   * IMPORTANT:
+   * getGameResults() intentionally filters to CURRENT_SEASON for the live
+   * Scores/Game Center experience. Historical series data must instead read
+   * GAME_RESULTS directly so every archived season is available.
+   */
+  const gameRows = await fetchCsvRows(
+    GAME_RESULTS_CSV_URL,
+    "GAME_RESULTS history",
+  );
 
-  return games
-    .filter((game) => {
-      if (excludedId && game.gameId === excludedId) {
-        return false;
-      }
+  return gameRows
+    .map((row) => {
+      const gameId = String(row.Game_ID ?? "").trim();
+
+      const rowTeam1Id = String(
+        firstValue(row, ["Team1_Franchise_ID", "Franchise1_ID"]),
+      ).trim();
+
+      const rowTeam2Id = String(
+        firstValue(row, ["Team2_Franchise_ID", "Franchise2_ID"]),
+      ).trim();
 
       const sameDirection =
-        game.team1Id === firstId && game.team2Id === secondId;
+        rowTeam1Id === firstId && rowTeam2Id === secondId;
 
       const oppositeDirection =
-        game.team1Id === secondId && game.team2Id === firstId;
+        rowTeam1Id === secondId && rowTeam2Id === firstId;
 
-      return sameDirection || oppositeDirection;
+      if (
+        !gameId ||
+        (excludedId && gameId === excludedId) ||
+        (!sameDirection && !oppositeDirection)
+      ) {
+        return null;
+      }
+
+      const team1Score = toOptionalNumber(
+        firstValue(row, ["Team1_Score", "Franchise1_Score"]),
+      );
+
+      const team2Score = toOptionalNumber(
+        firstValue(row, ["Team2_Score", "Franchise2_Score"]),
+      );
+
+      return {
+        id: gameId,
+        gameId,
+        season: toNumber(
+          firstValue(row, ["Season", "season", "Year", "YEAR"]),
+        ),
+        week: toNumber(
+          firstValue(row, ["Week", "Schedule_Week"]),
+        ),
+        tier: String(row.Tier ?? "").trim().toUpperCase(),
+        gameType: String(row.Game_Type ?? "").trim(),
+        gameCategory: String(row.Game_Category ?? "").trim(),
+        bowlName: String(row.Bowl_Name ?? "").trim(),
+        label: buildGameLabel(row),
+
+        team1Id: rowTeam1Id,
+        team2Id: rowTeam2Id,
+
+        /*
+         * For history, prefer the season-specific names saved on GAME_RESULTS.
+         * Permanent Franchise_ID is still what defines the series.
+         */
+        team1Team: String(
+          firstValue(row, [
+            "Team1_Franchise_Name",
+            "Franchise1_Name",
+            "Team1_Name",
+          ]),
+        ).trim(),
+
+        team2Team: String(
+          firstValue(row, [
+            "Team2_Franchise_Name",
+            "Franchise2_Name",
+            "Team2_Name",
+          ]),
+        ).trim(),
+
+        team1Score,
+        team2Score,
+        winnerId: String(row.Winner_Franchise_ID ?? "").trim(),
+      };
     })
+    .filter(Boolean)
     .sort((a, b) => {
       if (a.season !== b.season) {
         return b.season - a.season;
       }
 
-      return b.week - a.week;
+      if (a.week !== b.week) {
+        return b.week - a.week;
+      }
+
+      return String(b.gameId).localeCompare(String(a.gameId));
     });
 }
-
 
 const LIVE_PLAYER_SCORES_CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRwZdqNhyvQxRhmmZu9jzUdFnzB6ZFnh7gYe2bgN6qwPl9SGwPf9dYyrhLk8_dFONmrL9Ibi3iXYEnc/pub?gid=" +

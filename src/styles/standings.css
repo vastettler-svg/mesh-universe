@@ -1972,3 +1972,1180 @@ font-weight: 800;
     display: inline-flex;
   }
 }
+
+
+/* =========================================================
+   STANDINGS OVERVIEW V3 — PULSE FIRST + TIER HUBS
+========================================================= */
+
+.standings-pulse-first {
+  margin-top: clamp(24px, 4vw, 36px);
+}
+
+.standings-pulse-grid-live {
+  grid-template-columns: 1fr;
+}
+
+.standings-pulse-tier {
+  border-top: 3px solid transparent;
+}
+
+.standings-pulse-tier-nfl { border-top-color: #24b86d; }
+.standings-pulse-tier-fbs { border-top-color: #4287ff; }
+.standings-pulse-tier-fcs { border-top-color: #a068ff; }
+
+.standings-pulse-icon-nfl {
+  color: #63dda0;
+  background: rgba(31,178,101,.14);
+}
+
+.standings-pulse-icon-fbs {
+  color: #75aaff;
+  background: rgba(66,135,255,.14);
+}
+
+.standings-pulse-icon-fcs {
+  color: #bd98ff;
+  background: rgba(160,104,255,.14);
+}
+
+.standings-pulse-live-leader {
+  min-height: 45px;
+  padding: 9px 10px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 10px;
+
+  background: rgba(255,255,255,.02);
+}
+
+.standings-pulse-live-leader span,
+.standings-pulse-live-stat span {
+  font-size: .45rem;
+  font-weight: 900;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+
+  color: #7f91a2;
+}
+
+.standings-pulse-live-leader strong {
+  font-size: .68rem;
+  color: #fff;
+}
+
+.standings-pulse-live-stat {
+  margin-top: 7px;
+  padding: 8px 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  border-radius: 10px;
+  background: rgba(255,255,255,.018);
+}
+
+.standings-pulse-live-stat strong {
+  font-size: .62rem;
+  color: #dce4eb;
+}
+
+/* Tier hub */
+
+.standings-overview-hub {
+  margin-top: clamp(34px, 6vw, 52px);
+}
+
+.standings-overview-heading {
+  margin-bottom: 16px;
+}
+
+.standings-overview-heading > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  margin-bottom: 4px;
+
+  font-size: .57rem;
+  font-weight: 900;
+  letter-spacing: .085em;
+  text-transform: uppercase;
+
+  color: #efc85a;
+}
+
+.standings-overview-heading h2 {
+  margin: 0;
+
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: clamp(1.35rem, 4vw, 1.8rem);
+  font-weight: 400;
+  letter-spacing: .035em;
+}
+
+.standings-overview-heading p {
+  max-width: 660px;
+  margin: 7px 0 0;
+
+  font-size: .67rem;
+  line-height: 1.5;
+
+  color: #96a6b5;
+}
+
+.standings-overview-tier-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.standings-overview-tier-card {
+  position: relative;
+  overflow: hidden;
+
+  padding: 16px;
+
+  border: 1px solid rgba(255,255,255,.09);
+  border-top: 3px solid transparent;
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(25,45,68,.98),
+      rgba(9,22,38,.995)
+    );
+
+  box-shadow:
+    0 14px 32px rgba(0,0,0,.17),
+    inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.standings-overview-tier-card-nfl { border-top-color: #24b86d; }
+.standings-overview-tier-card-fbs { border-top-color: #4287ff; }
+.standings-overview-tier-card-fcs { border-top-color: #a068ff; }
+
+.standings-overview-tier-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 13px;
+}
+
+.standings-overview-tier-icon {
+  width: 36px;
+  height: 36px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 10px;
+}
+
+.standings-overview-tier-icon-nfl {
+  color: #63dda0;
+  background: rgba(31,178,101,.13);
+}
+
+.standings-overview-tier-icon-fbs {
+  color: #75aaff;
+  background: rgba(66,135,255,.13);
+}
+
+.standings-overview-tier-icon-fcs {
+  color: #bd98ff;
+  background: rgba(160,104,255,.13);
+}
+
+.standings-overview-tier-eyebrow {
+  display: block;
+
+  margin-bottom: 4px;
+
+  font-size: .49rem;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+
+  color: #8496a7;
+}
+
+.standings-overview-tier-card h2 {
+  margin: 0;
+
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.standings-overview-tier-card > p {
+  min-height: 44px;
+  margin: 7px 0 14px;
+
+  font-size: .61rem;
+  line-height: 1.48;
+
+  color: #a1afbc;
+}
+
+.standings-overview-tier-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 7px;
+
+  margin-bottom: 8px;
+}
+
+.standings-overview-tier-stats > div {
+  min-width: 0;
+  padding: 9px 10px;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 10px;
+
+  background: rgba(255,255,255,.025);
+}
+
+.standings-overview-tier-stats strong,
+.standings-overview-tier-stats span {
+  display: block;
+}
+
+.standings-overview-tier-stats strong {
+  font-size: .76rem;
+  color: #fff;
+}
+
+.standings-overview-tier-stats span {
+  margin-top: 2px;
+
+  font-size: .45rem;
+  font-weight: 850;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+
+  color: #7f91a2;
+}
+
+.standings-overview-leader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  min-height: 37px;
+  padding: 8px 10px;
+
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 10px;
+
+  background: rgba(255,255,255,.018);
+}
+
+.standings-overview-leader span {
+  flex: 0 0 auto;
+
+  font-size: .46rem;
+  font-weight: 900;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+
+  color: #7f91a2;
+}
+
+.standings-overview-leader strong {
+  min-width: 0;
+  overflow: hidden;
+
+  font-size: .6rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #e3eaf0;
+}
+
+.standings-overview-tier-card > button {
+  width: 100%;
+  min-height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  margin-top: 10px;
+
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 10px;
+
+  font: inherit;
+  font-size: .56rem;
+  font-weight: 900;
+
+  color: #fff;
+  background: rgba(255,255,255,.035);
+
+  cursor: pointer;
+}
+
+.standings-overview-tier-card-nfl > button {
+  border-color: rgba(31,178,101,.22);
+  background: rgba(31,178,101,.08);
+}
+
+.standings-overview-tier-card-fbs > button {
+  border-color: rgba(66,135,255,.22);
+  background: rgba(66,135,255,.08);
+}
+
+.standings-overview-tier-card-fcs > button {
+  border-color: rgba(160,104,255,.22);
+  background: rgba(160,104,255,.08);
+}
+
+@media (min-width: 700px) {
+  .standings-pulse-grid-live,
+  .standings-overview-tier-grid {
+    grid-template-columns: repeat(3, minmax(0,1fr));
+  }
+
+  .standings-overview-tier-card {
+    padding: 18px;
+  }
+}
+
+
+/* =========================================================
+   TRANSPARENT OFFICIAL LOGO STANDARD — RESTORED
+   Keeps V3 Pulse-first overview while removing logo circles.
+========================================================= */
+
+.standings-team-logo,
+.standings-team-logo-nfl,
+.standings-team-logo-fbs,
+.standings-team-logo-fcs,
+.standings-row-branded .standings-team-logo-nfl,
+.standings-row-branded .standings-team-logo-fbs,
+.standings-row-branded .standings-team-logo-fcs {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.standings-team-logo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.22));
+}
+
+/* Only missing-logo initials retain a subtle circle. */
+.standings-team-logo > span {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(225, 231, 237, 0.34);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+
+/* =========================================================
+   STANDINGS V4 — DYNAMIC MESH PULSE + TIER PATCHES
+========================================================= */
+
+.standings-pulse-card-clickable {
+  width: 100%;
+  display: block;
+
+  padding: 14px;
+
+  border: 1px solid rgba(255,255,255,.08);
+  border-top: 3px solid transparent;
+  border-radius: 15px;
+
+  font: inherit;
+  text-align: left;
+
+  color: inherit;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(24,44,65,.98),
+      rgba(9,22,38,.995)
+    );
+
+  cursor: pointer;
+
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+
+.standings-pulse-card-clickable:hover {
+  transform: translateY(-1px);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(28,50,74,.99),
+      rgba(10,24,42,.995)
+    );
+}
+
+.standings-pulse-card-clickable:focus-visible {
+  outline: 2px solid rgba(255,255,255,.65);
+  outline-offset: 2px;
+}
+
+.standings-pulse-tier-nfl { border-top-color: #24b86d; }
+.standings-pulse-tier-fbs { border-top-color: #4287ff; }
+.standings-pulse-tier-fcs { border-top-color: #a068ff; }
+
+.standings-pulse-top {
+  display: grid;
+  grid-template-columns: 54px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 10px;
+
+  margin-bottom: 11px;
+}
+
+.standings-pulse-patch {
+  width: 54px;
+  height: 54px;
+
+  display: block;
+
+  object-fit: contain;
+
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.28));
+}
+
+.standings-pulse-card-title {
+  min-width: 0;
+}
+
+.standings-pulse-card-title span,
+.standings-pulse-card-title strong {
+  display: block;
+}
+
+.standings-pulse-card-title span {
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .065em;
+  text-transform: uppercase;
+
+  color: #fff;
+}
+
+.standings-pulse-card-title strong {
+  margin-top: 2px;
+
+  font-size: .47rem;
+  font-weight: 800;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+
+  color: #8395a6;
+}
+
+.standings-pulse-open {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  color: #8899aa;
+}
+
+.standings-pulse-live-leader {
+  min-height: 0;
+  padding: 9px 10px;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 10px;
+
+  background: rgba(255,255,255,.02);
+}
+
+.standings-pulse-live-leader span {
+  display: block;
+
+  margin-bottom: 3px;
+
+  font-size: .44rem;
+  font-weight: 900;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+
+  color: #7f91a2;
+}
+
+.standings-pulse-live-leader strong {
+  display: block;
+
+  overflow: hidden;
+
+  font-size: .68rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #fff;
+}
+
+.standings-pulse-movement-list {
+  margin-top: 7px;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 10px;
+
+  background: rgba(255,255,255,.015);
+}
+
+.standings-pulse-movement-row {
+  min-height: 42px;
+  padding: 8px 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.standings-pulse-movement-row + .standings-pulse-movement-row {
+  border-top: 1px solid rgba(255,255,255,.055);
+}
+
+.standings-pulse-movement-row > span {
+  flex: 0 0 auto;
+
+  font-size: .43rem;
+  font-weight: 900;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+
+  color: #7f91a2;
+}
+
+.standings-pulse-movement-row > div {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.standings-pulse-movement-row strong {
+  min-width: 0;
+  overflow: hidden;
+
+  font-size: .57rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #e8eef3;
+}
+
+.standings-pulse-movement-row small {
+  flex: 0 0 auto;
+
+  font-size: .44rem;
+  font-weight: 950;
+}
+
+.standings-pulse-up {
+  color: #58d89b;
+}
+
+.standings-pulse-down {
+  color: #ff6b7d;
+}
+
+.standings-pulse-new {
+  padding: 2px 5px;
+
+  border-radius: 999px;
+
+  color: #d9e8ff;
+  background: rgba(66,135,255,.18);
+}
+
+.standings-pulse-cutoff {
+  margin-top: 8px;
+}
+
+.standings-pulse-cutoff-label {
+  display: block;
+
+  margin: 0 0 5px 2px;
+
+  font-size: .43rem;
+  font-weight: 900;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+
+  color: #8b9cab;
+}
+
+.standings-pulse-cutoff-list {
+  overflow: hidden;
+
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 10px;
+
+  background: rgba(255,255,255,.015);
+}
+
+.standings-pulse-cutoff-row {
+  min-height: 30px;
+  padding: 5px 9px;
+
+  display: grid;
+  grid-template-columns: 24px minmax(0,1fr);
+  align-items: center;
+  gap: 7px;
+}
+
+.standings-pulse-cutoff-row + .standings-pulse-cutoff-row {
+  border-top: 1px solid rgba(255,255,255,.04);
+}
+
+.standings-pulse-cutoff-row strong {
+  font-size: .52rem;
+  color: #90a4b5;
+}
+
+.standings-pulse-cutoff-row span {
+  min-width: 0;
+  overflow: hidden;
+
+  font-size: .56rem;
+  font-weight: 800;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #dce4eb;
+}
+
+.standings-pulse-cutoff-row-danger {
+  background: rgba(200,16,46,.09);
+}
+
+.standings-pulse-cutoff-row-danger strong,
+.standings-pulse-cutoff-row-danger span {
+  color: #ff7b8c;
+}
+
+.standings-pulse-relegation-line {
+  position: relative;
+
+  height: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ff667a;
+}
+
+.standings-pulse-relegation-line::before,
+.standings-pulse-relegation-line::after {
+  content: "";
+
+  height: 1px;
+  flex: 1;
+
+  background: rgba(255,76,99,.48);
+}
+
+.standings-pulse-relegation-line span {
+  padding: 0 7px;
+
+  font-size: .38rem;
+  font-weight: 950;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 700px) {
+  .standings-pulse-grid-live {
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    align-items: start;
+  }
+}
+
+@media (max-width: 390px) {
+  .standings-pulse-top {
+    grid-template-columns: 48px minmax(0,1fr) auto;
+  }
+
+  .standings-pulse-patch {
+    width: 48px;
+    height: 48px;
+  }
+
+  .standings-pulse-movement-row {
+    padding-inline: 8px;
+  }
+}
+
+
+/* =========================================================
+   V4B — TIER PATCHES IN CHOOSE YOUR TIER
+========================================================= */
+
+.standings-overview-tier-patch {
+  width: 48px;
+  height: 48px;
+
+  display: block;
+  object-fit: contain;
+
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.28));
+}
+
+/* Retire the old generic trophy/sparkle/medal icon box. */
+.standings-overview-tier-icon,
+.standings-overview-tier-icon-nfl,
+.standings-overview-tier-icon-fbs,
+.standings-overview-tier-icon-fcs {
+  display: none !important;
+}
+
+@media (max-width: 390px) {
+  .standings-overview-tier-patch {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+
+/* =========================================================
+   V4C — PULSE NO. 1 TEAM + OWNER
+========================================================= */
+
+.standings-pulse-leader-line {
+  min-width: 0;
+
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.standings-pulse-leader-line strong {
+  min-width: 0;
+  overflow: hidden;
+
+  font-size: .68rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #fff;
+}
+
+.standings-pulse-leader-line small {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+
+  font-size: .49rem;
+  font-weight: 800;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #9eb0bf;
+}
+
+@media (max-width: 390px) {
+  .standings-pulse-leader-line {
+    gap: 7px;
+  }
+
+  .standings-pulse-leader-line small {
+    font-size: .46rem;
+  }
+}
+
+
+/* =========================================================
+   V4D — MOVEMENT COACHES + TIER PROMOTION/RELEGATION STATS
+========================================================= */
+
+.standings-pulse-movement-team {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.standings-pulse-movement-name {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+.standings-pulse-movement-name strong {
+  max-width: 100%;
+}
+
+.standings-pulse-movement-coach {
+  max-width: 100%;
+  overflow: hidden;
+
+  font-size: .43rem;
+  font-weight: 700;
+  line-height: 1.15;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #91a3b3;
+}
+
+.standings-overview-tier-stats-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.standings-overview-tier-stats-three > div {
+  padding-inline: 8px;
+}
+
+@media (max-width: 390px) {
+  .standings-overview-tier-stats-three {
+    gap: 5px;
+  }
+
+  .standings-overview-tier-stats-three > div {
+    padding-inline: 6px;
+  }
+
+  .standings-overview-tier-stats-three strong {
+    font-size: .7rem;
+  }
+
+  .standings-overview-tier-stats-three span {
+    font-size: .4rem;
+  }
+}
+
+
+/* =========================================================
+   V5 — PULSE-ONLY OVERVIEW
+========================================================= */
+
+/* Pulse is now the complete Overview page. */
+.standings-pulse-first {
+  margin-top: clamp(22px, 4vw, 34px);
+  padding-bottom: 20px;
+}
+
+.standings-pulse-grid-live {
+  gap: 14px;
+}
+
+/* Tier structure stats live directly beneath each Pulse title. */
+.standings-pulse-tier-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+
+  margin-bottom: 8px;
+}
+
+.standings-pulse-tier-stats-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.standings-pulse-tier-stats > div {
+  min-width: 0;
+
+  padding: 8px 9px;
+
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 9px;
+
+  background: rgba(255,255,255,.022);
+}
+
+.standings-pulse-tier-stats strong,
+.standings-pulse-tier-stats span {
+  display: block;
+}
+
+.standings-pulse-tier-stats strong {
+  font-size: .7rem;
+  line-height: 1;
+
+  color: #fff;
+}
+
+.standings-pulse-tier-stats span {
+  margin-top: 3px;
+
+  font-size: .42rem;
+  font-weight: 900;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+
+  color: #8092a3;
+}
+
+/* With no secondary hub beneath it, give Pulse cards more visual weight. */
+@media (min-width: 700px) {
+  .standings-pulse-grid-live {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .standings-pulse-card-clickable {
+    height: 100%;
+    padding: 16px;
+  }
+
+  .standings-pulse-patch {
+    width: 58px;
+    height: 58px;
+  }
+}
+
+@media (max-width: 390px) {
+  .standings-pulse-tier-stats-three {
+    gap: 5px;
+  }
+
+  .standings-pulse-tier-stats-three > div {
+    padding-inline: 6px;
+  }
+
+  .standings-pulse-tier-stats-three strong {
+    font-size: .64rem;
+  }
+
+  .standings-pulse-tier-stats-three span {
+    font-size: .38rem;
+  }
+}
+
+
+/* =========================================================
+   V5B — EXPANDED PULSE DETAIL
+========================================================= */
+
+.standings-pulse-movement-row-list {
+  align-items: flex-start;
+}
+
+.standings-pulse-entry-list {
+  min-width: 0;
+  flex: 1;
+
+  display: grid;
+  gap: 6px;
+}
+
+.standings-pulse-entry {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.standings-pulse-entry-name {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+.standings-pulse-entry-name strong {
+  max-width: 100%;
+  overflow: hidden;
+
+  font-size: .56rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #e8eef3;
+}
+
+.standings-pulse-entry-name span {
+  max-width: 100%;
+  overflow: hidden;
+
+  font-size: .42rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #91a3b3;
+}
+
+.standings-pulse-cutoff-row {
+  align-items: start;
+}
+
+.standings-pulse-cutoff-team {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.standings-pulse-cutoff-team > span {
+  max-width: 100%;
+}
+
+.standings-pulse-cutoff-team small {
+  max-width: 100%;
+  overflow: hidden;
+
+  font-size: .41rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #899bab;
+}
+
+.standings-pulse-cutoff-row-danger .standings-pulse-cutoff-team small {
+  color: #e79aa5;
+}
+
+/* Expanded relegation lists need a little more breathing room. */
+.standings-pulse-cutoff-row {
+  min-height: 34px;
+  padding-block: 6px;
+}
+
+@media (max-width: 390px) {
+  .standings-pulse-movement-row-list {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .standings-pulse-entry {
+    justify-content: space-between;
+  }
+
+  .standings-pulse-entry-name {
+    align-items: flex-start;
+  }
+}
+
+
+/* =========================================================
+   V6 — CONFERENCE / TIER PATCHES IN STANDINGS HEADERS
+========================================================= */
+
+.standings-section-heading-patched {
+  align-items: center;
+}
+
+.standings-section-identity {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.standings-section-patch {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+
+  display: block;
+
+  object-fit: contain;
+  object-position: center;
+
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.3));
+}
+
+.standings-section-title-copy {
+  min-width: 0;
+}
+
+.standings-section-title-copy > span {
+  display: block;
+
+  margin-bottom: 3px;
+
+  font-size: .47rem;
+  font-weight: 900;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+
+  color: #8294a4;
+}
+
+.standings-section-title-copy h2 {
+  min-width: 0;
+  overflow: hidden;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/*
+ * Conference patches are intentionally visual identity only.
+ * The existing tier badge stays on the right so users always know
+ * whether the selected conference belongs to NFL, FBS, or FCS.
+ */
+@media (max-width: 430px) {
+  .standings-section-heading-patched {
+    gap: 8px;
+  }
+
+  .standings-section-identity {
+    gap: 8px;
+  }
+
+  .standings-section-patch {
+    width: 50px;
+    height: 50px;
+  }
+
+  .standings-section-title-copy > span {
+    font-size: .42rem;
+  }
+
+  .standings-section-title-copy h2 {
+    font-size: 1.05rem;
+  }
+}
+
+@media (min-width: 700px) {
+  .standings-section-patch {
+    width: 66px;
+    height: 66px;
+  }
+}

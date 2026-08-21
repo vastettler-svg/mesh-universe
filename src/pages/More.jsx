@@ -6,6 +6,11 @@ const internalLinks = [
     description: "Archives, champions, records and trophy rooms",
     path: "/history",
   },
+  {
+    name: "League Rules & Info",
+    description: "Official MESH Football rules and league structure",
+    path: "/rules",
+  },
 ];
 
 const futureSections = [
@@ -24,10 +29,6 @@ const futureSections = [
   {
     name: "Trophy Rooms",
     description: "Team championships, awards and achievements",
-  },
-  {
-    name: "League Rules & Info",
-    description: "Official MESH Football rules and league structure",
   },
   {
     name: "League Links",

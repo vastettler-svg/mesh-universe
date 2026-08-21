@@ -17,6 +17,7 @@ import {
   getHeadToHeadHistory,
 } from "../services/googleSheets";
 import meshShield from "../assets/logos/mfl-shield.png";
+import { MESH_PATCHES } from "../assets/logos/patches";
 
 import "../styles/gameCenter.css";
 
@@ -49,6 +50,95 @@ function matchupStatusLabel(game) {
   if (game.status === "live") return "Live Matchup";
   if (game.status === "final") return "Final";
   return "Game Preview";
+}
+
+function normalizePatchKey(value) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getConferencePatch(tier, conference) {
+  const conferenceKey = normalizePatchKey(conference);
+
+  if (tier === "NFL") {
+    if (conferenceKey === "afc") return MESH_PATCHES.NFL.AFC;
+    if (conferenceKey === "nfc") return MESH_PATCHES.NFL.NFC;
+    return MESH_PATCHES.tier.NFL;
+  }
+
+  if (tier === "FBS") {
+    const map = {
+      acc: MESH_PATCHES.FBS.ACC,
+      "big-ten": MESH_PATCHES.FBS["Big Ten"],
+      "big-12": MESH_PATCHES.FBS["Big 12"],
+      mac: MESH_PATCHES.FBS.MAC,
+      "mountain-west": MESH_PATCHES.FBS["Mountain West"],
+      sec: MESH_PATCHES.FBS.SEC,
+      "sun-belt": MESH_PATCHES.FBS["Sun Belt"],
+    };
+
+    return map[conferenceKey] ?? MESH_PATCHES.tier.FBS;
+  }
+
+  if (tier === "FCS") {
+    const map = {
+      "big-sky": MESH_PATCHES.FCS["Big Sky"],
+      coastal: MESH_PATCHES.FCS.CAA,
+      caa: MESH_PATCHES.FCS.CAA,
+      "coastal-athletic-association": MESH_PATCHES.FCS.CAA,
+      ivy: MESH_PATCHES.FCS.Ivy,
+      "ivy-league": MESH_PATCHES.FCS.Ivy,
+      mvc: MESH_PATCHES.FCS.MVC,
+      "missouri-valley": MESH_PATCHES.FCS.MVC,
+      "missouri-valley-conference": MESH_PATCHES.FCS.MVC,
+      nec: MESH_PATCHES.FCS.NEC,
+      northeast: MESH_PATCHES.FCS.NEC,
+      "northeast-conference": MESH_PATCHES.FCS.NEC,
+      southland: MESH_PATCHES.FCS.Southland,
+      "southland-conference": MESH_PATCHES.FCS.Southland,
+    };
+
+    return map[conferenceKey] ?? MESH_PATCHES.tier.FCS;
+  }
+
+  return null;
+}
+
+function getGameCenterBranding(game) {
+  const tier = String(game?.tier ?? "").trim().toUpperCase();
+  const conference1 = String(game?.team1Conference || "").trim();
+  const conference2 = String(game?.team2Conference || "").trim();
+
+  const sameConference =
+    conference1 &&
+    conference2 &&
+    normalizePatchKey(conference1) === normalizePatchKey(conference2);
+
+  if (conference1 && conference2 && !sameConference) {
+    return {
+      isCrossConference: true,
+      leftPatch: getConferencePatch(tier, conference1),
+      rightPatch: getConferencePatch(tier, conference2),
+      centerLabel: "Non-Conference",
+      leftLabel: conference1,
+      rightLabel: conference2,
+    };
+  }
+
+  const conference = conference1 || conference2;
+
+  return {
+    isCrossConference: false,
+    leftPatch: getConferencePatch(tier, conference),
+    rightPatch: null,
+    centerLabel: conference || tier,
+    leftLabel: conference || tier,
+    rightLabel: "",
+  };
 }
 
 function centerStatusLabel(game) {
@@ -187,6 +277,8 @@ function MatchupCard({ game, winnerState, rosters }) {
     game.gameType || game.gameCategory || "",
   ).toLowerCase();
 
+  const branding = getGameCenterBranding(game);
+
   const title =
     normalizedType.includes("playoff") ||
     normalizedType.includes("wild card") ||
@@ -199,13 +291,45 @@ function MatchupCard({ game, winnerState, rosters }) {
 
   return (
     <section className={`game-center-hero game-center-hero-${game.tierClass}`}>
-      <div className="game-center-hero-top">
-        <span className={`gc-home-state-pill gc-home-state-pill-${game.status}`}>
-          {game.status === "live" ? <Radio size={10} /> : null}
-          {matchupStatusLabel(game)}
-        </span>
+      <div className="game-center-hero-top game-center-hero-top-patched">
+        <div className="game-center-hero-status">
+          <span className={`gc-home-state-pill gc-home-state-pill-${game.status}`}>
+            {game.status === "live" ? <Radio size={10} /> : null}
+            {matchupStatusLabel(game)}
+          </span>
+        </div>
 
-        <h2>{title}</h2>
+        <div
+          className={[
+            "game-center-hero-title",
+            branding.isCrossConference
+              ? "game-center-hero-title-cross-conference"
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {branding.leftPatch ? (
+            <img
+              className="game-center-hero-patch"
+              src={branding.leftPatch}
+              alt={`${branding.leftLabel} MESH patch`}
+            />
+          ) : null}
+
+          <div className="game-center-hero-title-copy">
+            <span>{branding.centerLabel}</span>
+            <h2>{title}</h2>
+          </div>
+
+          {branding.isCrossConference && branding.rightPatch ? (
+            <img
+              className="game-center-hero-patch"
+              src={branding.rightPatch}
+              alt={`${branding.rightLabel} MESH patch`}
+            />
+          ) : null}
+        </div>
 
         <span className={`gc-home-tier-pill gc-home-tier-pill-${game.tierClass}`}>
           {game.tier}
@@ -329,31 +453,261 @@ function RosterPanel({ team, players, side }) {
   );
 }
 
+function meetingWinnerId(meeting) {
+  if (meeting.winnerId) {
+    return meeting.winnerId;
+  }
+
+  const firstScore = Number(meeting.team1Score);
+  const secondScore = Number(meeting.team2Score);
+
+  if (!Number.isFinite(firstScore) || !Number.isFinite(secondScore)) {
+    return "";
+  }
+
+  if (firstScore === secondScore) {
+    return "";
+  }
+
+  return firstScore > secondScore ? meeting.team1Id : meeting.team2Id;
+}
+
+function isPostseasonMeeting(meeting) {
+  const text = [
+    meeting.gameType,
+    meeting.gameCategory,
+    meeting.bowlName,
+    meeting.label,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return [
+    "playoff",
+    "wild card",
+    "wildcard",
+    "quarterfinal",
+    "semifinal",
+    "semi-final",
+    "championship",
+    "bowl",
+    "postseason",
+  ].some((term) => text.includes(term));
+}
+
+function buildSeriesSummary(history, currentTeam1Id, currentTeam2Id) {
+  const completed = history.filter(
+    (meeting) =>
+      Number.isFinite(Number(meeting.team1Score)) &&
+      Number.isFinite(Number(meeting.team2Score)),
+  );
+
+  let team1Wins = 0;
+  let team2Wins = 0;
+  let ties = 0;
+
+  let team1Points = 0;
+  let team2Points = 0;
+
+  let largestWin = null;
+  let closestMeeting = null;
+  let highestScoringMeeting = null;
+
+  let postseasonMeetings = 0;
+  let postseasonTeam1Wins = 0;
+  let postseasonTeam2Wins = 0;
+  let postseasonTies = 0;
+
+  completed.forEach((meeting) => {
+    const winnerId = meetingWinnerId(meeting);
+
+    const rawTeam1Score = Number(meeting.team1Score);
+    const rawTeam2Score = Number(meeting.team2Score);
+
+    const currentTeam1Score =
+      meeting.team1Id === currentTeam1Id
+        ? rawTeam1Score
+        : rawTeam2Score;
+
+    const currentTeam2Score =
+      meeting.team2Id === currentTeam2Id
+        ? rawTeam2Score
+        : rawTeam1Score;
+
+    team1Points += currentTeam1Score;
+    team2Points += currentTeam2Score;
+
+    const margin = Math.abs(rawTeam1Score - rawTeam2Score);
+    const combinedScore = rawTeam1Score + rawTeam2Score;
+
+    if (!winnerId) {
+      ties += 1;
+    } else if (winnerId === currentTeam1Id) {
+      team1Wins += 1;
+    } else if (winnerId === currentTeam2Id) {
+      team2Wins += 1;
+    }
+
+    if (
+      winnerId &&
+      (!largestWin || margin > largestWin.margin)
+    ) {
+      largestWin = {
+        meeting,
+        winnerId,
+        margin,
+      };
+    }
+
+    if (
+      !closestMeeting ||
+      margin < closestMeeting.margin
+    ) {
+      closestMeeting = {
+        meeting,
+        winnerId,
+        margin,
+      };
+    }
+
+    if (
+      !highestScoringMeeting ||
+      combinedScore > highestScoringMeeting.combinedScore
+    ) {
+      highestScoringMeeting = {
+        meeting,
+        combinedScore,
+      };
+    }
+
+    if (isPostseasonMeeting(meeting)) {
+      postseasonMeetings += 1;
+
+      if (!winnerId) {
+        postseasonTies += 1;
+      } else if (winnerId === currentTeam1Id) {
+        postseasonTeam1Wins += 1;
+      } else if (winnerId === currentTeam2Id) {
+        postseasonTeam2Wins += 1;
+      }
+    }
+  });
+
+  let streak = null;
+
+  for (const meeting of completed) {
+    const winnerId = meetingWinnerId(meeting);
+
+    if (!winnerId) {
+      if (!streak) {
+        streak = { winnerId: "", count: 0, isTie: true };
+      }
+      break;
+    }
+
+    if (!streak) {
+      streak = { winnerId, count: 1, isTie: false };
+      continue;
+    }
+
+    if (streak.winnerId === winnerId) {
+      streak.count += 1;
+    } else {
+      break;
+    }
+  }
+
+  return {
+    meetings: completed.length,
+    team1Wins,
+    team2Wins,
+    ties,
+
+    averageTeam1Score:
+      completed.length > 0 ? team1Points / completed.length : null,
+
+    averageTeam2Score:
+      completed.length > 0 ? team2Points / completed.length : null,
+
+    lastMeeting: completed[0] ?? null,
+    streak,
+    largestWin,
+    closestMeeting,
+    highestScoringMeeting,
+
+    postseasonMeetings,
+    postseasonTeam1Wins,
+    postseasonTeam2Wins,
+    postseasonTies,
+  };
+}
+
+
 function HistoryCard({ meeting, currentTeam1Id }) {
   const team1WasCurrentLeft = meeting.team1Id === currentTeam1Id;
 
-  const leftName = team1WasCurrentLeft ? meeting.team1Team : meeting.team2Team;
-  const rightName = team1WasCurrentLeft ? meeting.team2Team : meeting.team1Team;
-  const leftScore = team1WasCurrentLeft ? meeting.team1Score : meeting.team2Score;
-  const rightScore = team1WasCurrentLeft ? meeting.team2Score : meeting.team1Score;
+  const leftId = team1WasCurrentLeft ? meeting.team1Id : meeting.team2Id;
+  const rightId = team1WasCurrentLeft ? meeting.team2Id : meeting.team1Id;
+
+  const leftName = team1WasCurrentLeft
+    ? meeting.team1Team
+    : meeting.team2Team;
+
+  const rightName = team1WasCurrentLeft
+    ? meeting.team2Team
+    : meeting.team1Team;
+
+  const leftScore = team1WasCurrentLeft
+    ? meeting.team1Score
+    : meeting.team2Score;
+
+  const rightScore = team1WasCurrentLeft
+    ? meeting.team2Score
+    : meeting.team1Score;
+
+  const winnerId = meetingWinnerId(meeting);
+
+  const leftWon = winnerId && winnerId === leftId;
+  const rightWon = winnerId && winnerId === rightId;
 
   return (
     <div className="game-center-history-row">
-      <div>
-        <span>{meeting.season} • Week {meeting.week}</span>
-        <strong>{meeting.gameType || meeting.gameCategory || "Matchup"}</strong>
+      <div className="game-center-history-meta">
+        <span>
+          {meeting.season} • Week {meeting.week}
+        </span>
+        <strong>
+          {meeting.bowlName ||
+            meeting.gameType ||
+            meeting.gameCategory ||
+            "Matchup"}
+        </strong>
       </div>
 
       <div className="game-center-history-score">
-        <span>{leftName}</span>
-        <strong>{leftScore === null ? "—" : Number(leftScore).toFixed(1)}</strong>
+        <span className={leftWon ? "history-team-winner" : ""}>
+          {leftName}
+        </span>
+
+        <strong className={leftWon ? "history-score-winner" : ""}>
+          {leftScore === null ? "—" : Number(leftScore).toFixed(1)}
+        </strong>
+
         <span className="game-center-history-vs">vs</span>
-        <strong>{rightScore === null ? "—" : Number(rightScore).toFixed(1)}</strong>
-        <span>{rightName}</span>
+
+        <strong className={rightWon ? "history-score-winner" : ""}>
+          {rightScore === null ? "—" : Number(rightScore).toFixed(1)}
+        </strong>
+
+        <span className={rightWon ? "history-team-winner" : ""}>
+          {rightName}
+        </span>
       </div>
     </div>
   );
 }
+
 
 function GameCenter() {
   const { gameId } = useParams();
@@ -432,6 +786,18 @@ function GameCenter() {
       hasWinner: true,
     };
   }, [game]);
+
+  const seriesSummary = useMemo(() => {
+    if (!game) {
+      return null;
+    }
+
+    return buildSeriesSummary(
+      history,
+      game.team1Id,
+      game.team2Id,
+    );
+  }, [history, game]);
 
   const goBackToScores = () => {
     if (location.state?.scoresView) {
@@ -527,26 +893,223 @@ function GameCenter() {
       <section className="game-center-history">
         <div className="game-center-section-heading">
           <span>Series</span>
-          <h2>Head-to-Head History & Prior Meetings</h2>
+          <h2>Matchup History</h2>
         </div>
 
-        {history.length > 0 ? (
-          <div className="game-center-history-list">
-            {history.slice(0, 8).map((meeting) => (
-              <HistoryCard
-                key={meeting.gameId}
-                meeting={meeting}
-                currentTeam1Id={game.team1Id}
-              />
-            ))}
-          </div>
+        {seriesSummary && seriesSummary.meetings > 0 ? (
+          <>
+            <div
+              className={`game-center-series-summary game-center-series-summary-${game.tierClass}`}
+            >
+              <div className="game-center-series-title">
+                <History size={18} />
+                <div>
+                  <span>All-Time Series</span>
+                  <strong>
+                    {seriesSummary.team1Wins === seriesSummary.team2Wins
+                      ? `Series tied ${seriesSummary.team1Wins}–${seriesSummary.team2Wins}`
+                      : seriesSummary.team1Wins > seriesSummary.team2Wins
+                        ? `${game.team1Team} leads ${seriesSummary.team1Wins}–${seriesSummary.team2Wins}`
+                        : `${game.team2Team} leads ${seriesSummary.team2Wins}–${seriesSummary.team1Wins}`}
+                    {seriesSummary.ties > 0
+                      ? `–${seriesSummary.ties}`
+                      : ""}
+                  </strong>
+                </div>
+              </div>
+
+              <div className="game-center-series-record">
+                <div>
+                  <strong>{seriesSummary.team1Wins}</strong>
+                  <span>{game.team1Team}</span>
+                </div>
+
+                <div className="game-center-series-meetings">
+                  <strong>{seriesSummary.meetings}</strong>
+                  <span>Previous Meetings</span>
+                </div>
+
+                <div>
+                  <strong>{seriesSummary.team2Wins}</strong>
+                  <span>{game.team2Team}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="game-center-series-facts game-center-series-facts-v2">
+              <div className="game-center-series-fact">
+                <span>Last Meeting</span>
+                <strong>
+                  {seriesSummary.lastMeeting
+                    ? `${seriesSummary.lastMeeting.season} • Week ${seriesSummary.lastMeeting.week}`
+                    : "—"}
+                </strong>
+                {seriesSummary.lastMeeting ? (
+                  <>
+                    <small>
+                      {Number(seriesSummary.lastMeeting.team1Score).toFixed(1)}
+                      {" – "}
+                      {Number(seriesSummary.lastMeeting.team2Score).toFixed(1)}
+                    </small>
+                    <small className="game-center-series-team-labels">
+                      {seriesSummary.lastMeeting.team1Id === game.team1Id
+                        ? game.team1Team
+                        : game.team2Team}
+                      {" – "}
+                      {seriesSummary.lastMeeting.team2Id === game.team2Id
+                        ? game.team2Team
+                        : game.team1Team}
+                    </small>
+                  </>
+                ) : null}
+              </div>
+
+              <div className="game-center-series-fact">
+                <span>Current Streak</span>
+                <strong>
+                  {!seriesSummary.streak
+                    ? "—"
+                    : seriesSummary.streak.isTie
+                      ? "Tied last meeting"
+                      : `${
+                          seriesSummary.streak.winnerId === game.team1Id
+                            ? game.team1Team
+                            : game.team2Team
+                        } W${seriesSummary.streak.count}`}
+                </strong>
+                <small>
+                  {seriesSummary.streak &&
+                  !seriesSummary.streak.isTie
+                    ? `${seriesSummary.streak.count} straight`
+                    : "Most recent result"}
+                </small>
+              </div>
+
+              <div className="game-center-series-fact">
+                <span>Largest Win</span>
+                <strong>
+                  {seriesSummary.largestWin
+                    ? `${
+                        seriesSummary.largestWin.winnerId === game.team1Id
+                          ? game.team1Team
+                          : game.team2Team
+                      } +${seriesSummary.largestWin.margin.toFixed(1)}`
+                    : "—"}
+                </strong>
+                <small>
+                  {seriesSummary.largestWin
+                    ? `${seriesSummary.largestWin.meeting.season} • Week ${seriesSummary.largestWin.meeting.week}`
+                    : "No completed meetings"}
+                </small>
+              </div>
+
+              <div className="game-center-series-fact">
+                <span>Closest Meeting</span>
+                <strong>
+                  {seriesSummary.closestMeeting
+                    ? seriesSummary.closestMeeting.margin === 0
+                      ? "Tie Game"
+                      : `${
+                          seriesSummary.closestMeeting.winnerId === game.team1Id
+                            ? game.team1Team
+                            : game.team2Team
+                        } +${seriesSummary.closestMeeting.margin.toFixed(1)}`
+                    : "—"}
+                </strong>
+                <small>
+                  {seriesSummary.closestMeeting
+                    ? `${seriesSummary.closestMeeting.meeting.season} • Week ${seriesSummary.closestMeeting.meeting.week}`
+                    : "No completed meetings"}
+                </small>
+              </div>
+
+              <div className="game-center-series-fact">
+                <span>Highest-Scoring Meeting</span>
+                <strong>
+                  {seriesSummary.highestScoringMeeting
+                    ? `${seriesSummary.highestScoringMeeting.combinedScore.toFixed(1)} Combined`
+                    : "—"}
+                </strong>
+                <small>
+                  {seriesSummary.highestScoringMeeting
+                    ? `${seriesSummary.highestScoringMeeting.meeting.season} • Week ${seriesSummary.highestScoringMeeting.meeting.week}`
+                    : "No completed meetings"}
+                </small>
+              </div>
+
+              <div className="game-center-series-fact">
+                <span>Average Score</span>
+                <strong>
+                  {seriesSummary.averageTeam1Score !== null
+                    ? `${seriesSummary.averageTeam1Score.toFixed(1)} – ${seriesSummary.averageTeam2Score.toFixed(1)}`
+                    : "—"}
+                </strong>
+                <small>
+                  {game.team1Team} – {game.team2Team}
+                </small>
+              </div>
+
+              <div className="game-center-series-fact game-center-series-fact-wide">
+                <span>Postseason Series</span>
+                {seriesSummary.postseasonMeetings > 0 ? (
+                  <>
+                    <strong>
+                      {seriesSummary.postseasonTeam1Wins ===
+                      seriesSummary.postseasonTeam2Wins
+                        ? `Tied ${seriesSummary.postseasonTeam1Wins}–${seriesSummary.postseasonTeam2Wins}`
+                        : seriesSummary.postseasonTeam1Wins >
+                            seriesSummary.postseasonTeam2Wins
+                          ? `${game.team1Team} leads ${seriesSummary.postseasonTeam1Wins}–${seriesSummary.postseasonTeam2Wins}`
+                          : `${game.team2Team} leads ${seriesSummary.postseasonTeam2Wins}–${seriesSummary.postseasonTeam1Wins}`}
+                      {seriesSummary.postseasonTies > 0
+                        ? `–${seriesSummary.postseasonTies}`
+                        : ""}
+                    </strong>
+                    <small>
+                      {seriesSummary.postseasonMeetings} postseason{" "}
+                      {seriesSummary.postseasonMeetings === 1
+                        ? "meeting"
+                        : "meetings"}
+                    </small>
+                  </>
+                ) : (
+                  <>
+                    <strong>No Postseason Meetings</strong>
+                    <small>Regular-season series only</small>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="game-center-history-subheading">
+              <div>
+                <span>Archive</span>
+                <h3>Recent Meetings</h3>
+              </div>
+
+              <small>
+                Showing {Math.min(history.length, 8)} of {history.length}
+              </small>
+            </div>
+
+            <div className="game-center-history-list">
+              {history.slice(0, 8).map((meeting) => (
+                <HistoryCard
+                  key={meeting.gameId}
+                  meeting={meeting}
+                  currentTeam1Id={game.team1Id}
+                />
+              ))}
+            </div>
+          </>
         ) : (
           <div className="game-center-history-empty">
             <History size={20} />
             <div>
               <strong>No prior meetings found</strong>
               <span>
-                Historical meetings will populate as earlier GAME_RESULTS seasons are added.
+                This is the first archived meeting between these permanent
+                MESH franchises.
               </span>
             </div>
           </div>

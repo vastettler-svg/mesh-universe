@@ -1246,3 +1246,201 @@
   font-size: 0.52rem;
   font-weight: 800;
 }
+
+
+/* =========================================================
+   SCORES V8 — OFFICIAL FRANCHISE LOGOS
+   Uses the same FRANCHISE_DIRECTORY Logo_URL data as Standings.
+========================================================= */
+
+/*
+ * Keep a neutral logo well so team colors do not create inconsistent
+ * rings from card to card. This intentionally matches the visual
+ * direction used on Standings.
+ */
+.score-team-logo,
+.score-team-logo-nfl,
+.score-team-logo-fbs,
+.score-team-logo-fcs {
+  overflow: hidden;
+  flex: 0 0 auto;
+
+  border: 1px solid rgba(225, 231, 237, 0.46);
+
+  background:
+    radial-gradient(
+      circle at 50% 44%,
+      rgba(255, 255, 255, 0.13),
+      rgba(255, 255, 255, 0.05) 72%
+    );
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+}
+
+.score-team-logo img {
+  width: 82%;
+  height: 82%;
+  display: block;
+  object-fit: contain;
+}
+
+.score-team-logo-fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Give the official mark a little more presence than the old letter icon. */
+.score-team-row {
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+}
+
+.score-team-logo {
+  width: 44px;
+  height: 44px;
+}
+
+@media (max-width: 560px) {
+  .score-team-row {
+    grid-template-columns: 40px minmax(0, 1fr) 70px;
+  }
+
+  .score-team-logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .score-team-logo img {
+    width: 84%;
+    height: 84%;
+  }
+}
+
+@media (max-width: 410px) {
+  .score-team-row {
+    grid-template-columns: 38px minmax(0, 1fr) 64px;
+    gap: 7px;
+  }
+
+  .score-team-logo {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+
+/* =========================================================
+   V8C — LOGO FALLBACK VISIBILITY FIX
+========================================================= */
+
+/*
+ * The fallback initial carries the HTML hidden attribute whenever an
+ * official logo is available. The earlier display:grid rule overrode
+ * the browser's default [hidden] behavior, causing both the logo and
+ * letter to appear. Keep the fallback completely hidden until an image
+ * error explicitly removes the hidden attribute.
+ */
+.score-team-logo-fallback[hidden] {
+  display: none !important;
+}
+
+
+/* =========================================================
+   V8G — TRANSPARENT TEAM LOGOS TEST
+========================================================= */
+
+/*
+ * Test treatment requested for Scores:
+ * keep the logo in the exact same slot, but remove the circular
+ * border/background so only the transparent official mark is visible.
+ */
+.score-team-logo,
+.score-team-logo-nfl,
+.score-team-logo-fbs,
+.score-team-logo-fcs {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.score-team-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.22));
+}
+
+/* If an image ever fails, keep the fallback initial legible. */
+.score-team-logo-fallback:not([hidden]) {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(225, 231, 237, 0.34);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+
+/* =========================================================
+   SCORES V9 — TIER / CONFERENCE PATCH HEADERS
+========================================================= */
+
+.scores-section-heading-patched {
+  align-items: center;
+}
+
+.scores-section-identity {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.scores-section-identity > div {
+  min-width: 0;
+}
+
+.scores-section-patch {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+
+  display: block;
+
+  object-fit: contain;
+  object-position: center;
+
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.scores-section-identity h2 {
+  min-width: 0;
+  overflow: hidden;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 430px) {
+  .scores-section-identity {
+    gap: 8px;
+  }
+
+  .scores-section-patch {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media (min-width: 700px) {
+  .scores-section-patch {
+    width: 64px;
+    height: 64px;
+  }
+}

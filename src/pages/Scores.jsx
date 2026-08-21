@@ -16,6 +16,7 @@ import {
   getGameResults,
 } from "../services/googleSheets";
 import meshShield from "../assets/logos/mfl-shield.png";
+import { MESH_PATCHES } from "../assets/logos/patches";
 
 import "../styles/scores.css";
 
@@ -56,6 +57,37 @@ const secondaryFilters = {
     { id: "northeast", label: "Northeast" },
     { id: "southland", label: "Southland" },
   ],
+};
+
+const scoresPatchMap = {
+  nfl: {
+    all: MESH_PATCHES.tier.NFL,
+    afc: MESH_PATCHES.NFL.AFC,
+    nfc: MESH_PATCHES.NFL.NFC,
+  },
+
+  fbs: {
+    "top-25": MESH_PATCHES.tier.FBS,
+    all: MESH_PATCHES.tier.FBS,
+    acc: MESH_PATCHES.FBS.ACC,
+    "big-ten": MESH_PATCHES.FBS["Big Ten"],
+    "big-12": MESH_PATCHES.FBS["Big 12"],
+    mac: MESH_PATCHES.FBS.MAC,
+    "mountain-west": MESH_PATCHES.FBS["Mountain West"],
+    sec: MESH_PATCHES.FBS.SEC,
+    "sun-belt": MESH_PATCHES.FBS["Sun Belt"],
+  },
+
+  fcs: {
+    "top-25": MESH_PATCHES.tier.FCS,
+    all: MESH_PATCHES.tier.FCS,
+    "big-sky": MESH_PATCHES.FCS["Big Sky"],
+    coastal: MESH_PATCHES.FCS.CAA,
+    ivy: MESH_PATCHES.FCS.Ivy,
+    "missouri-valley": MESH_PATCHES.FCS.MVC,
+    northeast: MESH_PATCHES.FCS.NEC,
+    southland: MESH_PATCHES.FCS.Southland,
+  },
 };
 
 function conferenceMatches(game, filterId) {
@@ -172,6 +204,7 @@ function TeamRow({
   team,
   coach,
   initial,
+  logo,
   overallRecord,
   conferenceRecord,
   score,
@@ -196,7 +229,21 @@ function TeamRow({
         .join(" ")}
     >
       <div className={`score-team-logo score-team-logo-${tierClass}`}>
-        {initial}
+        {logo ? (
+          <img
+            src={logo}
+            alt={`${team || "Team"} logo`}
+            loading="lazy"
+            onError={(event) => {
+              event.currentTarget.style.display = "none";
+              event.currentTarget.nextElementSibling?.removeAttribute("hidden");
+            }}
+          />
+        ) : null}
+
+        <span className="score-team-logo-fallback" hidden={Boolean(logo)}>
+          {initial}
+        </span>
       </div>
 
       <div className="score-team-info">
@@ -230,13 +277,38 @@ function TeamRow({
 }
 
 function ScoreCard({ game, featured = false, featuredPosition = 0, scoresView }) {
-  const team1Winner =
-    game.status === "final" && game.winnerId === game.team1Id;
-  const team2Winner =
-    game.status === "final" && game.winnerId === game.team2Id;
+  const isFinal = game.status === "final";
 
-  const hasFinalWinner =
-    game.status === "final" && Boolean(game.winnerId);
+  const winnerIdMatchesTeam1 =
+    Boolean(game.winnerId) && game.winnerId === game.team1Id;
+  const winnerIdMatchesTeam2 =
+    Boolean(game.winnerId) && game.winnerId === game.team2Id;
+
+  const hasValidWinnerId = winnerIdMatchesTeam1 || winnerIdMatchesTeam2;
+
+  const team1ScoreNumber = Number(game.team1Score);
+  const team2ScoreNumber = Number(game.team2Score);
+  const hasComparableFinalScores =
+    isFinal &&
+    Number.isFinite(team1ScoreNumber) &&
+    Number.isFinite(team2ScoreNumber) &&
+    team1ScoreNumber !== team2ScoreNumber;
+
+  const team1Winner =
+    isFinal &&
+    (winnerIdMatchesTeam1 ||
+      (!hasValidWinnerId &&
+        hasComparableFinalScores &&
+        team1ScoreNumber > team2ScoreNumber));
+
+  const team2Winner =
+    isFinal &&
+    (winnerIdMatchesTeam2 ||
+      (!hasValidWinnerId &&
+        hasComparableFinalScores &&
+        team2ScoreNumber > team1ScoreNumber));
+
+  const hasFinalWinner = team1Winner || team2Winner;
 
   const featureLabel =
     featuredPosition === 0 ? "Game of the Week" : "Featured Matchup";
@@ -285,6 +357,7 @@ function ScoreCard({ game, featured = false, featuredPosition = 0, scoresView })
           team={game.team1Team}
           coach={game.team1Coach}
           initial={game.team1Initial}
+          logo={game.team1Logo}
           overallRecord={game.team1OverallRecord}
           conferenceRecord={game.team1ConferenceRecord}
           score={game.team1Score}
@@ -301,6 +374,7 @@ function ScoreCard({ game, featured = false, featuredPosition = 0, scoresView })
           team={game.team2Team}
           coach={game.team2Coach}
           initial={game.team2Initial}
+          logo={game.team2Logo}
           overallRecord={game.team2OverallRecord}
           conferenceRecord={game.team2ConferenceRecord}
           score={game.team2Score}
@@ -333,14 +407,26 @@ function FeaturedTierSection({
   onViewAll,
   scoresView,
 }) {
+  const tierPatch = MESH_PATCHES.tier[tier] ?? null;
+
   return (
     <section
       className={`featured-tier-section featured-tier-section-${tierClass}`}
     >
-      <div className="scores-section-heading">
-        <div>
-          <span>Three games to watch</span>
-          <h2>{tier}</h2>
+      <div className="scores-section-heading scores-section-heading-patched">
+        <div className="scores-section-identity">
+          {tierPatch ? (
+            <img
+              className="scores-section-patch"
+              src={tierPatch}
+              alt={`${tier} MESH patch`}
+            />
+          ) : null}
+
+          <div>
+            <span>Three games to watch</span>
+            <h2>{tier}</h2>
+          </div>
         </div>
 
         <TierBadge tier={tier} tierClass={tierClass} />
@@ -510,15 +596,17 @@ function Scores() {
         if (game.tierClass !== selectedPrimaryFilter) return false;
 
         if (isNflDoubleMatchupWeek) {
-          const category = String(game.gameCategoryId || "");
-          const isConferenceGame = category === "conference";
-          const isNonConferenceGame = category === "non-conference";
-
-          if (selectedNflMatchup === 1 && !isConferenceGame) {
-            return false;
-          }
-
-          if (selectedNflMatchup === 2 && !isNonConferenceGame) {
+          /*
+           * Weeks 3, 6, 9, and 12 contain two NFL games per team.
+           * GAME_RESULTS.Game_Numer is the authoritative matchup set:
+           *   1 = first/conference matchup
+           *   2 = second/non-conference matchup
+           *
+           * Do not rely on Game_Category here because that label is
+           * descriptive; Game_Numer is what uniquely separates the two
+           * weekly schedule sets.
+           */
+          if (Number(game.gameNumber) !== selectedNflMatchup) {
             return false;
           }
         }
@@ -554,6 +642,11 @@ function Scores() {
     activeSecondaryFilters.find(
       (filter) => filter.id === selectedSecondaryFilter,
     )?.label ?? "";
+
+  const activeScoresPatch =
+    scoresPatchMap[selectedPrimaryFilter]?.[selectedSecondaryFilter] ??
+    MESH_PATCHES.tier[activePrimaryLabel] ??
+    null;
 
   const phaseLabel = useMemo(() => {
     if (selectedPrimaryFilter === "featured") {
@@ -785,10 +878,20 @@ function Scores() {
         <section
           className={`scores-tier-view scores-tier-view-${selectedPrimaryFilter}`}
         >
-          <div className="scores-section-heading scores-tier-view-heading">
-            <div>
-              <span>{visibleTierGames.length} matchups shown</span>
-              <h2>{activeSecondaryLabel || activePrimaryLabel}</h2>
+          <div className="scores-section-heading scores-tier-view-heading scores-section-heading-patched">
+            <div className="scores-section-identity">
+              {activeScoresPatch ? (
+                <img
+                  className="scores-section-patch"
+                  src={activeScoresPatch}
+                  alt={`${activeSecondaryLabel || activePrimaryLabel} MESH patch`}
+                />
+              ) : null}
+
+              <div>
+                <span>{visibleTierGames.length} matchups shown</span>
+                <h2>{activeSecondaryLabel || activePrimaryLabel}</h2>
+              </div>
             </div>
 
             <TierBadge

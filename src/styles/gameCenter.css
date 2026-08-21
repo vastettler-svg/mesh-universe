@@ -748,3 +748,440 @@
   right: 0;
   left: auto;
 }
+
+
+/* =========================================================
+   GAME CENTER V9 — TIER / CONFERENCE PATCH HEADER
+========================================================= */
+
+.game-center-hero-top-patched {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.game-center-hero-status {
+  min-width: 0;
+}
+
+.game-center-hero-title {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.game-center-hero-patch {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+
+  display: block;
+  object-fit: contain;
+  object-position: center;
+
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.3));
+}
+
+.game-center-hero-title > div {
+  min-width: 0;
+}
+
+.game-center-hero-title > div > span {
+  display: block;
+
+  margin-bottom: 2px;
+
+  font-size: .43rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+
+  color: #8294a4;
+}
+
+.game-center-hero-title h2 {
+  min-width: 0;
+  overflow: hidden;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 430px) {
+  .game-center-hero-top-patched {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 5px;
+  }
+
+  .game-center-hero-title {
+    gap: 5px;
+  }
+
+  .game-center-hero-patch {
+    width: 38px;
+    height: 38px;
+  }
+
+  .game-center-hero-title > div > span {
+    font-size: .37rem;
+  }
+
+  .game-center-hero-title h2 {
+    font-size: .62rem;
+  }
+
+  .game-center-hero-status .gc-home-state-pill,
+  .game-center-hero-top-patched .gc-home-tier-pill {
+    padding-inline: 7px;
+    font-size: .46rem;
+  }
+}
+
+@media (min-width: 700px) {
+  .game-center-hero-patch {
+    width: 54px;
+    height: 54px;
+  }
+}
+
+
+/* =========================================================
+   GAME CENTER V9B — CROSS-CONFERENCE HEADER
+========================================================= */
+
+.game-center-hero-title-cross-conference {
+  gap: 7px;
+}
+
+.game-center-hero-title-copy {
+  min-width: 0;
+  text-align: center;
+}
+
+.game-center-hero-title-cross-conference .game-center-hero-title-copy > span {
+  color: #d7e0e7;
+}
+
+.game-center-hero-title-cross-conference .game-center-hero-patch {
+  width: 42px;
+  height: 42px;
+}
+
+@media (max-width: 430px) {
+  .game-center-hero-title-cross-conference {
+    gap: 4px;
+  }
+
+  .game-center-hero-title-cross-conference .game-center-hero-patch {
+    width: 34px;
+    height: 34px;
+  }
+
+  .game-center-hero-title-cross-conference .game-center-hero-title-copy > span {
+    font-size: .34rem;
+  }
+
+  .game-center-hero-title-cross-conference .game-center-hero-title-copy h2 {
+    font-size: .58rem;
+  }
+}
+
+@media (min-width: 700px) {
+  .game-center-hero-title-cross-conference .game-center-hero-patch {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+
+/* =========================================================
+   GAME CENTER — MATCHUP HISTORY V1
+========================================================= */
+
+.game-center-series-summary {
+  position: relative;
+  overflow: hidden;
+
+  padding: 14px;
+
+  border: 1px solid rgba(255,255,255,.085);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(145deg, rgba(22,39,58,.96), rgba(10,23,37,.98));
+}
+
+.game-center-series-summary::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+}
+
+.game-center-series-summary-nfl::before { background:#24b86d; }
+.game-center-series-summary-fbs::before { background:#4287ff; }
+.game-center-series-summary-fcs::before { background:#a068ff; }
+
+.game-center-series-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+
+  border-bottom: 1px solid rgba(255,255,255,.065);
+}
+
+.game-center-series-title svg {
+  flex: 0 0 auto;
+  color: #f1cc61;
+}
+
+.game-center-series-title > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.game-center-series-title span {
+  font-size: .48rem;
+  font-weight: 900;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+  color: #8395a5;
+}
+
+.game-center-series-title strong {
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: .9rem;
+  font-weight: 400;
+  color: #fff;
+}
+
+.game-center-series-record {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.game-center-series-record > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+}
+
+.game-center-series-record strong {
+  font-size: 1.18rem;
+  line-height: 1;
+  color: #fff;
+}
+
+.game-center-series-record span {
+  max-width: 100%;
+  overflow: hidden;
+
+  font-size: .53rem;
+  font-weight: 800;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #97a7b5;
+}
+
+.game-center-series-meetings {
+  padding: 7px 12px;
+
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 10px;
+
+  background: rgba(255,255,255,.035);
+}
+
+.game-center-series-meetings strong {
+  font-size: .9rem;
+  color: #f1cc61;
+}
+
+.game-center-series-meetings span {
+  font-size: .42rem;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+
+.game-center-series-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 8px;
+
+  margin-top: 9px;
+}
+
+.game-center-series-fact {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  padding: 10px;
+
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 10px;
+
+  background: rgba(255,255,255,.025);
+}
+
+.game-center-series-fact > span {
+  font-size: .44rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+
+  color: #788b9c;
+}
+
+.game-center-series-fact strong {
+  overflow: hidden;
+
+  font-size: .61rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #e3eaf0;
+}
+
+.game-center-series-fact small {
+  overflow: hidden;
+
+  font-size: .47rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #8294a4;
+}
+
+.game-center-history-subheading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 10px;
+
+  margin: 18px 0 8px;
+}
+
+.game-center-history-subheading > div {
+  min-width: 0;
+}
+
+.game-center-history-subheading span {
+  display: block;
+
+  margin-bottom: 2px;
+
+  font-size: .45rem;
+  font-weight: 900;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+
+  color: #7d90a0;
+}
+
+.game-center-history-subheading h3 {
+  margin: 0;
+
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: .82rem;
+  font-weight: 400;
+
+  color: #fff;
+}
+
+.game-center-history-subheading small {
+  flex: 0 0 auto;
+
+  font-size: .47rem;
+
+  color: #718494;
+}
+
+.game-center-history-meta {
+  min-width: 0;
+}
+
+.history-team-winner {
+  font-weight: 900 !important;
+  color: #dce7ef !important;
+}
+
+.history-score-winner {
+  color: #54dc8e !important;
+}
+
+@media (max-width: 600px) {
+  .game-center-series-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .game-center-series-record {
+    gap: 6px;
+  }
+
+  .game-center-series-meetings {
+    padding-inline: 8px;
+  }
+
+  .game-center-series-record span {
+    font-size: .47rem;
+  }
+}
+
+
+/* =========================================================
+   GAME CENTER — SERIES HISTORY V2
+========================================================= */
+
+.game-center-series-facts-v2 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.game-center-series-fact-wide {
+  grid-column: span 3;
+}
+
+.game-center-series-facts-v2 .game-center-series-fact {
+  min-height: 70px;
+  justify-content: center;
+}
+
+@media (min-width: 900px) {
+  .game-center-series-facts-v2 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .game-center-series-facts-v2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .game-center-series-fact-wide {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 390px) {
+  .game-center-series-facts-v2 {
+    grid-template-columns: 1fr;
+  }
+
+  .game-center-series-fact-wide {
+    grid-column: auto;
+  }
+}

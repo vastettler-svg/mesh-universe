@@ -14,14 +14,15 @@ import {
 } from "lucide-react";
 
 import PageHeader from "../components/PageHeader";
-import StandingsRaceCenter from "../components/StandingsRaceCenter";
 import { getStandingsData } from "../services/googleSheets";
 import meshShield from "../assets/logos/mfl-shield.png";
+
+import { MESH_PATCHES } from "../assets/logos/patches";
 
 import "../styles/standings.css";
 
 const primaryFilters = [
-  { id: "overview", label: "Overview" },
+  { id: "overview", label: "Pulse" },
   { id: "nfl", label: "NFL" },
   { id: "fbs", label: "FBS" },
   { id: "fcs", label: "FCS" },
@@ -74,52 +75,37 @@ const nflDivisionFilters = {
   ],
 };
 
-const pulseStories = [
-  {
-    id: "rise",
-    eyebrow: "Biggest Rise",
-    title: "Rankings",
-    detail: "Weekly movement will update from the live MESH standings.",
-    value: "Live",
-    tier: "FBS",
-    tierClass: "fbs",
-    icon: TrendingUp,
-    type: "rise",
+const standingsPatchMap = {
+  nfl: {
+    all: MESH_PATCHES.tier.NFL,
+    "playoff-picture": MESH_PATCHES.tier.NFL,
+    afc: MESH_PATCHES.NFL.AFC,
+    nfc: MESH_PATCHES.NFL.NFC,
   },
-  {
-    id: "fall",
-    eyebrow: "Biggest Fall",
-    title: "Hot Seats",
-    detail: "Programs under pressure will appear as rankings update.",
-    value: "Live",
-    tier: "FBS",
-    tierClass: "fbs",
-    icon: TrendingDown,
-    type: "fall",
+
+  fbs: {
+    "top-25": MESH_PATCHES.tier.FBS,
+    overall: MESH_PATCHES.tier.FBS,
+    acc: MESH_PATCHES.FBS.ACC,
+    "big-ten": MESH_PATCHES.FBS["Big Ten"],
+    "big-12": MESH_PATCHES.FBS["Big 12"],
+    mac: MESH_PATCHES.FBS.MAC,
+    "mountain-west": MESH_PATCHES.FBS["Mountain West"],
+    sec: MESH_PATCHES.FBS.SEC,
+    "sun-belt": MESH_PATCHES.FBS["Sun Belt"],
   },
-  {
-    id: "leaders",
-    eyebrow: "League Leaders",
-    title: "Playoff Race",
-    detail: "Current playoff positions update from TEAM DATA.",
-    value: "Live",
-    tier: "NFL",
-    tierClass: "nfl",
-    icon: Flame,
-    type: "streak",
+
+  fcs: {
+    "top-25": MESH_PATCHES.tier.FCS,
+    overall: MESH_PATCHES.tier.FCS,
+    "big-sky": MESH_PATCHES.FCS["Big Sky"],
+    coastal: MESH_PATCHES.FCS.CAA,
+    ivy: MESH_PATCHES.FCS.Ivy,
+    mvc: MESH_PATCHES.FCS.MVC,
+    northeast: MESH_PATCHES.FCS.NEC,
+    southland: MESH_PATCHES.FCS.Southland,
   },
-  {
-    id: "race",
-    eyebrow: "Closest Race",
-    title: "Promotion Race",
-    detail: "Follow every promotion and relegation race across MESH.",
-    value: "Live",
-    tier: "FCS",
-    tierClass: "fcs",
-    icon: Trophy,
-    type: "race",
-  },
-];
+};
 
 function normalizeSlug(value) {
   return String(value ?? "")
@@ -390,23 +376,191 @@ function StandingsList({
   );
 }
 
-function PulseCard({ story }) {
-  const StoryIcon = story.icon;
+
+function PulseMovementRow({
+  label,
+  team,
+  coach,
+  movement,
+  isNew = false,
+  entries = [],
+}) {
+  const hasMovement = Number.isFinite(Number(movement)) && Number(movement) !== 0;
+  const hasEntries = Array.isArray(entries) && entries.length > 0;
+
+  if (hasEntries) {
+    return (
+      <div className="standings-pulse-movement-row standings-pulse-movement-row-list">
+        <span>{label}</span>
+
+        <div className="standings-pulse-entry-list">
+          {entries.map((entry) => (
+            <div
+              className="standings-pulse-entry"
+              key={`${entry.rank}-${entry.team}`}
+            >
+              <div className="standings-pulse-entry-name">
+                <strong>
+                  {entry.rank ? `#${entry.rank} ${entry.team}` : entry.team}
+                </strong>
+                {entry.coach ? <span>{entry.coach}</span> : null}
+              </div>
+
+              <small className="standings-pulse-new">NEW</small>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <article className={`standings-pulse-card standings-pulse-${story.type}`}>
-      <div className="standings-pulse-top">
-        <div className="standings-pulse-icon"><StoryIcon size={20} /></div>
-        <TierBadge tier={story.tier} tierClass={story.tierClass} />
+    <div className="standings-pulse-movement-row">
+      <span>{label}</span>
+      <div className="standings-pulse-movement-team">
+        <div className="standings-pulse-movement-name">
+          <strong>{team || (isNew ? "No new entrant" : "No movement yet")}</strong>
+
+          {team && coach ? (
+            <span className="standings-pulse-movement-coach">{coach}</span>
+          ) : null}
+        </div>
+
+        {isNew && team ? (
+          <small className="standings-pulse-new">NEW</small>
+        ) : hasMovement ? (
+          <small
+            className={
+              Number(movement) > 0
+                ? "standings-pulse-up"
+                : "standings-pulse-down"
+            }
+          >
+            {Number(movement) > 0 ? "▲" : "▼"} {Math.abs(Number(movement))}
+          </small>
+        ) : null}
       </div>
-      <span className="standings-pulse-eyebrow">{story.eyebrow}</span>
-      <div className="standings-pulse-title">
-        <h3>{story.title}</h3>
-        <strong>{story.value}</strong>
-      </div>
-      <p>{story.detail}</p>
-    </article>
+    </div>
   );
 }
+
+function PulseCutoff({ rows, lineAfter = 2 }) {
+  return (
+    <div className="standings-pulse-cutoff">
+      <span className="standings-pulse-cutoff-label">Relegation Watch</span>
+
+      <div className="standings-pulse-cutoff-list">
+        {rows.map((row, index) => (
+          <div key={`${row.rank}-${row.team || "open"}`}>
+            {index === lineAfter ? (
+              <div className="standings-pulse-relegation-line">
+                <span>Relegation Line</span>
+              </div>
+            ) : null}
+
+            <div
+              className={[
+                "standings-pulse-cutoff-row",
+                row.danger ? "standings-pulse-cutoff-row-danger" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              <strong>{row.rank}</strong>
+
+              <div className="standings-pulse-cutoff-team">
+                <span>{row.team || "—"}</span>
+                {row.team && row.coach ? <small>{row.coach}</small> : null}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PulseCard({
+  tier,
+  tierClass,
+  patch,
+  leader,
+  leaderCoach,
+  statRows = [],
+  movementRows = [],
+  cutoffRows = [],
+  onOpen,
+}) {
+  return (
+    <button
+      type="button"
+      className={`standings-pulse-card standings-pulse-tier standings-pulse-tier-${tierClass} standings-pulse-card-clickable`}
+      onClick={onOpen}
+      aria-label={`Open ${tier} standings`}
+    >
+      <div className="standings-pulse-top">
+        <img
+          className="standings-pulse-patch"
+          src={patch}
+          alt={`${tier} MESH patch`}
+        />
+
+        <div className="standings-pulse-card-title">
+          <span>{tier} Pulse</span>
+          <strong>Live Standings Snapshot</strong>
+        </div>
+
+        <div className="standings-pulse-open">
+          <TierBadge tier={tier} tierClass={tierClass} />
+          <ChevronRight size={16} />
+        </div>
+      </div>
+
+      {statRows.length > 0 ? (
+        <div
+          className={[
+            "standings-pulse-tier-stats",
+            statRows.length >= 3 ? "standings-pulse-tier-stats-three" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {statRows.map((stat) => (
+            <div key={`${tier}-${stat.label}`}>
+              <strong>{stat.value}</strong>
+              <span>{stat.label}</span>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="standings-pulse-live-leader">
+        <span>Current No. 1</span>
+
+        <div className="standings-pulse-leader-line">
+          <strong>{leader || "Season not started"}</strong>
+
+          {leader && leaderCoach ? (
+            <small>{leaderCoach}</small>
+          ) : null}
+        </div>
+      </div>
+
+      {movementRows.length > 0 ? (
+        <div className="standings-pulse-movement-list">
+          {movementRows.map((row) => (
+            <PulseMovementRow key={row.label} {...row} />
+          ))}
+        </div>
+      ) : null}
+
+      {cutoffRows.length > 0 ? <PulseCutoff rows={cutoffRows} /> : null}
+    </button>
+  );
+}
+
+
+
 
 function Standings() {
   const [standingsData, setStandingsData] = useState([]);
@@ -484,6 +638,133 @@ function Standings() {
     atLarge.forEach((team) => selectedIds.add(team.franchiseId));
 
     return selectedIds;
+  }, [standingsData]);
+
+  const overviewData = useMemo(() => {
+    const byTier = (tierClass) =>
+      standingsData.filter((team) => team.tierClass === tierClass);
+
+    const nflTeams = byTier("nfl");
+    const fbsTeams = byTier("fbs");
+    const fcsTeams = byTier("fcs");
+
+    const rankedLeader = (teams, key) =>
+      [...teams]
+        .filter((team) => Number(team[key]) >= 1)
+        .sort((a, b) => Number(a[key]) - Number(b[key]))[0] ?? null;
+
+    const rankedAt = (teams, key, rank) =>
+      teams.find((team) => Number(team[key]) === rank) ?? null;
+
+    const biggestPositive = (teams, key) =>
+      [...teams]
+        .filter((team) => Number(team[key]) > 0)
+        .sort((a, b) => Number(b[key]) - Number(a[key]))[0] ?? null;
+
+    const biggestNegative = (teams, key) =>
+      [...teams]
+        .filter((team) => Number(team[key]) < 0)
+        .sort((a, b) => Number(a[key]) - Number(b[key]))[0] ?? null;
+
+    const newTop25Entries = (teams) =>
+      [...teams]
+        .filter(
+          (team) =>
+            team.isNewTop25 &&
+            Number(team.top25Rank) >= 1 &&
+            Number(team.top25Rank) <= 25,
+        )
+        .sort((a, b) => Number(a.top25Rank) - Number(b.top25Rank));
+
+    const nflLeader = rankedLeader(nflTeams, "overallRank");
+    const fbsLeader = rankedLeader(fbsTeams, "top25Rank");
+    const fcsLeader = rankedLeader(fcsTeams, "top25Rank");
+
+    const nflRiser = biggestPositive(nflTeams, "movement");
+    const nflFaller = biggestNegative(nflTeams, "movement");
+
+    const fbsRise = biggestPositive(
+      fbsTeams.filter(
+        (team) =>
+          Number(team.top25Rank) >= 1 &&
+          Number(team.top25Rank) <= 25,
+      ),
+      "top25Movement",
+    );
+    const fbsFall = biggestNegative(
+      fbsTeams.filter(
+        (team) =>
+          Number(team.top25Rank) >= 1 &&
+          Number(team.top25Rank) <= 25,
+      ),
+      "top25Movement",
+    );
+
+    const fcsRise = biggestPositive(
+      fcsTeams.filter(
+        (team) =>
+          Number(team.top25Rank) >= 1 &&
+          Number(team.top25Rank) <= 25,
+      ),
+      "top25Movement",
+    );
+    const fcsFall = biggestNegative(
+      fcsTeams.filter(
+        (team) =>
+          Number(team.top25Rank) >= 1 &&
+          Number(team.top25Rank) <= 25,
+      ),
+      "top25Movement",
+    );
+
+    const fbsNew = newTop25Entries(fbsTeams);
+    const fcsNew = newTop25Entries(fcsTeams);
+
+    return {
+      nfl: {
+        teams: nflTeams.length,
+        leader: nflLeader?.team || "",
+        leaderCoach: nflLeader?.coach || "",
+        riser: nflRiser,
+        faller: nflFaller,
+        cutoff: [27, 28, 29, 30, 31, 32].map((rank) => {
+          const team = rankedAt(nflTeams, "overallRank", rank);
+          return {
+            rank,
+            team: team?.team || "",
+            coach: team?.coach || "",
+            danger: rank >= 29,
+          };
+        }),
+      },
+
+      fbs: {
+        teams: fbsTeams.length,
+        leader: fbsLeader?.team || "",
+        leaderCoach: fbsLeader?.coach || "",
+        rise: fbsRise,
+        fall: fbsFall,
+        newTop25: fbsNew,
+        cutoff: [89, 90, 91, 92, 93, 94, 95, 96, 97, 98].map((rank) => {
+          const team = rankedAt(fbsTeams, "overallRank", rank);
+          return {
+            rank,
+            team: team?.team || "",
+            coach: team?.coach || "",
+            danger: rank >= 91,
+          };
+        }),
+      },
+
+      fcs: {
+        teams: fcsTeams.length,
+        leader: fcsLeader?.team || "",
+        leaderCoach: fcsLeader?.coach || "",
+        rise: fcsRise,
+        fall: fcsFall,
+        newTop25: fcsNew,
+      },
+    };
   }, [standingsData]);
 
   const visibleStandings = useMemo(() => {
@@ -647,6 +928,21 @@ function Standings() {
   const isNflConferenceView = selectedPrimaryFilter === "nfl" && ["afc", "nfc"].includes(selectedSecondaryFilter);
   const standingsHeading = isNflConferenceView ? activeNflDivisionLabel : activeSecondaryLabel;
 
+  const activeStandingsPatch =
+    standingsPatchMap[selectedPrimaryFilter]?.[selectedSecondaryFilter] ??
+    MESH_PATCHES.tier[activePrimaryLabel] ??
+    null;
+
+  const activeStandingsPatchLabel =
+    isNflConferenceView
+      ? activeSecondaryLabel
+      : selectedSecondaryFilter === "top-25" ||
+          selectedSecondaryFilter === "overall" ||
+          selectedSecondaryFilter === "all" ||
+          selectedSecondaryFilter === "playoff-picture"
+        ? activePrimaryLabel
+        : activeSecondaryLabel;
+
   const selectPrimaryFilter = (filterId) => {
     setSelectedPrimaryFilter(filterId);
     setSelectedNflDivisionFilter("all");
@@ -796,28 +1092,147 @@ function Standings() {
 
       {selectedPrimaryFilter === "overview" ? (
         <>
-          <section className="standings-featured-section">
+          <section className="standings-featured-section standings-pulse-first">
             <div className="standings-featured-heading">
               <div>
-                <span><Sparkles size={13} />Weekly movement</span>
+                <span><Sparkles size={13} />League snapshot</span>
                 <h2>MESH Pulse</h2>
-                <p>The biggest stories shaping the current standings, promotion races, and relegation pressure.</p>
+                <p>
+                  The biggest live movement across all three tiers — leaders,
+                  ranking swings, new Top 25 teams, and relegation pressure.
+                </p>
               </div>
             </div>
-            <div className="standings-pulse-grid">
-              {pulseStories.map((story) => <PulseCard key={story.id} story={story} />)}
+
+            <div className="standings-pulse-grid standings-pulse-grid-live">
+              <PulseCard
+                tier="NFL"
+                tierClass="nfl"
+                patch={MESH_PATCHES.tier.NFL}
+                leader={overviewData.nfl.leader}
+                leaderCoach={overviewData.nfl.leaderCoach}
+                statRows={[
+                  { value: overviewData.nfl.teams || 32, label: "Franchises" },
+                  { value: 4, label: "Relegated" },
+                ]}
+                movementRows={[
+                  {
+                    label: "Biggest Rise",
+                    team: overviewData.nfl.riser?.team,
+                    coach: overviewData.nfl.riser?.coach,
+                    movement: overviewData.nfl.riser?.movement,
+                  },
+                  {
+                    label: "Biggest Fall",
+                    team: overviewData.nfl.faller?.team,
+                    coach: overviewData.nfl.faller?.coach,
+                    movement: overviewData.nfl.faller?.movement,
+                  },
+                ]}
+                cutoffRows={overviewData.nfl.cutoff}
+                onOpen={() => viewTier("nfl")}
+              />
+
+              <PulseCard
+                tier="FBS"
+                tierClass="fbs"
+                patch={MESH_PATCHES.tier.FBS}
+                leader={overviewData.fbs.leader}
+                leaderCoach={overviewData.fbs.leaderCoach}
+                statRows={[
+                  { value: overviewData.fbs.teams || 98, label: "Franchises" },
+                  { value: 4, label: "Promoted" },
+                  { value: 8, label: "Relegated" },
+                ]}
+                movementRows={[
+                  {
+                    label: "Biggest Top 25 Rise",
+                    team: overviewData.fbs.rise?.team,
+                    coach: overviewData.fbs.rise?.coach,
+                    movement: overviewData.fbs.rise?.top25Movement,
+                  },
+                  {
+                    label: "Biggest Top 25 Fall",
+                    team: overviewData.fbs.fall?.team,
+                    coach: overviewData.fbs.fall?.coach,
+                    movement: overviewData.fbs.fall?.top25Movement,
+                  },
+                  {
+                    label: "New Top 25 Entrants",
+                    entries: overviewData.fbs.newTop25.map((team) => ({
+                      rank: team.top25Rank,
+                      team: team.team,
+                      coach: team.coach,
+                    })),
+                    isNew: true,
+                  },
+                ]}
+                cutoffRows={overviewData.fbs.cutoff}
+                onOpen={() => viewTier("fbs")}
+              />
+
+              <PulseCard
+                tier="FCS"
+                tierClass="fcs"
+                patch={MESH_PATCHES.tier.FCS}
+                leader={overviewData.fcs.leader}
+                leaderCoach={overviewData.fcs.leaderCoach}
+                statRows={[
+                  { value: overviewData.fcs.teams || 72, label: "Franchises" },
+                  { value: 8, label: "Promoted" },
+                ]}
+                movementRows={[
+                  {
+                    label: "Biggest Top 25 Rise",
+                    team: overviewData.fcs.rise?.team,
+                    coach: overviewData.fcs.rise?.coach,
+                    movement: overviewData.fcs.rise?.top25Movement,
+                  },
+                  {
+                    label: "Biggest Top 25 Fall",
+                    team: overviewData.fcs.fall?.team,
+                    coach: overviewData.fcs.fall?.coach,
+                    movement: overviewData.fcs.fall?.top25Movement,
+                  },
+                  {
+                    label: "New Top 25 Entrants",
+                    entries: overviewData.fcs.newTop25.map((team) => ({
+                      rank: team.top25Rank,
+                      team: team.team,
+                      coach: team.coach,
+                    })),
+                    isNew: true,
+                  },
+                ]}
+                onOpen={() => viewTier("fcs")}
+              />
             </div>
           </section>
-          <StandingsRaceCenter onSelectTier={viewTier} />
         </>
       ) : (
         <section className={`standings-tier-view standings-tier-view-${selectedPrimaryFilter}`}>
-          <div className="standings-section-heading">
-            <div>
-              <h2>{standingsHeading}</h2>
+          <div className="standings-section-heading standings-section-heading-patched">
+            <div className="standings-section-identity">
+              {activeStandingsPatch ? (
+                <img
+                  className="standings-section-patch"
+                  src={activeStandingsPatch}
+                  alt={`${activeStandingsPatchLabel} MESH patch`}
+                />
+              ) : null}
+
+              <div className="standings-section-title-copy">
+                <span>{activePrimaryLabel} Standings</span>
+                <h2>{standingsHeading}</h2>
+              </div>
             </div>
-            <TierBadge tier={activePrimaryLabel} tierClass={selectedPrimaryFilter} />
+
+            <TierBadge
+              tier={activePrimaryLabel}
+              tierClass={selectedPrimaryFilter}
+            />
           </div>
+
           {renderStandingsContent()}
         </section>
       )}

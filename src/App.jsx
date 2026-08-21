@@ -10,6 +10,7 @@ import Stats from "./pages/Stats";
 import More from "./pages/More";
 import History from "./pages/History";
 import GameCenter from "./pages/GameCenter";
+import RulesInfo from "./pages/RulesInfo";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/stats" element={<Stats />} />
         <Route path="/more" element={<More />} />
         <Route path="/history" element={<History />} />
+        <Route path="/rules" element={<RulesInfo />} />
       </Routes>
     </AppShell>
   );

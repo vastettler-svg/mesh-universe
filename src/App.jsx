@@ -11,6 +11,7 @@ import More from "./pages/More";
 import History from "./pages/History";
 import GameCenter from "./pages/GameCenter";
 import RulesInfo from "./pages/RulesInfo";
+import LeagueLinks from "./pages/LeagueLinks";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/more" element={<More />} />
         <Route path="/history" element={<History />} />
         <Route path="/rules" element={<RulesInfo />} />
+        <Route path="/league-links" element={<LeagueLinks />} />
       </Routes>
     </AppShell>
   );

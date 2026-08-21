@@ -8,6 +8,7 @@ import {
   ChevronDown,
   Circle,
   ClipboardList,
+  ExternalLink,
   Flame,
   History,
   Medal,
@@ -40,6 +41,12 @@ const quickLinks = [
     description: "Competition format and league policies",
     icon: BookOpen,
     path: "/rules",
+  },
+  {
+    title: "Sleeper Leagues",
+    description: "Open all 15 MESH conference leagues",
+    icon: ExternalLink,
+    path: "/league-links",
   },
   {
     title: "Prestige",
@@ -894,6 +901,194 @@ function buildWeekOneFcsStory(team) {
 }
 
 
+function getBestUpcomingGame(games, tier, week) {
+  const tierGames = games.filter(
+    (game) => game.tier === tier && Number(game.week) === Number(week),
+  );
+
+  if (tierGames.length === 0) return null;
+
+  const gameOfWeek = tierGames.find(
+    (game) => Number(game.featuredRank) === 1,
+  );
+
+  if (gameOfWeek) return gameOfWeek;
+
+  if (tier !== "NFL") {
+    const rankedGames = tierGames
+      .map((game) => {
+        const rank1 = Number(game.team1GameRank) || 999;
+        const rank2 = Number(game.team2GameRank) || 999;
+        const ranked1 = rank1 >= 1 && rank1 <= 25;
+        const ranked2 = rank2 >= 1 && rank2 <= 25;
+
+        return {
+          game,
+          rankedCount: Number(ranked1) + Number(ranked2),
+          bestRank: Math.min(rank1, rank2),
+          rankTotal:
+            (ranked1 ? rank1 : 50) +
+            (ranked2 ? rank2 : 50),
+        };
+      })
+      .sort(
+        (a, b) =>
+          b.rankedCount - a.rankedCount ||
+          a.bestRank - b.bestRank ||
+          a.rankTotal - b.rankTotal,
+      );
+
+    if (rankedGames[0]?.rankedCount > 0) {
+      return rankedGames[0].game;
+    }
+  }
+
+  return tierGames[0];
+}
+
+function formatUpcomingTeamLabel(team, rank) {
+  const numericRank = Number(rank) || 0;
+  return numericRank >= 1 && numericRank <= 25
+    ? `#${numericRank} ${team}`
+    : team;
+}
+
+function buildUpcomingNflStory(game, week, priorMeetings = []) {
+  if (!game) return null;
+
+  const team1Label = formatUpcomingTeamLabel(
+    game.team1Team,
+    game.team1GameRank,
+  );
+  const team2Label = formatUpcomingTeamLabel(
+    game.team2Team,
+    game.team2GameRank,
+  );
+
+  const completedPrior = priorMeetings.filter(
+    (meeting) =>
+      numericScore(meeting?.team1Score) !== null &&
+      numericScore(meeting?.team2Score) !== null,
+  );
+
+  let historyParagraph = null;
+
+  if (completedPrior.length > 0) {
+    let team1Wins = 0;
+    let team2Wins = 0;
+
+    completedPrior.forEach((meeting) => {
+      const winnerId = historyWinnerId(meeting);
+
+      if (winnerId === game.team1Id) team1Wins += 1;
+      else if (winnerId === game.team2Id) team2Wins += 1;
+    });
+
+    const seriesText =
+      team1Wins === team2Wins
+        ? `The permanent franchises enter Week ${week} tied ${team1Wins}–${team2Wins} in their archived series`
+        : team1Wins > team2Wins
+          ? `${game.team1Team}'s permanent franchise leads the archived series ${team1Wins}–${team2Wins}`
+          : `${game.team2Team}'s permanent franchise leads the archived series ${team2Wins}–${team1Wins}`;
+
+    const last = completedPrior[0];
+
+    historyParagraph =
+      `${seriesText}. Their most recent archived meeting was ${last.season}, Week ${last.week}, ` +
+      `when ${last.team1Team} and ${last.team2Team} finished ` +
+      `${Number(last.team1Score).toFixed(1)}–${Number(last.team2Score).toFixed(1)}.`;
+  }
+
+  return {
+    category: "NFL",
+    tierClass: "nfl",
+    patch: MESH_PATCHES.tier.NFL,
+    gameId: game.gameId,
+    title: `${team1Label} and ${team2Label} headline Week ${week}`,
+    summary:
+      `${game.team1Coach || game.team1Team} and ${game.team2Coach || game.team2Team} meet in the NFL Game of the Week as the next MESH slate comes into focus.`,
+    fullStory: [
+      `The NFL spotlight shifts to ${team1Label} against ${team2Label}. With promotion and relegation pressure building across MESH, every result can quickly reshape the race.`,
+      historyParagraph,
+    ].filter(Boolean),
+    time: `Week ${week} preview`,
+    footer: "NFL Game of the Week",
+  };
+}
+
+function buildUpcomingFbsStory(game, week) {
+  if (!game) return null;
+
+  const team1Label = formatUpcomingTeamLabel(
+    game.team1Team,
+    game.team1GameRank,
+  );
+  const team2Label = formatUpcomingTeamLabel(
+    game.team2Team,
+    game.team2GameRank,
+  );
+
+  const rank1 = Number(game.team1GameRank) || 0;
+  const rank2 = Number(game.team2GameRank) || 0;
+  const hasRankedTeam =
+    (rank1 >= 1 && rank1 <= 25) ||
+    (rank2 >= 1 && rank2 <= 25);
+
+  return {
+    category: "FBS",
+    tierClass: "fbs",
+    patch: MESH_PATCHES.tier.FBS,
+    gameId: game.gameId,
+    title: hasRankedTeam
+      ? `${team1Label} vs. ${team2Label} carries Top 25 weight`
+      : `${team1Label} and ${team2Label} enter a pivotal FBS week`,
+    summary:
+      hasRankedTeam
+        ? `Week ${week} brings another ranking test as the FBS Top 25 and CFP race continue to take shape.`
+        : `Week ${week} brings another chance for FBS contenders to strengthen their conference and promotion résumés.`,
+    fullStory: [
+      `The FBS picture can move quickly once Week ${week} begins. Conference position, national ranking, and the race for four promotion places all give this matchup added importance.`,
+      Number(game.featuredRank) === 1
+        ? `This matchup has also been selected as the FBS Game of the Week.`
+        : `A strong result here could become one of the résumé-building wins that matters later in the season.`,
+    ],
+    time: `Week ${week} preview`,
+    footer: hasRankedTeam ? "Top 25 watch" : "FBS race",
+  };
+}
+
+function buildUpcomingFcsStory(game, week) {
+  if (!game) return null;
+
+  const team1Label = formatUpcomingTeamLabel(
+    game.team1Team,
+    game.team1GameRank,
+  );
+  const team2Label = formatUpcomingTeamLabel(
+    game.team2Team,
+    game.team2GameRank,
+  );
+
+  return {
+    category: "FCS",
+    tierClass: "fcs",
+    patch: MESH_PATCHES.tier.FCS,
+    gameId: game.gameId,
+    title: `${team1Label} and ${team2Label} meet with promotion points at stake`,
+    summary:
+      `The Week ${week} FCS slate puts another important result on the board in a tier where eight coaches can earn promotion to the FBS.`,
+    fullStory: [
+      `The FCS promotion race rewards consistency, and every Week ${week} result can change the order behind the leaders. This matchup gives both sides another chance to improve their position.`,
+      Number(game.featuredRank) === 1
+        ? `MESH has selected this matchup as the FCS Game of the Week.`
+        : `The deeper the season goes, the more valuable wins like this become in the promotion conversation.`,
+    ],
+    time: `Week ${week} preview`,
+    footer: "Promotion watch",
+  };
+}
+
+
 function chooseHeadlineGame(games, tier, week) {
   const tierGames = games.filter(
     (game) => game.tier === tier && Number(game.week) === Number(week),
@@ -1214,9 +1409,17 @@ function Home() {
         if (openingGame) targetGames.push(openingGame);
       } else {
         ["NFL", "FBS", "FCS"].forEach((tier) => {
-          const game = chooseHeadlineGame(games, tier, currentWeek - 1);
-          if (game) targetGames.push(game);
+          const recapGame = chooseHeadlineGame(games, tier, currentWeek - 1);
+          if (recapGame) targetGames.push(recapGame);
         });
+
+        const upcomingNflGame = getBestUpcomingGame(
+          games,
+          "NFL",
+          currentWeek,
+        );
+
+        if (upcomingNflGame) targetGames.push(upcomingNflGame);
       }
 
       const uniqueGames = targetGames.filter(
@@ -1423,6 +1626,33 @@ function Home() {
 
   const previousWeek = currentWeek - 1;
 
+  const showUpcomingHeadlines = useMemo(() => {
+    if (currentWeek <= 1) return false;
+
+    const day = new Date().getDay();
+
+    // Thursday through Monday. Tuesday/Wednesday remain recap-only.
+    return day === 4 || day === 5 || day === 6 || day === 0 || day === 1;
+  }, [currentWeek]);
+
+  const upcomingHeadlines = useMemo(() => {
+    if (!showUpcomingHeadlines) return [];
+
+    const nflGame = getBestUpcomingGame(games, "NFL", currentWeek);
+    const fbsGame = getBestUpcomingGame(games, "FBS", currentWeek);
+    const fcsGame = getBestUpcomingGame(games, "FCS", currentWeek);
+
+    return [
+      buildUpcomingNflStory(
+        nflGame,
+        currentWeek,
+        headlineHistory[nflGame?.gameId] ?? [],
+      ),
+      buildUpcomingFbsStory(fbsGame, currentWeek),
+      buildUpcomingFcsStory(fcsGame, currentWeek),
+    ].filter(Boolean);
+  }, [games, currentWeek, showUpcomingHeadlines, headlineHistory]);
+
   const weeklyHighScorers = useMemo(() => {
     if (previousWeek < 1) {
       return { NFL: null, FBS: null, FCS: null };
@@ -1527,26 +1757,75 @@ function Home() {
           eyebrow={
             currentWeek <= 1
               ? "Opening week storylines"
-              : `Biggest stories from Week ${currentWeek - 1}`
+              : showUpcomingHeadlines
+                ? `Thursday preview • Week ${currentWeek}`
+                : `Biggest stories from Week ${currentWeek - 1}`
           }
           title="MESH Headlines"
         />
 
         {homeLoading ? (
           <div className="home-loading-card">Loading MESH headlines…</div>
-        ) : headlines.length > 0 ? (
-          <div className="headlines-grid">
-            {headlines.map((headline) => (
-              <HeadlineCard
-                key={`${headline.category}-${headline.gameId}`}
-                headline={headline}
-              />
-            ))}
-          </div>
         ) : (
-          <div className="home-loading-card">
-            Headlines will appear once featured matchups are available.
-          </div>
+          <>
+            {showUpcomingHeadlines && upcomingHeadlines.length > 0 ? (
+              <div className="home-headline-group">
+                <div
+                  style={{
+                    margin: "0 0 10px",
+                    fontSize: ".63rem",
+                    fontWeight: 900,
+                    letterSpacing: ".08em",
+                    textTransform: "uppercase",
+                    color: "#9cadbd",
+                  }}
+                >
+                  Looking Ahead to Week {currentWeek}
+                </div>
+
+                <div className="headlines-grid">
+                  {upcomingHeadlines.map((headline) => (
+                    <HeadlineCard
+                      key={`upcoming-${headline.category}-${headline.gameId}`}
+                      headline={headline}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {headlines.length > 0 ? (
+              <div className="home-headline-group">
+                {currentWeek > 1 ? (
+                  <div
+                    style={{
+                      margin: showUpcomingHeadlines ? "20px 0 10px" : "0 0 10px",
+                      fontSize: ".63rem",
+                      fontWeight: 900,
+                      letterSpacing: ".08em",
+                      textTransform: "uppercase",
+                      color: "#9cadbd",
+                    }}
+                  >
+                    Week {currentWeek - 1} Recap
+                  </div>
+                ) : null}
+
+                <div className="headlines-grid">
+                  {headlines.map((headline) => (
+                    <HeadlineCard
+                      key={`recap-${headline.category}-${headline.gameId}`}
+                      headline={headline}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="home-loading-card">
+                Headlines will appear once featured matchups are available.
+              </div>
+            )}
+          </>
         )}
       </section>
 

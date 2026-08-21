@@ -11,6 +11,11 @@ const internalLinks = [
     description: "Official MESH Football rules and league structure",
     path: "/rules",
   },
+  {
+    name: "Sleeper Leagues",
+    description: "Open all 15 individual MESH Sleeper leagues",
+    path: "/league-links",
+  },
 ];
 
 const futureSections = [
@@ -29,10 +34,6 @@ const futureSections = [
   {
     name: "Trophy Rooms",
     description: "Team championships, awards and achievements",
-  },
-  {
-    name: "League Links",
-    description: "Open each of the 15 individual Sleeper leagues",
   },
 ];
 

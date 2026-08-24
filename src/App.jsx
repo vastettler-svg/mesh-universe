@@ -12,6 +12,8 @@ import History from "./pages/History";
 import GameCenter from "./pages/GameCenter";
 import RulesInfo from "./pages/RulesInfo";
 import LeagueLinks from "./pages/LeagueLinks";
+import FranchiseDirectory from "./pages/FranchiseDirectory";
+import FranchiseProfile from "./pages/FranchiseProfile";
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
         <Route path="/scores/:gameId" element={<GameCenter />} />
         <Route path="/standings" element={<Standings />} />
         <Route path="/league" element={<League />} />
+        <Route path="/league/franchises" element={<FranchiseDirectory />} />
+        <Route path="/league/franchises/:franchiseId" element={<FranchiseProfile />} />
         <Route path="/stats" element={<Stats />} />
         <Route path="/more" element={<More />} />
         <Route path="/history" element={<History />} />

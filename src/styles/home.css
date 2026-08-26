@@ -2199,3 +2199,65 @@
     gap: 0;
   }
 }
+
+/* =========================================================
+   PHASE 3D — HOME PROFILE LINKS
+========================================================= */
+
+.home-clickable-card {
+  cursor: pointer;
+}
+
+.home-clickable-card:focus-visible {
+  outline: 1px solid rgba(255,255,255,.32);
+  outline-offset: 3px;
+}
+
+.home-franchise-logo-link,
+.home-franchise-name-link,
+.home-coach-name-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-franchise-logo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+}
+
+.home-franchise-name-link {
+  font: inherit;
+  line-height: inherit;
+}
+
+.home-franchise-logo-link:hover,
+.home-franchise-logo-link:focus-visible {
+  filter: brightness(1.08);
+}
+
+.home-franchise-name-link:hover,
+.home-franchise-name-link:focus-visible,
+.home-coach-name-link:hover,
+.home-coach-name-link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.home-franchise-logo-link:focus-visible,
+.home-franchise-name-link:focus-visible,
+.home-coach-name-link:focus-visible {
+  outline: 1px solid rgba(255,255,255,.3);
+  outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  .home-clickable-card,
+  .home-franchise-logo-link,
+  .home-franchise-name-link,
+  .home-coach-name-link {
+    -webkit-tap-highlight-color: transparent;
+  }
+}

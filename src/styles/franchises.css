@@ -1695,3 +1695,116 @@
   visibility: hidden;
 }
 
+
+
+/* =========================================================
+   FRANCHISE PROFILE — FINAL POLISH PATCH
+========================================================= */
+
+.franchise-profile-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.franchise-profile-meta-row .franchise-profile-coach {
+  margin-top: 0;
+}
+
+.franchise-profile-prestige {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 11px;
+  border: 1px solid rgba(239,200,90,.12);
+  border-radius: 10px;
+  background: rgba(239,200,90,.035);
+}
+
+.franchise-profile-prestige > svg {
+  flex: 0 0 auto;
+  color: #efc85a;
+}
+
+.franchise-profile-prestige div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.franchise-profile-prestige span {
+  font-size: .42rem;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: #8d814f;
+}
+
+.franchise-profile-prestige strong {
+  font-size: .61rem;
+  color: #fff;
+}
+
+/* Let current-season labels use two lines rather than ellipsis. */
+.franchise-hero-current span {
+  min-height: 2.25em;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+
+/* Pull historical identity closer to the season year. */
+.franchise-season-card {
+  grid-template-columns: 58px minmax(190px, 1fr) minmax(250px, auto) !important;
+  column-gap: 8px !important;
+}
+
+@media (max-width: 850px) {
+  .franchise-season-card {
+    grid-template-columns: 50px minmax(0, 1fr) !important;
+    column-gap: 7px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .franchise-profile-meta-row {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .franchise-profile-meta-row > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .franchise-season-card {
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+    column-gap: 6px !important;
+  }
+
+  .franchise-hero-current span {
+    font-size: .30rem;
+  }
+}
+
+/* =========================================================
+   PHASE 3E — FRANCHISE ↔ COACH CROSS-LINKS
+========================================================= */
+
+.franchise-current-coach-link {
+  color: #fff;
+  font-size: inherit;
+  font-weight: inherit;
+  text-decoration: none;
+}
+
+.franchise-current-coach-link:hover,
+.franchise-current-coach-link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+

@@ -492,6 +492,7 @@ function createTeamLookup(rows, brandingLookup = new Map()) {
         {
           franchiseId,
           name: String(row.Franchise_Name ?? "").trim(),
+          coachId: String(row.Coach_ID ?? "").trim(),
           coach: String(row.Coach_Name ?? "").trim(),
           logo:
             getTeamLogoOverride(String(row.Franchise_Name ?? "").trim()) ||
@@ -941,6 +942,7 @@ export async function getGameResults(options = {}) {
           .trim()
           .charAt(0)
           .toUpperCase(),
+        team1CoachId: team1.coachId || "",
         team1Coach: team1.coach || "",
         team1Logo:
           (isHistoricalSeason
@@ -981,6 +983,7 @@ export async function getGameResults(options = {}) {
           .trim()
           .charAt(0)
           .toUpperCase(),
+        team2CoachId: team2.coachId || "",
         team2Coach: team2.coach || "",
         team2Logo:
           (isHistoricalSeason

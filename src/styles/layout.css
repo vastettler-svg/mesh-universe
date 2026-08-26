@@ -307,3 +307,80 @@
     width: 100%;
   }
 }
+
+/* =========================================================
+   UNIVERSAL HISTORY-AWARE BACK NAVIGATION
+========================================================= */
+
+.universal-back-row {
+  width: 100%;
+  margin: 0 0 8px;
+}
+
+.universal-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  min-height: 32px;
+  padding: 4px 2px;
+
+  border: 0;
+  border-radius: 7px;
+
+  color: #94a5b4;
+  background: transparent;
+
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 850;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.universal-back-button:hover,
+.universal-back-button:focus-visible {
+  color: var(--color-white);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.universal-back-button:active {
+  transform: translateX(-2px);
+}
+
+.universal-back-button:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.28);
+  outline-offset: 2px;
+}
+
+/*
+ * These pages already had older destination-specific back controls.
+ * AppShell now owns back navigation, so hide the old controls whenever
+ * the universal history-aware Back button is active.
+ *
+ * Keeping the old page code intact makes this patch low-risk and easy
+ * to reverse; we are changing navigation presentation, not page logic.
+ */
+.app-shell-has-universal-back .game-center-back,
+.app-shell-has-universal-back .franchise-back-link,
+.app-shell-has-universal-back .coach-back-link {
+  display: none !important;
+}
+
+@media (max-width: 560px) {
+  .universal-back-row {
+    margin-bottom: 5px;
+  }
+
+  .universal-back-button {
+    min-height: 30px;
+    font-size: 0.58rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+}

@@ -14,6 +14,8 @@ import RulesInfo from "./pages/RulesInfo";
 import LeagueLinks from "./pages/LeagueLinks";
 import FranchiseDirectory from "./pages/FranchiseDirectory";
 import FranchiseProfile from "./pages/FranchiseProfile";
+import CoachDirectory from "./pages/CoachDirectory";
+import CoachProfile from "./pages/CoachProfile";
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
         <Route path="/league" element={<League />} />
         <Route path="/league/franchises" element={<FranchiseDirectory />} />
         <Route path="/league/franchises/:franchiseId" element={<FranchiseProfile />} />
+        <Route path="/league/coaches" element={<CoachDirectory />} />
+        <Route path="/league/coaches/:coachId" element={<CoachProfile />} />
         <Route path="/stats" element={<Stats />} />
         <Route path="/more" element={<More />} />
         <Route path="/history" element={<History />} />

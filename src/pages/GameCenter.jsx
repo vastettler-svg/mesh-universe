@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   Activity,
   ArrowLeft,
@@ -173,6 +173,8 @@ function TeamSide({
   side,
   team,
   coach,
+  franchiseId,
+  coachId,
   conference,
   overallRecord,
   conferenceRecord,
@@ -197,19 +199,56 @@ function TeamSide({
         isLoser ? "loser" : "",
       ].filter(Boolean).join(" ")}
     >
-      <TeamLogo
-        src={logo}
-        initial={initial}
-        team={team || "TBD"}
-        rank={rank}
-      />
+      {franchiseId ? (
+        <Link
+          className="game-center-profile-logo-link"
+          to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
+          aria-label={`Open ${team || "franchise"} profile`}
+        >
+          <TeamLogo
+            src={logo}
+            initial={initial}
+            team={team || "TBD"}
+            rank={rank}
+          />
+        </Link>
+      ) : (
+        <TeamLogo
+          src={logo}
+          initial={initial}
+          team={team || "TBD"}
+          rank={rank}
+        />
+      )}
 
       <div className="game-center-team-side-copy">
         <h2 className="game-center-team-name">
-          <span>{team || "TBD"}</span>
+          {franchiseId ? (
+            <Link
+              className="game-center-franchise-link"
+              to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
+            >
+              {team || "TBD"}
+            </Link>
+          ) : (
+            <span>{team || "TBD"}</span>
+          )}
         </h2>
 
-        {coach ? <p className="game-center-coach">{coach}</p> : null}
+        {coach ? (
+          <p className="game-center-coach">
+            {coachId ? (
+              <Link
+                className="game-center-coach-link"
+                to={`/league/coaches/${encodeURIComponent(coachId)}`}
+              >
+                {coach}
+              </Link>
+            ) : (
+              coach
+            )}
+          </p>
+        ) : null}
 
         <div className="game-center-records">
           {isCollege ? (
@@ -349,6 +388,8 @@ function MatchupCard({ game, winnerState, rosters }) {
           side="one"
           team={game.team1Team}
           coach={game.team1Coach}
+          franchiseId={game.team1Id}
+          coachId={game.team1CoachId}
           conference={game.team1Conference}
           overallRecord={game.team1OverallRecord}
           conferenceRecord={game.team1ConferenceRecord}
@@ -373,6 +414,8 @@ function MatchupCard({ game, winnerState, rosters }) {
           side="two"
           team={game.team2Team}
           coach={game.team2Coach}
+          franchiseId={game.team2Id}
+          coachId={game.team2CoachId}
           conference={game.team2Conference}
           overallRecord={game.team2OverallRecord}
           conferenceRecord={game.team2ConferenceRecord}
@@ -613,6 +656,10 @@ function buildDetailedSeriesHistory(game, history = []) {
       winnerName,
       season: meeting.season,
       week: meeting.week,
+      leftName: oriented.leftName,
+      rightName: oriented.rightName,
+      leftScore: oriented.leftScore,
+      rightScore: oriented.rightScore,
     };
 
     if (!largest || margin > largest.margin) {
@@ -628,6 +675,10 @@ function buildDetailedSeriesHistory(game, history = []) {
         total,
         season: meeting.season,
         week: meeting.week,
+        leftName: oriented.leftName,
+        rightName: oriented.rightName,
+        leftScore: oriented.leftScore,
+        rightScore: oriented.rightScore,
       };
     }
   });
@@ -673,6 +724,10 @@ function buildDetailedSeriesHistory(game, history = []) {
     ties,
     seriesLeader,
     lastMeeting,
+    lastMeetingLeftName: orientedLast.leftName,
+    lastMeetingRightName: orientedLast.rightName,
+    lastMeetingLeftScore: orientedLast.leftScore,
+    lastMeetingRightScore: orientedLast.rightScore,
     lastMeetingScore,
     lastMeetingTeams:
       `${orientedLast.leftName} – ${orientedLast.rightName}`,
@@ -686,6 +741,8 @@ function buildDetailedSeriesHistory(game, history = []) {
         : streakTeam
           ? "Won last meeting"
           : "No active streak",
+    streakSeason: completed[0]?.season,
+    streakWeek: completed[0]?.week,
     largest,
     closest,
     highestScoring,
@@ -745,47 +802,98 @@ function SeriesHistoryPanel({ game, history }) {
       <div className="game-center-series-stat-grid">
         <div className="game-center-series-stat-card">
           <span>Last Meeting</span>
-          <strong>{stats.lastMeeting.season} • Week {stats.lastMeeting.week}</strong>
-          <em>{stats.lastMeetingScore}</em>
-          <small>{stats.lastMeetingTeams}</small>
+
+          <div className="game-center-series-team-score">
+            <strong>{stats.lastMeetingLeftName}</strong>
+            <strong>{stats.lastMeetingLeftScore.toFixed(1)}</strong>
+          </div>
+
+          <div className="game-center-series-team-score">
+            <strong>{stats.lastMeetingRightName}</strong>
+            <strong>{stats.lastMeetingRightScore.toFixed(1)}</strong>
+          </div>
+
+          <small>{stats.lastMeeting.season} • Week {stats.lastMeeting.week}</small>
         </div>
 
         <div className="game-center-series-stat-card">
           <span>Current Streak</span>
-          <strong>{stats.streakHeadline}</strong>
-          <em>{stats.streakSubtext}</em>
+
+          <div className="game-center-series-single-team">
+            <strong>{stats.streakHeadline.replace(/\sW\d+$/, "")}</strong>
+          </div>
+
+          <div className="game-center-series-major-stat">
+            {stats.streakHeadline.match(/W\d+$/)?.[0] || "—"}
+          </div>
+
+          <small>{stats.streakSeason} • Week {stats.streakWeek}</small>
         </div>
 
         <div className="game-center-series-stat-card">
           <span>Largest Win</span>
-          <strong>
-            {stats.largest.winnerName} +{stats.largest.margin.toFixed(1)}
-          </strong>
-          <em>{stats.largest.season} • Week {stats.largest.week}</em>
+
+          <div className="game-center-series-single-team">
+            <strong>{stats.largest.winnerName}</strong>
+          </div>
+
+          <div className="game-center-series-major-stat">
+            +{stats.largest.margin.toFixed(1)}
+          </div>
+
+          <small>{stats.largest.season} • Week {stats.largest.week}</small>
         </div>
 
         <div className="game-center-series-stat-card">
           <span>Closest Meeting</span>
-          <strong>
-            {stats.closest.winnerName} +{stats.closest.margin.toFixed(1)}
-          </strong>
-          <em>{stats.closest.season} • Week {stats.closest.week}</em>
+
+          <div className="game-center-series-single-team">
+            <strong>{stats.closest.winnerName}</strong>
+          </div>
+
+          <div className="game-center-series-major-stat">
+            +{stats.closest.margin.toFixed(1)}
+          </div>
+
+          <small>{stats.closest.season} • Week {stats.closest.week}</small>
         </div>
 
         <div className="game-center-series-stat-card">
           <span>Highest-Scoring Meeting</span>
-          <strong>{stats.highestScoring.total.toFixed(1)} Combined</strong>
-          <em>
+
+          <div className="game-center-series-single-team">
+            <strong>
+              {stats.highestScoring.leftScore >= stats.highestScoring.rightScore
+                ? stats.highestScoring.leftName
+                : stats.highestScoring.rightName}
+            </strong>
+          </div>
+
+          <div className="game-center-series-major-stat">
+            {stats.highestScoring.total.toFixed(1)} Combined
+          </div>
+
+          <small>
             {stats.highestScoring.season} • Week {stats.highestScoring.week}
-          </em>
+          </small>
         </div>
 
         <div className="game-center-series-stat-card">
           <span>Average Score</span>
-          <strong>
-            {stats.averageLeft.toFixed(1)} – {stats.averageRight.toFixed(1)}
-          </strong>
-          <em>{game.team1Team} – {game.team2Team}</em>
+
+          <div className="game-center-series-team-score">
+            <strong>{game.team1Team}</strong>
+            <strong>{stats.averageLeft.toFixed(1)}</strong>
+          </div>
+
+          <div className="game-center-series-team-score">
+            <strong>{game.team2Team}</strong>
+            <strong>{stats.averageRight.toFixed(1)}</strong>
+          </div>
+
+          <small>
+            All {stats.meetings} Previous Meeting{stats.meetings === 1 ? "" : "s"}
+          </small>
         </div>
       </div>
 

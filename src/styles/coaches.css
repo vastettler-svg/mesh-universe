@@ -1,0 +1,1403 @@
+/* =========================================================
+   MESH COACH DIRECTORY + ACTIVE COACH PROFILE — PHASE 1
+========================================================= */
+
+.coach-directory-page,
+.coach-profile-page {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  padding: 0 0 34px;
+}
+
+.coach-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 3px 0 11px;
+  color: #8ea0ae;
+  font-size: .55rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+/* Directory */
+
+.coach-directory-controls {
+  margin-top: 18px;
+}
+
+.coach-tier-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.coach-tier-tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 12px 13px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  text-align: left;
+  color: #dce6ef;
+  background: rgba(255,255,255,.025);
+  cursor: pointer;
+}
+
+.coach-tier-tab::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  opacity: 0;
+}
+
+.coach-tier-tab-nfl::after { background: #24bd78; }
+.coach-tier-tab-fbs::after { background: #4287ff; }
+.coach-tier-tab-fcs::after { background: #9c67ff; }
+
+.coach-tier-tab.active {
+  border-color: rgba(255,255,255,.16);
+  background: linear-gradient(145deg, rgba(26,49,72,.97), rgba(10,24,39,.99));
+}
+
+.coach-tier-tab.active::after {
+  opacity: 1;
+}
+
+.coach-tier-tab strong {
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: .86rem;
+  font-weight: 400;
+}
+
+.coach-tier-tab span {
+  color: #8295a6;
+  font-size: .45rem;
+  font-weight: 800;
+}
+
+.coach-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 46px;
+  margin-top: 9px;
+  padding: 0 13px;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 12px;
+  color: #7f93a5;
+  background: rgba(7,21,35,.72);
+}
+
+.coach-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #fff;
+  background: transparent;
+  font-size: .66rem;
+}
+
+.coach-directory-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 9px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 10px;
+  background: rgba(255,255,255,.018);
+}
+
+.coach-directory-summary > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #7e92a2;
+  font-size: .5rem;
+}
+
+.coach-directory-summary strong {
+  color: #fff;
+  font-size: .6rem;
+}
+
+.coach-directory-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.coach-directory-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 88px;
+  overflow: hidden;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 13px;
+  color: inherit;
+  text-decoration: none;
+  background: linear-gradient(145deg, rgba(20,39,58,.96), rgba(9,22,36,.99));
+  transition: transform .16s ease, border-color .16s ease;
+}
+
+.coach-directory-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,.14);
+}
+
+.coach-directory-card-accent {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+}
+
+.coach-directory-card-nfl .coach-directory-card-accent { background: #24bd78; }
+.coach-directory-card-fbs .coach-directory-card-accent { background: #4287ff; }
+.coach-directory-card-fcs .coach-directory-card-accent { background: #9c67ff; }
+
+.coach-directory-avatar {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 50%;
+  color: #9cb1c2;
+  background: rgba(255,255,255,.035);
+}
+
+.coach-directory-copy {
+  min-width: 0;
+}
+
+.coach-directory-copy > span {
+  display: block;
+  margin-bottom: 3px;
+  color: #73899a;
+  font-size: .42rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.coach-directory-copy > strong {
+  display: block;
+  overflow: hidden;
+  color: #fff;
+  font-size: .69rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coach-directory-team {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  margin-top: 4px;
+  color: #8fa1af;
+  font-size: .49rem;
+}
+
+.coach-directory-team img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.coach-directory-team span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coach-directory-record {
+  text-align: right;
+}
+
+.coach-directory-record span {
+  display: block;
+  color: #708596;
+  font-size: .40rem;
+  font-weight: 900;
+}
+
+.coach-directory-record strong {
+  display: block;
+  margin-top: 3px;
+  color: #fff;
+  font-size: .62rem;
+}
+
+.coach-directory-card > svg {
+  color: #71889a;
+}
+
+.coach-directory-state,
+.coach-profile-state {
+  display: grid;
+  place-items: center;
+  min-height: 170px;
+  margin-top: 18px;
+  padding: 22px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+  color: #93a4b2;
+  text-align: center;
+  background: rgba(255,255,255,.018);
+}
+
+.coach-directory-error {
+  color: #ff7e88;
+}
+
+/* Profile hero */
+
+.coach-profile-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+  min-height: 240px;
+  overflow: hidden;
+  padding: 25px 28px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--coach-primary) 25%, transparent), transparent 35%),
+    radial-gradient(circle at 90% 20%, color-mix(in srgb, var(--coach-secondary) 22%, transparent), transparent 33%),
+    linear-gradient(145deg, rgba(19,42,65,.98), rgba(7,21,35,.99));
+  box-shadow: 0 15px 35px rgba(0,0,0,.18);
+}
+
+.coach-profile-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+}
+
+.coach-profile-hero-nfl::before { background: #24bd78; }
+.coach-profile-hero-fbs::before { background: #4287ff; }
+.coach-profile-hero-fcs::before { background: #9c67ff; }
+
+.coach-profile-hero-glow {
+  position: absolute;
+  right: -140px;
+  bottom: -180px;
+  width: 330px;
+  height: 330px;
+  border: 1px solid rgba(255,255,255,.04);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 35px rgba(255,255,255,.012),
+    0 0 0 70px rgba(255,255,255,.008);
+}
+
+.coach-profile-avatar {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 140px;
+  height: 140px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 50%;
+  color: #b7c5d1;
+  background: rgba(255,255,255,.025);
+}
+
+.coach-profile-identity {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+}
+
+.coach-profile-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 7px;
+  color: #93a9ba;
+  font-size: .51rem;
+  font-weight: 900;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.coach-profile-identity h1 {
+  margin: 0;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: clamp(1.75rem, 5vw, 3.15rem);
+  font-weight: 400;
+  line-height: 1.03;
+  color: #fff;
+}
+
+.coach-profile-current-team {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 15px;
+  padding: 8px 11px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 10px;
+  background: rgba(255,255,255,.025);
+}
+
+.coach-profile-current-team img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.coach-profile-current-team div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.coach-profile-current-team span {
+  color: #74899a;
+  font-size: .41rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.coach-profile-current-team a {
+  color: #fff;
+  font-size: .62rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.coach-profile-current-team a:hover {
+  text-decoration: underline;
+}
+
+.coach-profile-top-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.coach-current-stat {
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 9px;
+  background: rgba(255,255,255,.018);
+}
+
+.coach-current-stat span {
+  display: block;
+  color: #718697;
+  font-size: .39rem;
+  font-weight: 900;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+.coach-current-stat strong {
+  display: block;
+  margin-top: 4px;
+  color: #fff;
+  font-size: .63rem;
+}
+
+.coach-current-stat small {
+  display: block;
+  margin-top: 2px;
+  color: #728696;
+  font-size: .40rem;
+}
+
+/* Profile sections */
+
+.coach-profile-section {
+  margin-top: 25px;
+}
+
+.coach-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 2px 9px;
+}
+
+.coach-section-heading span {
+  display: block;
+  margin-bottom: 3px;
+  color: #8195a6;
+  font-size: .48rem;
+  font-weight: 900;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.coach-section-heading h2 {
+  margin: 0;
+  font-family: var(--heading-font, "Graduate", serif);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.coach-section-heading small {
+  color: #718596;
+  font-size: .47rem;
+}
+
+.coach-trophy-section {
+  margin-top: 18px;
+}
+
+.coach-trophy-entry {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-height: 116px;
+  padding: 16px;
+  border: 1px solid rgba(239,200,90,.11);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 8% 50%, rgba(239,200,90,.09), transparent 30%),
+    linear-gradient(145deg, rgba(24,43,61,.97), rgba(9,22,35,.99));
+}
+
+.coach-trophy-icon {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border: 1px solid rgba(239,200,90,.13);
+  border-radius: 50%;
+  color: #efc85a;
+  background: rgba(239,200,90,.055);
+}
+
+.coach-trophy-entry > div:nth-child(2) > span {
+  color: #9d884d;
+  font-size: .42rem;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.coach-trophy-entry strong {
+  display: block;
+  margin-top: 3px;
+  color: #fff;
+  font-size: .67rem;
+}
+
+.coach-trophy-entry p {
+  margin: 5px 0 0;
+  max-width: 720px;
+  color: #8296a6;
+  font-size: .47rem;
+  line-height: 1.5;
+}
+
+.coach-trophy-entry > svg {
+  color: #927c42;
+}
+
+.coach-career-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.coach-career-stat {
+  min-height: 112px;
+  padding: 13px;
+  border: 1px solid rgba(255,255,255,.065);
+  border-radius: 13px;
+  background: linear-gradient(145deg, rgba(20,39,58,.95), rgba(9,22,36,.99));
+}
+
+.coach-career-stat > svg {
+  margin-bottom: 10px;
+  color: #849aaa;
+}
+
+.coach-career-stat > span {
+  display: block;
+  color: #73899a;
+  font-size: .43rem;
+  font-weight: 900;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+.coach-career-stat > strong {
+  display: block;
+  margin-top: 6px;
+  color: #fff;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.coach-career-stat > small {
+  display: block;
+  margin-top: 4px;
+  color: #708495;
+  font-size: .43rem;
+  line-height: 1.4;
+}
+
+.coach-current-tenure,
+.coach-franchise-stop {
+  display: grid;
+  grid-template-columns: 105px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border: 1px solid rgba(255,255,255,.065);
+  border-radius: 12px;
+  background: rgba(255,255,255,.02);
+}
+
+.coach-current-tenure > span,
+.coach-franchise-stop > div:nth-child(2) > span {
+  color: #73899a;
+  font-size: .43rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.coach-current-tenure-team {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.coach-current-tenure-team img,
+.coach-franchise-stop-logo img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.coach-current-tenure-team div,
+.coach-franchise-stop > div:nth-child(2) {
+  min-width: 0;
+}
+
+.coach-current-tenure-team strong,
+.coach-franchise-stop strong {
+  display: block;
+  overflow: hidden;
+  color: #fff;
+  font-size: .62rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coach-current-tenure-team small,
+.coach-franchise-stop small {
+  display: block;
+  margin-top: 2px;
+  color: #788d9d;
+  font-size: .45rem;
+}
+
+.coach-current-tenure > strong {
+  color: #fff;
+  font-size: .61rem;
+}
+
+.coach-profile-coming-note {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px dashed rgba(255,255,255,.07);
+  border-radius: 10px;
+  color: #718696;
+  background: rgba(255,255,255,.012);
+  font-size: .47rem;
+  line-height: 1.5;
+}
+
+.coach-franchise-stop {
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  color: inherit;
+  text-decoration: none;
+}
+
+.coach-franchise-stop:hover {
+  border-color: rgba(255,255,255,.13);
+}
+
+.coach-franchise-stop-logo {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.025);
+}
+
+.coach-franchise-stop > svg {
+  color: #718899;
+}
+
+@media (max-width: 720px) {
+  .coach-directory-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .coach-profile-hero {
+    grid-template-columns: 95px minmax(0, 1fr);
+    gap: 15px;
+    min-height: 200px;
+    padding: 19px 16px;
+  }
+
+  .coach-profile-avatar {
+    width: 90px;
+    height: 90px;
+  }
+
+  .coach-profile-avatar svg {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 560px) {
+  .coach-tier-tab {
+    padding: 10px 8px;
+  }
+
+  .coach-tier-tab strong {
+    font-size: .73rem;
+  }
+
+  .coach-tier-tab span {
+    font-size: .38rem;
+  }
+
+  .coach-directory-card {
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+  }
+
+  .coach-directory-card > svg {
+    display: none;
+  }
+
+  .coach-directory-record {
+    min-width: 38px;
+  }
+
+  .coach-profile-hero {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 12px;
+    padding: 16px 13px;
+  }
+
+  .coach-profile-avatar {
+    width: 68px;
+    height: 68px;
+  }
+
+  .coach-profile-avatar svg {
+    width: 31px;
+    height: 31px;
+  }
+
+  .coach-profile-identity h1 {
+    font-size: clamp(1.25rem, 7vw, 1.8rem);
+  }
+
+  .coach-profile-current-team {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .coach-profile-top-stats {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .coach-current-stat {
+    padding-inline: 7px;
+  }
+
+  .coach-current-stat span {
+    min-height: 2.2em;
+    line-height: 1.1;
+  }
+
+  .coach-section-heading {
+    align-items: flex-start;
+  }
+
+  .coach-section-heading small {
+    max-width: 145px;
+    text-align: right;
+  }
+
+  .coach-trophy-entry {
+    grid-template-columns: 50px minmax(0, 1fr);
+  }
+
+  .coach-trophy-icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .coach-trophy-entry > svg {
+    display: none;
+  }
+
+  .coach-career-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .coach-current-tenure {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .coach-current-tenure > strong {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 380px) {
+  .coach-career-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   UNIVERSAL COACH PROFILE TEMPLATE
+========================================================= */
+
+.coach-overall-career-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.coach-career-stat-clean {
+  min-height: 96px;
+}
+
+.coach-career-stat-clean > span {
+  min-height: 2.25em;
+  line-height: 1.15;
+}
+
+.coach-tier-career-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.coach-tier-career-card {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 15px;
+  background:
+    linear-gradient(145deg, rgba(20,39,58,.97), rgba(9,22,36,.99));
+}
+
+.coach-tier-career-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--coach-tier-accent);
+}
+
+.coach-tier-career-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 15px 14px 13px;
+  border-bottom: 1px solid rgba(255,255,255,.065);
+}
+
+.coach-tier-career-heading > div {
+  min-width: 0;
+}
+
+.coach-tier-career-heading span {
+  display: block;
+  color: var(--coach-tier-accent);
+  font-size: .45rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.coach-tier-career-heading h3 {
+  margin: 3px 0 0;
+  color: #fff;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: .76rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.coach-tier-career-heading > strong {
+  flex: 0 0 auto;
+  min-width: 31px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255,255,255,.025);
+  font-size: .58rem;
+  text-align: center;
+}
+
+.coach-tier-career-rows {
+  display: grid;
+}
+
+.coach-tier-career-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 9px 13px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+
+.coach-tier-career-row:last-child {
+  border-bottom: 0;
+}
+
+.coach-tier-career-row > span {
+  min-width: 0;
+  color: #8396a5;
+  font-size: .47rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.coach-tier-career-row > strong {
+  color: #fff;
+  font-size: .57rem;
+  text-align: right;
+}
+
+.coach-tier-career-row > small {
+  grid-column: 1 / -1;
+  color: #6e8292;
+  font-size: .40rem;
+}
+
+.coach-tier-career-card-nfl {
+  --coach-tier-accent: #24bd78;
+}
+
+.coach-tier-career-card-fbs {
+  --coach-tier-accent: #4287ff;
+}
+
+.coach-tier-career-card-fcs {
+  --coach-tier-accent: #9c67ff;
+}
+
+@media (max-width: 900px) {
+  .coach-tier-career-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .coach-overall-career-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .coach-career-stat-clean {
+    min-height: 88px;
+  }
+
+  .coach-tier-career-heading {
+    padding-inline: 12px;
+  }
+
+  .coach-tier-career-row {
+    padding-inline: 11px;
+  }
+}
+
+@media (max-width: 360px) {
+  .coach-overall-career-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   COACH PROFILE — HEADER / LOGO / RESUME POLISH
+========================================================= */
+
+.coach-directory-avatar-team {
+  overflow: hidden;
+}
+
+.coach-directory-avatar-team img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 6px rgba(0,0,0,.22));
+}
+
+.coach-profile-avatar-team {
+  overflow: hidden;
+}
+
+.coach-profile-avatar-team img {
+  width: 108px;
+  height: 108px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 13px rgba(0,0,0,.28));
+}
+
+.coach-profile-top-stats-four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.coach-profile-top-stats-four .coach-current-stat:first-child {
+  border-color: rgba(239,200,90,.12);
+  background: rgba(239,200,90,.035);
+}
+
+.coach-profile-top-stats-four .coach-current-stat:first-child span {
+  color: #9d884d;
+}
+
+.coach-profile-top-stats-four .coach-current-stat:first-child strong {
+  color: #efc85a;
+}
+
+@media (max-width: 720px) {
+  .coach-profile-top-stats-four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .coach-profile-avatar-team img {
+    width: 72px;
+    height: 72px;
+  }
+}
+
+@media (max-width: 560px) {
+  .coach-profile-top-stats-four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .coach-profile-avatar-team img {
+    width: 56px;
+    height: 56px;
+  }
+
+  .coach-profile-top-stats-four .coach-current-stat span {
+    min-height: 2.2em;
+    line-height: 1.1;
+  }
+}
+
+/* =========================================================
+   COACH HEADER — LEFT-ALIGNED FINAL TEMPLATE
+========================================================= */
+
+.coach-directory-team {
+  margin-top: 4px;
+}
+
+.coach-directory-team img,
+.coach-directory-team svg {
+  display: none !important;
+}
+
+.coach-profile-hero {
+  display: block !important;
+  min-height: 0;
+  padding: 25px 28px;
+}
+
+.coach-profile-identity-full {
+  width: 100%;
+  max-width: none;
+}
+
+.coach-profile-identity-full h1 {
+  max-width: none;
+}
+
+.coach-profile-hero-data {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.coach-hero-info {
+  min-width: 0;
+  min-height: 70px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,.065);
+  border-radius: 10px;
+  background: rgba(255,255,255,.02);
+}
+
+.coach-hero-info > span {
+  display: block;
+  min-height: 2.15em;
+  color: #73899a;
+  font-size: .41rem;
+  font-weight: 900;
+  letter-spacing: .055em;
+  line-height: 1.08;
+  text-transform: uppercase;
+}
+
+.coach-hero-info > strong,
+.coach-hero-info > a {
+  display: block;
+  margin-top: 5px;
+  overflow: visible;
+  color: #fff;
+  font-size: .64rem;
+  font-weight: 850;
+  line-height: 1.25;
+  text-decoration: none;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.coach-hero-info > a:hover {
+  text-decoration: underline;
+}
+
+.coach-hero-prestige {
+  border-color: rgba(239,200,90,.13);
+  background: rgba(239,200,90,.04);
+}
+
+.coach-hero-prestige > span {
+  color: #9d884d;
+}
+
+.coach-hero-prestige > strong {
+  color: #efc85a;
+}
+
+/* Old avatar/current-team header elements are no longer rendered. */
+.coach-profile-avatar,
+.coach-profile-current-team,
+.coach-profile-top-stats {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  .coach-profile-hero {
+    padding: 20px 17px;
+  }
+
+  .coach-profile-hero-data {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .coach-profile-hero {
+    padding: 18px 14px;
+  }
+
+  .coach-profile-hero-data {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .coach-hero-info {
+    min-height: 68px;
+    padding: 9px 7px;
+  }
+
+  .coach-hero-info > span {
+    font-size: .34rem;
+  }
+
+  .coach-hero-info > strong,
+  .coach-hero-info > a {
+    font-size: .54rem;
+  }
+}
+
+@media (max-width: 390px) {
+  .coach-profile-hero-data {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .coach-hero-info {
+    padding-inline: 6px;
+  }
+
+  .coach-hero-info > span {
+    font-size: .31rem;
+  }
+
+  .coach-hero-info > strong,
+  .coach-hero-info > a {
+    font-size: .50rem;
+  }
+}
+
+/* Current Franchise logo restored inside the header information box */
+.coach-hero-franchise-link {
+  display: flex !important;
+  align-items: center;
+  gap: 7px;
+}
+
+.coach-hero-franchise-link img {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 5px rgba(0,0,0,.22));
+}
+
+.coach-hero-franchise-link strong {
+  min-width: 0;
+  color: #fff;
+  font-size: inherit;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+@media (max-width: 560px) {
+  .coach-hero-franchise-link {
+    gap: 5px;
+  }
+
+  .coach-hero-franchise-link img {
+    width: 23px;
+    height: 23px;
+  }
+}
+
+/* =========================================================
+   COACH PROFILE — PHASE 2 REAL CAREER DATA
+========================================================= */
+
+.coach-career-history-list,
+.coach-franchise-stops-list {
+  display: grid;
+  gap: 7px;
+}
+
+.coach-career-history-row {
+  display: grid;
+  grid-template-columns: 62px 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  border: 1px solid rgba(255,255,255,.065);
+  border-radius: 12px;
+  background: rgba(255,255,255,.02);
+}
+
+.coach-career-history-season strong,
+.coach-career-history-season span {
+  display: block;
+}
+
+.coach-career-history-season strong {
+  color: #fff;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: .68rem;
+  font-weight: 400;
+}
+
+.coach-career-history-season span {
+  margin-top: 3px;
+  color: #778b9b;
+  font-size: .39rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.coach-career-history-logo {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 9px;
+  color: #7890a2;
+  background: rgba(255,255,255,.025);
+}
+
+.coach-career-history-logo img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.coach-career-history-copy {
+  min-width: 0;
+}
+
+.coach-career-history-copy strong {
+  display: block;
+  color: #fff;
+  font-size: .62rem;
+  line-height: 1.25;
+}
+
+.coach-career-history-copy span {
+  display: block;
+  margin-top: 3px;
+  color: #788d9d;
+  font-size: .44rem;
+}
+
+.coach-career-history-record {
+  min-width: 48px;
+  text-align: right;
+}
+
+.coach-career-history-record span {
+  display: block;
+  color: #718697;
+  font-size: .38rem;
+  font-weight: 900;
+}
+
+.coach-career-history-record strong {
+  display: block;
+  margin-top: 3px;
+  color: #fff;
+  font-size: .58rem;
+}
+
+.coach-franchise-stops-list .coach-franchise-stop {
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .coach-career-history-row {
+    grid-template-columns: 48px 36px minmax(0, 1fr) auto;
+    gap: 7px;
+    padding-inline: 9px;
+  }
+
+  .coach-career-history-logo {
+    width: 34px;
+    height: 34px;
+  }
+
+  .coach-career-history-logo img {
+    width: 30px;
+    height: 30px;
+  }
+
+  .coach-career-history-copy strong {
+    font-size: .55rem;
+  }
+
+  .coach-career-history-copy span {
+    font-size: .39rem;
+  }
+}
+
+/* =========================================================
+   COACH CAREER HISTORY — POSTSEASON ACHIEVEMENTS
+========================================================= */
+
+.coach-career-history-achievements {
+  grid-column: 2 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 3px;
+  padding: 8px 10px;
+  border: 1px solid rgba(239,200,90,.12);
+  border-radius: 8px;
+  color: #efc85a;
+  background: rgba(239,200,90,.035);
+}
+
+.coach-career-history-achievements > svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.coach-career-history-achievements > div {
+  display: grid;
+  gap: 4px;
+}
+
+.coach-career-history-achievements span {
+  color: #efc85a;
+  font-size: .45rem;
+  font-weight: 850;
+  line-height: 1.3;
+}
+
+@media (max-width: 560px) {
+  .coach-career-history-achievements {
+    grid-column: 1 / -1;
+  }
+
+  .coach-career-history-achievements span {
+    font-size: .41rem;
+  }
+}
+
+/* =========================================================
+   PHASE 3E — COACH ↔ FRANCHISE CROSS-LINKS
+========================================================= */
+
+.coach-career-franchise-link,
+.coach-career-franchise-name-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.coach-career-franchise-link {
+  cursor: pointer;
+}
+
+.coach-career-franchise-name-link:hover,
+.coach-career-franchise-name-link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.coach-career-franchise-link:hover,
+.coach-career-franchise-link:focus-visible {
+  filter: brightness(1.08);
+}
+

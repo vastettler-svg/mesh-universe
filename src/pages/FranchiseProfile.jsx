@@ -208,14 +208,11 @@ function getCareerStats(tier) {
       { label: "Conference Titles" },
       { label: "Division Titles" },
       {
-        label: "Playoff Appearances",
-        detail: "Appearances: — • Playoff Record: —",
-      },
-      {
         label: "Overall Franchise Record",
         detail: "Record • Win % • Points For",
       },
-      { label: "Franchise Prestige Points" },
+      { label: "Playoff Appearances" },
+      { label: "Playoff Record" },
       { label: "Highest Career Weekly Score" },
       { label: "Lowest Career Weekly Score" },
     ];
@@ -245,7 +242,7 @@ function getCareerStats(tier) {
         detail: "Conference games only",
       },
       { label: "Weeks in the Top 25" },
-      { label: "Franchise Prestige Points" },
+      { label: "Weeks in the Top 10" },
       { label: "Highest Career Weekly Score" },
       { label: "Lowest Career Weekly Score" },
     ];
@@ -265,12 +262,11 @@ function getCareerStats(tier) {
       detail: "Conference games only",
     },
     { label: "Weeks in the Top 25" },
-    { label: "Franchise Prestige Points" },
+    { label: "Weeks in the Top 10" },
     { label: "Highest Career Weekly Score" },
     { label: "Lowest Career Weekly Score" },
   ];
 }
-
 
 function getGameDescriptor(game) {
   return [
@@ -362,8 +358,8 @@ function getNflStage(game) {
   ) {
     return "Conference Championship";
   }
-  if (text.includes("divisional")) return "Divisional Round";
-  if (text.includes("wild card")) return "Wild Card";
+  if (text.includes("divisional")) return "Playoffs - Divisional Round";
+  if (text.includes("wild card")) return "Playoffs - Wild Card";
 
   return "NFL Playoff";
 }
@@ -536,7 +532,19 @@ function formatHistoricalPostseason(
           !lower.includes("first round") &&
           !lower.includes("1st round")
         ) {
+          if (lower.includes("wild card")) {
+          items.push("Playoffs - Wild Card");
+        } else if (lower.includes("divisional")) {
+          items.push("Playoffs - Divisional Round");
+        } else if (lower.includes("conference championship")) {
+          items.push(
+            conference
+              ? `Playoffs - ${conference} Championship`
+              : "Playoffs - Conference Championship",
+          );
+        } else {
           items.push(playoffResult);
+        }
         }
       }
     }
@@ -568,13 +576,13 @@ function formatHistoricalPostseason(
         const stage = finalGame.stage;
 
         if (stage === "FCS Semifinal") {
-          items.push("FCS Semifinalist");
+          items.push("FCS Playoff Semifinalist");
         } else if (stage === "FCS Quarterfinal") {
-          items.push("FCS Quarterfinalist");
+          items.push("FCS Playoff Quarterfinalist");
         } else if (stage === "FCS Second Round") {
-          items.push("FCS Second Round");
+          items.push("FCS Playoffs - Second Round");
         } else if (stage === "FCS First Round") {
-          items.push("FCS First Round");
+          items.push("FCS Playoffs - First Round");
         } else {
           items.push(stage);
         }
@@ -596,13 +604,13 @@ function formatHistoricalPostseason(
       ) {
         items.push("FCS National Runner-Up");
       } else if (lower.includes("semi")) {
-        items.push("FCS Semifinalist");
+        items.push("FCS Playoff Semifinalist");
       } else if (lower.includes("quarter")) {
-        items.push("FCS Quarterfinalist");
+        items.push("FCS Playoff Quarterfinalist");
       } else if (lower.includes("second") || lower.includes("2nd")) {
-        items.push("FCS Second Round");
+        items.push("FCS Playoffs - Second Round");
       } else if (lower.includes("first") || lower.includes("1st")) {
-        items.push("FCS First Round");
+        items.push("FCS Playoffs - First Round");
       }
     }
   }
@@ -627,7 +635,15 @@ function formatHistoricalPostseason(
       ) {
         items.push("Super Bowl Runner-Up");
       } else {
-        items.push(`${finalGame.stage}`);
+        if (finalGame.stage === "Conference Championship") {
+          items.push(
+            conference
+              ? `Playoffs - ${conference} Championship`
+              : "Playoffs - Conference Championship",
+          );
+        } else {
+          items.push(`${finalGame.stage}`);
+        }
       }
     } else {
       const playoffResult =
@@ -903,6 +919,19 @@ function FranchiseProfile() {
         .map((game) => `${game.season}-${game.week}`),
     ).size;
 
+    const top10Weeks = new Set(
+      allGames
+        .filter((game) => {
+          const rank =
+            game.team1Id === franchise.franchiseId
+              ? game.team1GameRank
+              : game.team2GameRank;
+
+          return Number(rank) >= 1 && Number(rank) <= 10;
+        })
+        .map((game) => `${game.season}-${game.week}`),
+    ).size;
+
     const playoffAppearanceRows = completedRows.filter((row) => {
       const result = String(row.playoffResult || "").toLowerCase();
       return (
@@ -1012,6 +1041,7 @@ function FranchiseProfile() {
       highScore,
       lowScore,
       top25Weeks,
+      top10Weeks,
       bowlAppearances: new Set(
         bowlGames.map((game) => `${game.season}-${game.bowlName || game.gameId}`),
       ).size,
@@ -1134,6 +1164,9 @@ function FranchiseProfile() {
       "Weeks in the Top 25": {
         value: String(careerSummary.top25Weeks),
       },
+      "Weeks in the Top 10": {
+        value: String(careerSummary.top10Weeks),
+      },
       "Division Titles": {
         value: String(careerSummary.divisionTitles),
       },
@@ -1158,10 +1191,7 @@ function FranchiseProfile() {
       },
       "Playoff Appearances": {
         value: String(careerSummary.playoffAppearances),
-        detail:
-          franchise.tier === "NFL"
-            ? `Playoff Record: ${careerSummary.playoffRecord}`
-            : stat.detail,
+        detail: stat.detail,
       },
       "Playoff Record": {
         value: careerSummary.playoffRecord,
@@ -1223,11 +1253,35 @@ function FranchiseProfile() {
 
           <h1>{franchise.team}</h1>
 
-          <div className="franchise-profile-coach">
-            <UserRound size={16} />
-            <div>
-              <span>Current Coach</span>
-              <strong>{franchise.coach || "Coach TBD"}</strong>
+          <div className="franchise-profile-meta-row">
+            <div className="franchise-profile-coach">
+              <UserRound size={16} />
+              <div>
+                <span>Current Coach</span>
+                {franchise.coachId && franchise.coach ? (
+                  <Link
+                    className="franchise-current-coach-link"
+                    to={`/league/coaches/${encodeURIComponent(franchise.coachId)}`}
+                  >
+                    {franchise.coach}
+                  </Link>
+                ) : (
+                  <strong>{franchise.coach || "Coach TBD"}</strong>
+                )}
+              </div>
+            </div>
+
+            <div className="franchise-profile-prestige">
+              <Trophy size={16} />
+              <div>
+                <span>Prestige Points</span>
+                <strong>
+                  {franchise.prestigePoints === null ||
+                  franchise.prestigePoints === undefined
+                    ? "—"
+                    : Number(franchise.prestigePoints).toFixed(1)}
+                </strong>
+              </div>
             </div>
           </div>
 

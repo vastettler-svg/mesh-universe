@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import {
   Activity,
   ChevronLeft,
@@ -203,6 +203,7 @@ function formatProjection(projection) {
 function TeamRow({
   team,
   coach,
+  franchiseId,
   initial,
   logo,
   overallRecord,
@@ -228,28 +229,76 @@ function TeamRow({
         .filter(Boolean)
         .join(" ")}
     >
-      <div className={`score-team-logo score-team-logo-${tierClass}`}>
-        {logo ? (
-          <img
-            src={logo}
-            alt={`${team || "Team"} logo`}
-            loading="lazy"
-            onError={(event) => {
-              event.currentTarget.style.display = "none";
-              event.currentTarget.nextElementSibling?.removeAttribute("hidden");
-            }}
-          />
-        ) : null}
+      {franchiseId ? (
+        <Link
+          to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
+          aria-label={`Open ${team || "franchise"} profile`}
+          style={{
+            display: "block",
+            flex: "0 0 auto",
+            color: "inherit",
+            textDecoration: "none",
+          }}
+        >
+          <div className={`score-team-logo score-team-logo-${tierClass}`}>
+            {logo ? (
+              <img
+                src={logo}
+                alt={`${team || "Team"} logo`}
+                loading="lazy"
+                onError={(event) => {
+                  event.currentTarget.style.display = "none";
+                  event.currentTarget.nextElementSibling?.removeAttribute("hidden");
+                }}
+              />
+            ) : null}
 
-        <span className="score-team-logo-fallback" hidden={Boolean(logo)}>
-          {initial}
-        </span>
-      </div>
+            <span className="score-team-logo-fallback" hidden={Boolean(logo)}>
+              {initial}
+            </span>
+          </div>
+        </Link>
+      ) : (
+        <div className={`score-team-logo score-team-logo-${tierClass}`}>
+          {logo ? (
+            <img
+              src={logo}
+              alt={`${team || "Team"} logo`}
+              loading="lazy"
+              onError={(event) => {
+                event.currentTarget.style.display = "none";
+                event.currentTarget.nextElementSibling?.removeAttribute("hidden");
+              }}
+            />
+          ) : null}
+
+          <span className="score-team-logo-fallback" hidden={Boolean(logo)}>
+            {initial}
+          </span>
+        </div>
+      )}
 
       <div className="score-team-info">
         <strong>
-          {rank > 0 && rank <= 25 ? `#${rank} ` : ""}
-          {team || "TBD"}
+          {franchiseId ? (
+            <Link
+              to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
+              style={{
+                color: "inherit",
+                font: "inherit",
+                lineHeight: "inherit",
+                textDecoration: "none",
+              }}
+            >
+              {rank > 0 && rank <= 25 ? `#${rank} ` : ""}
+              {team || "TBD"}
+            </Link>
+          ) : (
+            <>
+              {rank > 0 && rank <= 25 ? `#${rank} ` : ""}
+              {team || "TBD"}
+            </>
+          )}
         </strong>
 
         {coach ? <span className="score-team-coach">{coach}</span> : null}
@@ -356,6 +405,7 @@ function ScoreCard({ game, featured = false, featuredPosition = 0, scoresView })
         <TeamRow
           team={game.team1Team}
           coach={game.team1Coach}
+          franchiseId={game.team1Id}
           initial={game.team1Initial}
           logo={game.team1Logo}
           overallRecord={game.team1OverallRecord}
@@ -373,6 +423,7 @@ function ScoreCard({ game, featured = false, featuredPosition = 0, scoresView })
         <TeamRow
           team={game.team2Team}
           coach={game.team2Coach}
+          franchiseId={game.team2Id}
           initial={game.team2Initial}
           logo={game.team2Logo}
           overallRecord={game.team2OverallRecord}
@@ -466,23 +517,44 @@ function FeaturedTierSection({
 
 function Scores() {
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const restoredView = location.state?.restoreScores ?? null;
+
+  const urlWeek = Number(searchParams.get("week"));
+  const urlPrimary = searchParams.get("tier");
+  const urlSecondary = searchParams.get("filter");
+  const urlNflMatchup = Number(searchParams.get("matchup"));
+
+  const validPrimary = primaryFilters.some((filter) => filter.id === urlPrimary)
+    ? urlPrimary
+    : null;
+
+  const validSecondary =
+    validPrimary && secondaryFilters[validPrimary]?.some(
+      (filter) => filter.id === urlSecondary,
+    )
+      ? urlSecondary
+      : null;
 
   const [scoreData, setScoreData] = useState([]);
   const [appSettings, setAppSettings] = useState(null);
   const [scoresLoading, setScoresLoading] = useState(true);
   const [scoresError, setScoresError] = useState("");
   const [selectedWeek, setSelectedWeek] = useState(
-    restoredView?.selectedWeek ?? 1,
+    urlWeek >= 1 && urlWeek <= MAX_WEEK
+      ? urlWeek
+      : restoredView?.selectedWeek ?? 1,
   );
   const [selectedPrimaryFilter, setSelectedPrimaryFilter] = useState(
-    restoredView?.selectedPrimaryFilter ?? "featured",
+    validPrimary ?? restoredView?.selectedPrimaryFilter ?? "featured",
   );
   const [selectedSecondaryFilter, setSelectedSecondaryFilter] = useState(
-    restoredView?.selectedSecondaryFilter ?? "all",
+    validSecondary ?? restoredView?.selectedSecondaryFilter ?? "all",
   );
   const [selectedNflMatchup, setSelectedNflMatchup] = useState(
-    restoredView?.selectedNflMatchup ?? 1,
+    urlNflMatchup === 2
+      ? 2
+      : restoredView?.selectedNflMatchup ?? 1,
   );
 
   useEffect(() => {
@@ -509,11 +581,13 @@ function Scores() {
           const configuredWeek = Number(settings?.currentWeek);
 
           const initialWeek =
-            restoredWeek >= 1 && restoredWeek <= MAX_WEEK
-              ? restoredWeek
-              : configuredWeek >= 1 && configuredWeek <= MAX_WEEK
-                ? configuredWeek
-                : chooseInitialWeek(games);
+            urlWeek >= 1 && urlWeek <= MAX_WEEK
+              ? urlWeek
+              : restoredWeek >= 1 && restoredWeek <= MAX_WEEK
+                ? restoredWeek
+                : configuredWeek >= 1 && configuredWeek <= MAX_WEEK
+                  ? configuredWeek
+                  : chooseInitialWeek(games);
 
           setSelectedWeek(initialWeek);
         }
@@ -538,6 +612,34 @@ function Scores() {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (scoresLoading) return;
+
+    const nextParams = new URLSearchParams();
+    nextParams.set("week", String(selectedWeek));
+    nextParams.set("tier", selectedPrimaryFilter);
+
+    if (selectedPrimaryFilter !== "featured") {
+      nextParams.set("filter", selectedSecondaryFilter);
+    }
+
+    if (
+      selectedPrimaryFilter === "nfl" &&
+      NFL_DOUBLE_MATCHUP_WEEKS.has(selectedWeek)
+    ) {
+      nextParams.set("matchup", String(selectedNflMatchup));
+    }
+
+    setSearchParams(nextParams, { replace: true });
+  }, [
+    scoresLoading,
+    selectedWeek,
+    selectedPrimaryFilter,
+    selectedSecondaryFilter,
+    selectedNflMatchup,
+    setSearchParams,
+  ]);
 
   const availableWeeks = useMemo(
     () => Array.from({ length: MAX_WEEK }, (_, index) => index + 1),

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowDown,
   ArrowUp,
@@ -245,29 +246,68 @@ function StandingsRow({
         <MovementIndicator movement={movement} isNew={isNew} />
       </div>
 
-      <div
-        className={`standings-team-logo standings-team-logo-${team.tierClass}`}
-        title={teamName}
-      >
-        {team.logo ? (
-          <img
-            src={team.logo}
-            alt={`${teamName} logo`}
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <span>{teamName.charAt(0).toUpperCase()}</span>
-        )}
-      </div>
+      {team.franchiseId ? (
+        <Link
+          to={`/league/franchises/${encodeURIComponent(team.franchiseId)}`}
+          className="standings-franchise-logo-link"
+          aria-label={`Open ${teamName} franchise profile`}
+        >
+          <div
+            className={`standings-team-logo standings-team-logo-${team.tierClass}`}
+            title={teamName}
+          >
+            {team.logo ? (
+              <img
+                src={team.logo}
+                alt={`${teamName} logo`}
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <span>{teamName.charAt(0).toUpperCase()}</span>
+            )}
+          </div>
+        </Link>
+      ) : (
+        <div
+          className={`standings-team-logo standings-team-logo-${team.tierClass}`}
+          title={teamName}
+        >
+          {team.logo ? (
+            <img
+              src={team.logo}
+              alt={`${teamName} logo`}
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <span>{teamName.charAt(0).toUpperCase()}</span>
+          )}
+        </div>
+      )}
 
       <div className="standings-team-info">
         <strong className="standings-team-name">
-          {showTop25Prefix &&
-          Number(team.top25Rank) >= 1 &&
-          Number(team.top25Rank) <= 25
-            ? `#${team.top25Rank} ${teamName}`
-            : teamName}
+          {team.franchiseId ? (
+            <Link
+              to={`/league/franchises/${encodeURIComponent(team.franchiseId)}`}
+              className="standings-franchise-name-link"
+            >
+              {showTop25Prefix &&
+              Number(team.top25Rank) >= 1 &&
+              Number(team.top25Rank) <= 25
+                ? `#${team.top25Rank} ${teamName}`
+                : teamName}
+            </Link>
+          ) : (
+            <>
+              {showTop25Prefix &&
+              Number(team.top25Rank) >= 1 &&
+              Number(team.top25Rank) <= 25
+                ? `#${team.top25Rank} ${teamName}`
+                : teamName}
+            </>
+          )}
         </strong>
         <span className="standings-coach">
           {team.coach || "Coach unavailable"}
@@ -294,13 +334,23 @@ function StandingsRow({
         </div>
       </div>
 
-      <button
-        type="button"
-        className="standings-row-action"
-        aria-label={`View ${teamName}`}
-      >
-        <ChevronRight size={17} />
-      </button>
+      {team.franchiseId ? (
+        <Link
+          to={`/league/franchises/${encodeURIComponent(team.franchiseId)}`}
+          className="standings-row-action"
+          aria-label={`View ${teamName} franchise profile`}
+        >
+          <ChevronRight size={17} />
+        </Link>
+      ) : (
+        <button
+          type="button"
+          className="standings-row-action"
+          aria-label={`View ${teamName}`}
+        >
+          <ChevronRight size={17} />
+        </button>
+      )}
 
       <div className="standings-points-status">
         <span className="standings-conference-badge">
@@ -563,12 +613,35 @@ function PulseCard({
 
 
 function Standings() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const urlPrimary = searchParams.get("tier");
+  const initialPrimary = primaryFilters.some((filter) => filter.id === urlPrimary)
+    ? urlPrimary
+    : "overview";
+
+  const urlSecondary = searchParams.get("filter");
+  const initialSecondary =
+    secondaryFilters[initialPrimary]?.some((filter) => filter.id === urlSecondary)
+      ? urlSecondary
+      : initialPrimary === "nfl"
+        ? "all"
+        : initialPrimary === "fbs" || initialPrimary === "fcs"
+          ? "top-25"
+          : "overall";
+
+  const urlDivision = searchParams.get("division");
+  const initialDivision =
+    nflDivisionFilters[initialSecondary]?.some((filter) => filter.id === urlDivision)
+      ? urlDivision
+      : "all";
+
   const [standingsData, setStandingsData] = useState([]);
   const [standingsLoading, setStandingsLoading] = useState(true);
   const [standingsError, setStandingsError] = useState("");
-  const [selectedPrimaryFilter, setSelectedPrimaryFilter] = useState("overview");
-  const [selectedSecondaryFilter, setSelectedSecondaryFilter] = useState("overall");
-  const [selectedNflDivisionFilter, setSelectedNflDivisionFilter] = useState("all");
+  const [selectedPrimaryFilter, setSelectedPrimaryFilter] = useState(initialPrimary);
+  const [selectedSecondaryFilter, setSelectedSecondaryFilter] = useState(initialSecondary);
+  const [selectedNflDivisionFilter, setSelectedNflDivisionFilter] = useState(initialDivision);
 
   useEffect(() => {
     let isMounted = true;
@@ -590,6 +663,29 @@ function Standings() {
     loadStandings();
     return () => { isMounted = false; };
   }, []);
+
+  useEffect(() => {
+    const nextParams = new URLSearchParams();
+
+    if (selectedPrimaryFilter !== "overview") {
+      nextParams.set("tier", selectedPrimaryFilter);
+      nextParams.set("filter", selectedSecondaryFilter);
+
+      if (
+        selectedPrimaryFilter === "nfl" &&
+        (selectedSecondaryFilter === "afc" || selectedSecondaryFilter === "nfc")
+      ) {
+        nextParams.set("division", selectedNflDivisionFilter);
+      }
+    }
+
+    setSearchParams(nextParams, { replace: true });
+  }, [
+    selectedPrimaryFilter,
+    selectedSecondaryFilter,
+    selectedNflDivisionFilter,
+    setSearchParams,
+  ]);
 
   const activeSecondaryFilters = secondaryFilters[selectedPrimaryFilter] ?? [];
   const activePrimaryLabel = primaryFilters.find((filter) => filter.id === selectedPrimaryFilter)?.label ?? "Overview";

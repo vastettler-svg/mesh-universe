@@ -107,6 +107,8 @@ function formatHomePoints(value) {
 function TeamIdentity({
   team,
   coach,
+  franchiseId,
+  coachId,
   logo,
   initial,
   overallRecord,
@@ -119,20 +121,62 @@ function TeamIdentity({
 
   return (
     <div className="game-team">
-      <div className={`game-team-logo game-team-logo-${tierClass}`}>
-        {logo ? (
-          <img src={logo} alt={`${team} logo`} />
-        ) : (
-          <span>{initial}</span>
-        )}
-      </div>
+      {franchiseId ? (
+        <Link
+          className="home-franchise-logo-link"
+          to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
+          onClick={(event) => event.stopPropagation()}
+          aria-label={`Open ${team} franchise profile`}
+        >
+          <div className={`game-team-logo game-team-logo-${tierClass}`}>
+            {logo ? (
+              <img src={logo} alt={`${team} logo`} />
+            ) : (
+              <span>{initial}</span>
+            )}
+          </div>
+        </Link>
+      ) : (
+        <div className={`game-team-logo game-team-logo-${tierClass}`}>
+          {logo ? (
+            <img src={logo} alt={`${team} logo`} />
+          ) : (
+            <span>{initial}</span>
+          )}
+        </div>
+      )}
 
       <strong title={team}>
-        {ranked ? `#${rank} ` : ""}
-        {team}
+        {franchiseId ? (
+          <Link
+            className="home-franchise-name-link"
+            to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {ranked ? `#${rank} ` : ""}
+            {team}
+          </Link>
+        ) : (
+          <>
+            {ranked ? `#${rank} ` : ""}
+            {team}
+          </>
+        )}
       </strong>
 
-      <span className="game-team-coach">{coach || "Coach TBD"}</span>
+      <span className="game-team-coach">
+        {coachId && coach ? (
+          <Link
+            className="home-coach-name-link"
+            to={`/league/coaches/${encodeURIComponent(coachId)}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {coach}
+          </Link>
+        ) : (
+          coach || "Coach TBD"
+        )}
+      </span>
 
       {tier === "FBS" || tier === "FCS" ? (
         <span className="game-team-records">
@@ -149,6 +193,8 @@ function TeamIdentity({
 }
 
 function GameOfTheWeekCard({ game }) {
+  const navigate = useNavigate();
+
   if (!game) return null;
 
   const isLive = game.status === "live";
@@ -190,10 +236,23 @@ function GameOfTheWeekCard({ game }) {
       ? Math.max(firstProbability, secondProbability)
       : null;
 
+  const openGameCenter = () => {
+    navigate(`/scores/${encodeURIComponent(game.gameId)}`);
+  };
+
   return (
-    <Link
-      className={`home-card game-card game-card-${game.tierClass}`}
-      to={`/scores/${encodeURIComponent(game.gameId)}`}
+    <article
+      className={`home-card game-card game-card-${game.tierClass} home-clickable-card`}
+      role="link"
+      tabIndex={0}
+      aria-label={`Open ${game.tier} Game of the Week Game Center`}
+      onClick={openGameCenter}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openGameCenter();
+        }
+      }}
     >
       <div className="game-card-top">
         <span
@@ -221,6 +280,8 @@ function GameOfTheWeekCard({ game }) {
         <TeamIdentity
           team={game.team1Team}
           coach={game.team1Coach}
+          franchiseId={game.team1Id}
+          coachId={game.team1CoachId}
           logo={game.team1Logo}
           initial={game.team1Initial}
           overallRecord={game.team1OverallRecord}
@@ -254,6 +315,8 @@ function GameOfTheWeekCard({ game }) {
         <TeamIdentity
           team={game.team2Team}
           coach={game.team2Coach}
+          franchiseId={game.team2Id}
+          coachId={game.team2CoachId}
           logo={game.team2Logo}
           initial={game.team2Initial}
           overallRecord={game.team2OverallRecord}
@@ -289,7 +352,7 @@ function GameOfTheWeekCard({ game }) {
       <div className="game-card-footer">
         View Game Center
       </div>
-    </Link>
+    </article>
   );
 }
 
@@ -389,17 +452,56 @@ function WeeklyHighScorerCard({
       {hasWinner ? (
         <>
           <div className="weekly-award-winner">
-            <div className="weekly-award-logo">
-              {winner.logo ? (
-                <img src={winner.logo} alt={`${winner.team} logo`} />
-              ) : (
-                <span>{winner.initial}</span>
-              )}
-            </div>
+            {winner.id ? (
+              <Link
+                className="home-franchise-logo-link"
+                to={`/league/franchises/${encodeURIComponent(winner.id)}`}
+                aria-label={`Open ${winner.team} franchise profile`}
+              >
+                <div className="weekly-award-logo">
+                  {winner.logo ? (
+                    <img src={winner.logo} alt={`${winner.team} logo`} />
+                  ) : (
+                    <span>{winner.initial}</span>
+                  )}
+                </div>
+              </Link>
+            ) : (
+              <div className="weekly-award-logo">
+                {winner.logo ? (
+                  <img src={winner.logo} alt={`${winner.team} logo`} />
+                ) : (
+                  <span>{winner.initial}</span>
+                )}
+              </div>
+            )}
 
             <div className="weekly-award-team">
-              <strong>{winner.team}</strong>
-              <span>{winner.coach || "Coach TBD"}</span>
+              <strong>
+                {winner.id ? (
+                  <Link
+                    className="home-franchise-name-link"
+                    to={`/league/franchises/${encodeURIComponent(winner.id)}`}
+                  >
+                    {winner.team}
+                  </Link>
+                ) : (
+                  winner.team
+                )}
+              </strong>
+
+              <span>
+                {winner.coachId && winner.coach ? (
+                  <Link
+                    className="home-coach-name-link"
+                    to={`/league/coaches/${encodeURIComponent(winner.coachId)}`}
+                  >
+                    {winner.coach}
+                  </Link>
+                ) : (
+                  winner.coach || "Coach TBD"
+                )}
+              </span>
             </div>
 
             <div className="weekly-award-points">
@@ -1155,6 +1257,7 @@ function buildWeeklyHighScorers(games, week) {
           id: game.team1Id,
           team: game.team1Team,
           coach: game.team1Coach,
+          coachId: game.team1CoachId || "",
           logo: game.team1Logo,
           initial: game.team1Initial,
           score: numericScore(game.team1Score),
@@ -1165,6 +1268,7 @@ function buildWeeklyHighScorers(games, week) {
           id: game.team2Id,
           team: game.team2Team,
           coach: game.team2Coach,
+          coachId: game.team2CoachId || "",
           logo: game.team2Logo,
           initial: game.team2Initial,
           score: numericScore(game.team2Score),
@@ -1179,6 +1283,7 @@ function buildWeeklyHighScorers(games, week) {
             id: appearance.id,
             team: appearance.team,
             coach: appearance.coach,
+            coachId: appearance.coachId || "",
             logo: appearance.logo,
             initial: appearance.initial,
             score: appearance.score,

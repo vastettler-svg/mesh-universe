@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   Activity,
   ArrowLeft,
@@ -147,24 +147,18 @@ function centerStatusLabel(game) {
   return "Scheduled";
 }
 
-function TeamLogo({ src, initial, team, rank }) {
-  const ranked = Number(rank) >= 1 && Number(rank) <= 25;
+function TeamLogo({ src, initial, team }) {
+  if (src) {
+    return (
+      <div className="game-center-logo">
+        <img src={src} alt={`${team} logo`} />
+      </div>
+    );
+  }
 
   return (
-    <div className="game-center-logo-wrap">
-      {ranked ? (
-        <span className="game-center-logo-rank">#{rank}</span>
-      ) : null}
-
-      {src ? (
-        <div className="game-center-logo">
-          <img src={src} alt={`${team} logo`} />
-        </div>
-      ) : (
-        <div className="game-center-logo game-center-logo-placeholder">
-          {initial || "?"}
-        </div>
-      )}
+    <div className="game-center-logo game-center-logo-placeholder">
+      {initial || "?"}
     </div>
   );
 }
@@ -173,8 +167,6 @@ function TeamSide({
   side,
   team,
   coach,
-  franchiseId,
-  coachId,
   conference,
   overallRecord,
   conferenceRecord,
@@ -199,56 +191,17 @@ function TeamSide({
         isLoser ? "loser" : "",
       ].filter(Boolean).join(" ")}
     >
-      {franchiseId ? (
-        <Link
-          className="game-center-profile-logo-link"
-          to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
-          aria-label={`Open ${team || "franchise"} profile`}
-        >
-          <TeamLogo
-            src={logo}
-            initial={initial}
-            team={team || "TBD"}
-            rank={rank}
-          />
-        </Link>
-      ) : (
-        <TeamLogo
-          src={logo}
-          initial={initial}
-          team={team || "TBD"}
-          rank={rank}
-        />
-      )}
+      <TeamLogo src={logo} initial={initial} team={team || "TBD"} />
 
       <div className="game-center-team-side-copy">
         <h2 className="game-center-team-name">
-          {franchiseId ? (
-            <Link
-              className="game-center-franchise-link"
-              to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
-            >
-              {team || "TBD"}
-            </Link>
-          ) : (
-            <span>{team || "TBD"}</span>
-          )}
+          {rank >= 1 && rank <= 25 ? (
+            <span className="game-center-inline-rank">#{rank}</span>
+          ) : null}
+          <span>{team || "TBD"}</span>
         </h2>
 
-        {coach ? (
-          <p className="game-center-coach">
-            {coachId ? (
-              <Link
-                className="game-center-coach-link"
-                to={`/league/coaches/${encodeURIComponent(coachId)}`}
-              >
-                {coach}
-              </Link>
-            ) : (
-              coach
-            )}
-          </p>
-        ) : null}
+        {coach ? <p className="game-center-coach">{coach}</p> : null}
 
         <div className="game-center-records">
           {isCollege ? (
@@ -319,25 +272,165 @@ function WinProbability({ game }) {
   );
 }
 
-function MatchupCard({ game, winnerState, rosters }) {
-  const normalizedType = String(
-    game.gameType || game.gameCategory || "",
-  ).toLowerCase();
+function postseasonText(game) {
+  return [
+    game?.gameCategory,
+    game?.gameType,
+    game?.label,
+    game?.bowlName,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
 
+function isPostseasonGame(game) {
+  const text = postseasonText(game);
+
+  if (
+    text.includes("playoff") ||
+    text.includes("wild card") ||
+    text.includes("divisional") ||
+    text.includes("championship") ||
+    text.includes("bowl") ||
+    text.includes("cfp")
+  ) {
+    return true;
+  }
+
+  const tier = String(game?.tier || "").toUpperCase();
+  const week = Number(game?.week);
+
+  if (tier === "NFL") return week >= 14 && week <= 17;
+  if (tier === "FBS") return week >= 13 && week <= 17;
+  if (tier === "FCS") return week >= 13 && week <= 17;
+
+  return false;
+}
+
+function getPostseasonRound(game) {
+  const tier = String(game?.tier || "").trim().toUpperCase();
+  const week = Number(game?.week);
+  const text = postseasonText(game);
+
+  // Explicit labels always win.
+  if (game?.bowlName) {
+    if (
+      text.includes("national championship") ||
+      text.includes("cfp national championship")
+    ) {
+      return "CFP National Championship";
+    }
+
+    if (
+      text.includes("cfp") ||
+      text.includes("playoff quarter") ||
+      text.includes("playoff semi")
+    ) {
+      // Continue below so CFP rounds retain their round identity.
+    } else {
+      return game.bowlName;
+    }
+  }
+
+  if (text.includes("super bowl")) return "Super Bowl";
+  if (text.includes("afc championship")) return "AFC Championship";
+  if (text.includes("nfc championship")) return "NFC Championship";
+  if (text.includes("wild card")) return "Wild Card";
+  if (text.includes("divisional")) return "Divisional Round";
+
+  if (
+    text.includes("cfp national championship") ||
+    text.includes("college football playoff national championship")
+  ) {
+    return "CFP National Championship";
+  }
+
+  if (text.includes("national championship")) {
+    return tier === "FCS"
+      ? "FCS National Championship"
+      : tier === "FBS"
+        ? "CFP National Championship"
+        : "National Championship";
+  }
+
+  if (text.includes("conference championship")) {
+    return game?.gameType || game?.gameCategory || "Conference Championship";
+  }
+
+  if (text.includes("semifinal")) {
+    return tier === "FCS" ? "FCS Semifinal" : "CFP Semifinal";
+  }
+
+  if (text.includes("quarterfinal")) {
+    return tier === "FCS" ? "FCS Quarterfinal" : "CFP Quarterfinal";
+  }
+
+  if (text.includes("second round")) return "FCS Second Round";
+  if (text.includes("first round")) {
+    return tier === "FCS" ? "FCS First Round" : "CFP First Round";
+  }
+
+  // Week-based fallback for current/future manually scheduled rows.
+  if (tier === "NFL") {
+    if (week === 14) return "Wild Card";
+    if (week === 15) return "Divisional Round";
+    if (week === 16) return "Conference Championship";
+    if (week === 17) return "Super Bowl";
+  }
+
+  if (tier === "FBS") {
+    if (week === 13) return "Conference Championship";
+    if (week === 14) return "CFP First Round";
+    if (week === 15) return "CFP Quarterfinal";
+    if (week === 16) return "CFP Semifinal";
+    if (week === 17) return "CFP National Championship";
+  }
+
+  if (tier === "FCS") {
+    if (week === 13) return "FCS First Round";
+    if (week === 14) return "FCS Second Round";
+    if (week === 15) return "FCS Quarterfinal";
+    if (week === 16) return "FCS Semifinal";
+    if (week === 17) return "FCS National Championship";
+  }
+
+  return game?.gameType || game?.gameCategory || "Postseason";
+}
+
+function getPostseasonSeriesLabel(game) {
+  const tier = String(game?.tier || "").toUpperCase();
+  const round = getPostseasonRound(game);
+
+  if (game?.bowlName && !postseasonText(game).includes("cfp")) {
+    return "FBS Bowl Season";
+  }
+
+  if (tier === "NFL") return "NFL Playoffs";
+  if (tier === "FBS") return round.includes("Conference") ? "FBS Championship Week" : "College Football Playoff";
+  if (tier === "FCS") return "FCS Playoffs";
+
+  return "MESH Postseason";
+}
+
+function MatchupCard({ game, winnerState, rosters }) {
+  const postseason = isPostseasonGame(game);
+  const postseasonRound = postseason ? getPostseasonRound(game) : "";
+  const postseasonSeries = postseason ? getPostseasonSeriesLabel(game) : "";
   const branding = getGameCenterBranding(game);
 
-  const title =
-    normalizedType.includes("playoff") ||
-    normalizedType.includes("wild card") ||
-    normalizedType.includes("quarterfinal") ||
-    normalizedType.includes("semifinal") ||
-    normalizedType.includes("championship") ||
-    normalizedType.includes("bowl")
-      ? "PLAYOFF"
-      : "REGULAR SEASON";
+  const title = postseason ? postseasonRound : "REGULAR SEASON";
 
   return (
-    <section className={`game-center-hero game-center-hero-${game.tierClass}`}>
+    <section
+      className={[
+        "game-center-hero",
+        `game-center-hero-${game.tierClass}`,
+        postseason ? "game-center-hero-postseason" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <div className="game-center-hero-top game-center-hero-top-patched">
         <div className="game-center-hero-status">
           <span className={`gc-home-state-pill gc-home-state-pill-${game.status}`}>
@@ -365,7 +458,7 @@ function MatchupCard({ game, winnerState, rosters }) {
           ) : null}
 
           <div className="game-center-hero-title-copy">
-            <span>{branding.centerLabel}</span>
+            <span>{postseason ? postseasonSeries : branding.centerLabel}</span>
             <h2>{title}</h2>
           </div>
 
@@ -383,17 +476,23 @@ function MatchupCard({ game, winnerState, rosters }) {
         </span>
       </div>
 
+      {postseason ? (
+        <div className={`game-center-postseason-strip game-center-postseason-strip-${game.tierClass}`}>
+          <span>Postseason</span>
+          <strong>{postseasonRound}</strong>
+          <small>Week {game.week}</small>
+        </div>
+      ) : null}
+
       <div className="game-center-matchup-row">
         <TeamSide
           side="one"
           team={game.team1Team}
           coach={game.team1Coach}
-          franchiseId={game.team1Id}
-          coachId={game.team1CoachId}
           conference={game.team1Conference}
           overallRecord={game.team1OverallRecord}
           conferenceRecord={game.team1ConferenceRecord}
-          rank={game.team1Top25Rank}
+          rank={postseason ? game.team1GameRank : game.team1Top25Rank}
           score={game.team1Score}
           projection={
             rosters.team1ProjectedPoints ?? game.team1Projection
@@ -414,12 +513,10 @@ function MatchupCard({ game, winnerState, rosters }) {
           side="two"
           team={game.team2Team}
           coach={game.team2Coach}
-          franchiseId={game.team2Id}
-          coachId={game.team2CoachId}
           conference={game.team2Conference}
           overallRecord={game.team2OverallRecord}
           conferenceRecord={game.team2ConferenceRecord}
-          rank={game.team2Top25Rank}
+          rank={postseason ? game.team2GameRank : game.team2Top25Rank}
           score={game.team2Score}
           projection={
             rosters.team2ProjectedPoints ?? game.team2Projection
@@ -504,459 +601,30 @@ function RosterPanel({ team, players, side }) {
   );
 }
 
-
-function historyScore(value) {
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
-}
-
-function getHistoricalWinnerId(meeting) {
-  const storedWinner = String(meeting?.winnerId || "").trim();
-
-  if (storedWinner) return storedWinner;
-
-  const score1 = historyScore(meeting?.team1Score);
-  const score2 = historyScore(meeting?.team2Score);
-
-  if (score1 === null || score2 === null || score1 === score2) {
-    return "";
-  }
-
-  return score1 > score2 ? meeting.team1Id : meeting.team2Id;
-}
-
-function orientHistoricalMeeting(meeting, game) {
-  const team1OnLeft = meeting.team1Id === game.team1Id;
-
-  return {
-    leftName: team1OnLeft ? meeting.team1Team : meeting.team2Team,
-    rightName: team1OnLeft ? meeting.team2Team : meeting.team1Team,
-    leftId: team1OnLeft ? meeting.team1Id : meeting.team2Id,
-    rightId: team1OnLeft ? meeting.team2Id : meeting.team1Id,
-    leftScore: historyScore(
-      team1OnLeft ? meeting.team1Score : meeting.team2Score,
-    ),
-    rightScore: historyScore(
-      team1OnLeft ? meeting.team2Score : meeting.team1Score,
-    ),
-  };
-}
-
-function isHistoricalPostseasonMeeting(meeting) {
-  const text = [
-    meeting?.gameType,
-    meeting?.gameCategory,
-    meeting?.label,
-    meeting?.bowlName,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-
-  return (
-    text.includes("playoff") ||
-    text.includes("wild card") ||
-    text.includes("divisional") ||
-    text.includes("quarterfinal") ||
-    text.includes("semifinal") ||
-    text.includes("championship") ||
-    text.includes("bowl") ||
-    text.includes("cfp")
-  );
-}
-
-function describeHistoryType(meeting) {
-  return (
-    meeting.gameType ||
-    meeting.gameCategory ||
-    meeting.label ||
-    "Regular Season"
-  );
-}
-
-function buildDetailedSeriesHistory(game, history = []) {
-  if (!game) return null;
-
-  const completed = history.filter((meeting) => {
-    return (
-      historyScore(meeting?.team1Score) !== null &&
-      historyScore(meeting?.team2Score) !== null
-    );
-  });
-
-  if (completed.length === 0) return null;
-
-  let leftWins = 0;
-  let rightWins = 0;
-  let ties = 0;
-
-  completed.forEach((meeting) => {
-    const winnerId = getHistoricalWinnerId(meeting);
-
-    if (!winnerId) ties += 1;
-    else if (winnerId === game.team1Id) leftWins += 1;
-    else if (winnerId === game.team2Id) rightWins += 1;
-  });
-
-  const seriesLeader =
-    leftWins === rightWins
-      ? `Series tied ${leftWins}–${rightWins}${ties ? `–${ties}` : ""}`
-      : leftWins > rightWins
-        ? `${game.team1Team} leads ${leftWins}–${rightWins}${ties ? `–${ties}` : ""}`
-        : `${game.team2Team} leads ${rightWins}–${leftWins}${ties ? `–${ties}` : ""}`;
-
-  const lastMeeting = completed[0];
-  const orientedLast = orientHistoricalMeeting(lastMeeting, game);
-
-  const lastMeetingScore =
-    `${orientedLast.leftScore.toFixed(1)} – ${orientedLast.rightScore.toFixed(1)}`;
-
-  let streakWinnerId = getHistoricalWinnerId(completed[0]);
-  let streakCount = streakWinnerId ? 1 : 0;
-
-  if (streakWinnerId) {
-    for (let i = 1; i < completed.length; i += 1) {
-      if (getHistoricalWinnerId(completed[i]) !== streakWinnerId) break;
-      streakCount += 1;
-    }
-  }
-
-  const streakTeam =
-    streakWinnerId === game.team1Id
-      ? game.team1Team
-      : streakWinnerId === game.team2Id
-        ? game.team2Team
-        : "";
-
-  let largest = null;
-  let closest = null;
-  let highestScoring = null;
-
-  let team1Points = 0;
-  let team2Points = 0;
-
-  completed.forEach((meeting) => {
-    const oriented = orientHistoricalMeeting(meeting, game);
-    const margin = Math.abs(oriented.leftScore - oriented.rightScore);
-    const total = oriented.leftScore + oriented.rightScore;
-    const winnerId = getHistoricalWinnerId(meeting);
-
-    team1Points += oriented.leftScore;
-    team2Points += oriented.rightScore;
-
-    const winnerName =
-      winnerId === game.team1Id
-        ? game.team1Team
-        : winnerId === game.team2Id
-          ? game.team2Team
-          : "Tie";
-
-    const marginEntry = {
-      margin,
-      winnerName,
-      season: meeting.season,
-      week: meeting.week,
-      leftName: oriented.leftName,
-      rightName: oriented.rightName,
-      leftScore: oriented.leftScore,
-      rightScore: oriented.rightScore,
-    };
-
-    if (!largest || margin > largest.margin) {
-      largest = marginEntry;
-    }
-
-    if (!closest || margin < closest.margin) {
-      closest = marginEntry;
-    }
-
-    if (!highestScoring || total > highestScoring.total) {
-      highestScoring = {
-        total,
-        season: meeting.season,
-        week: meeting.week,
-        leftName: oriented.leftName,
-        rightName: oriented.rightName,
-        leftScore: oriented.leftScore,
-        rightScore: oriented.rightScore,
-      };
-    }
-  });
-
-  const postseason = completed.filter(isHistoricalPostseasonMeeting);
-
-  let postseasonText = "No Postseason Meetings";
-  let postseasonSubtext = "Regular-season series only";
-
-  if (postseason.length > 0) {
-    let team1PostWins = 0;
-    let team2PostWins = 0;
-    let postTies = 0;
-
-    postseason.forEach((meeting) => {
-      const winnerId = getHistoricalWinnerId(meeting);
-      if (!winnerId) postTies += 1;
-      else if (winnerId === game.team1Id) team1PostWins += 1;
-      else if (winnerId === game.team2Id) team2PostWins += 1;
-    });
-
-    if (team1PostWins === team2PostWins) {
-      postseasonText =
-        `Postseason series tied ${team1PostWins}–${team2PostWins}` +
-        (postTies ? `–${postTies}` : "");
-    } else if (team1PostWins > team2PostWins) {
-      postseasonText =
-        `${game.team1Team} leads postseason ${team1PostWins}–${team2PostWins}`;
-    } else {
-      postseasonText =
-        `${game.team2Team} leads postseason ${team2PostWins}–${team1PostWins}`;
-    }
-
-    postseasonSubtext =
-      `${postseason.length} postseason meeting${postseason.length === 1 ? "" : "s"}`;
-  }
-
-  return {
-    completed,
-    meetings: completed.length,
-    leftWins,
-    rightWins,
-    ties,
-    seriesLeader,
-    lastMeeting,
-    lastMeetingLeftName: orientedLast.leftName,
-    lastMeetingRightName: orientedLast.rightName,
-    lastMeetingLeftScore: orientedLast.leftScore,
-    lastMeetingRightScore: orientedLast.rightScore,
-    lastMeetingScore,
-    lastMeetingTeams:
-      `${orientedLast.leftName} – ${orientedLast.rightName}`,
-    streakHeadline:
-      streakTeam && streakCount
-        ? `${streakTeam} W${streakCount}`
-        : "Series tied",
-    streakSubtext:
-      streakCount >= 2
-        ? `${streakCount} straight`
-        : streakTeam
-          ? "Won last meeting"
-          : "No active streak",
-    streakSeason: completed[0]?.season,
-    streakWeek: completed[0]?.week,
-    largest,
-    closest,
-    highestScoring,
-    averageLeft: team1Points / completed.length,
-    averageRight: team2Points / completed.length,
-    postseasonText,
-    postseasonSubtext,
-  };
-}
-
-function SeriesHistoryPanel({ game, history }) {
-  const stats = buildDetailedSeriesHistory(game, history);
-
-  if (!stats) {
-    return (
-      <div className="game-center-history-empty">
-        <History size={20} />
-        <div>
-          <strong>No prior meetings found</strong>
-          <span>
-            This is the first archived meeting between these permanent MESH franchises.
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <div className="game-center-series-card">
-        <div className="game-center-series-card-heading">
-          <Clock3 size={22} />
-          <div>
-            <span>All-Time Series</span>
-            <strong>{stats.seriesLeader}</strong>
-          </div>
-        </div>
-
-        <div className="game-center-series-scoreboard">
-          <div className="game-center-series-team">
-            <strong>{stats.leftWins}</strong>
-            <span>{game.team1Team}</span>
-          </div>
-
-          <div className="game-center-series-meetings">
-            <strong>{stats.meetings}</strong>
-            <span>Previous Meetings</span>
-          </div>
-
-          <div className="game-center-series-team">
-            <strong>{stats.rightWins}</strong>
-            <span>{game.team2Team}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="game-center-series-stat-grid">
-        <div className="game-center-series-stat-card">
-          <span>Last Meeting</span>
-
-          <div className="game-center-series-team-score">
-            <strong>{stats.lastMeetingLeftName}</strong>
-            <strong>{stats.lastMeetingLeftScore.toFixed(1)}</strong>
-          </div>
-
-          <div className="game-center-series-team-score">
-            <strong>{stats.lastMeetingRightName}</strong>
-            <strong>{stats.lastMeetingRightScore.toFixed(1)}</strong>
-          </div>
-
-          <small>{stats.lastMeeting.season} • Week {stats.lastMeeting.week}</small>
-        </div>
-
-        <div className="game-center-series-stat-card">
-          <span>Current Streak</span>
-
-          <div className="game-center-series-single-team">
-            <strong>{stats.streakHeadline.replace(/\sW\d+$/, "")}</strong>
-          </div>
-
-          <div className="game-center-series-major-stat">
-            {stats.streakHeadline.match(/W\d+$/)?.[0] || "—"}
-          </div>
-
-          <small>{stats.streakSeason} • Week {stats.streakWeek}</small>
-        </div>
-
-        <div className="game-center-series-stat-card">
-          <span>Largest Win</span>
-
-          <div className="game-center-series-single-team">
-            <strong>{stats.largest.winnerName}</strong>
-          </div>
-
-          <div className="game-center-series-major-stat">
-            +{stats.largest.margin.toFixed(1)}
-          </div>
-
-          <small>{stats.largest.season} • Week {stats.largest.week}</small>
-        </div>
-
-        <div className="game-center-series-stat-card">
-          <span>Closest Meeting</span>
-
-          <div className="game-center-series-single-team">
-            <strong>{stats.closest.winnerName}</strong>
-          </div>
-
-          <div className="game-center-series-major-stat">
-            +{stats.closest.margin.toFixed(1)}
-          </div>
-
-          <small>{stats.closest.season} • Week {stats.closest.week}</small>
-        </div>
-
-        <div className="game-center-series-stat-card">
-          <span>Highest-Scoring Meeting</span>
-
-          <div className="game-center-series-single-team">
-            <strong>
-              {stats.highestScoring.leftScore >= stats.highestScoring.rightScore
-                ? stats.highestScoring.leftName
-                : stats.highestScoring.rightName}
-            </strong>
-          </div>
-
-          <div className="game-center-series-major-stat">
-            {stats.highestScoring.total.toFixed(1)} Combined
-          </div>
-
-          <small>
-            {stats.highestScoring.season} • Week {stats.highestScoring.week}
-          </small>
-        </div>
-
-        <div className="game-center-series-stat-card">
-          <span>Average Score</span>
-
-          <div className="game-center-series-team-score">
-            <strong>{game.team1Team}</strong>
-            <strong>{stats.averageLeft.toFixed(1)}</strong>
-          </div>
-
-          <div className="game-center-series-team-score">
-            <strong>{game.team2Team}</strong>
-            <strong>{stats.averageRight.toFixed(1)}</strong>
-          </div>
-
-          <small>
-            All {stats.meetings} Previous Meeting{stats.meetings === 1 ? "" : "s"}
-          </small>
-        </div>
-      </div>
-
-      <div className="game-center-postseason-series">
-        <span>Postseason Series</span>
-        <strong>{stats.postseasonText}</strong>
-        <em>{stats.postseasonSubtext}</em>
-      </div>
-
-      <div className="game-center-history-archive-heading">
-        <div>
-          <span>Archive</span>
-          <h3>Recent Meetings</h3>
-        </div>
-        <small>Showing {Math.min(stats.completed.length, 8)} of {stats.completed.length}</small>
-      </div>
-
-      <div className="game-center-history-list game-center-history-list-restored">
-        {stats.completed.slice(0, 8).map((meeting) => (
-          <HistoryCard
-            key={meeting.gameId}
-            meeting={meeting}
-            currentTeam1Id={game.team1Id}
-          />
-        ))}
-      </div>
-    </>
-  );
-}
-
 function HistoryCard({ meeting, currentTeam1Id }) {
   const team1WasCurrentLeft = meeting.team1Id === currentTeam1Id;
 
   const leftName = team1WasCurrentLeft ? meeting.team1Team : meeting.team2Team;
   const rightName = team1WasCurrentLeft ? meeting.team2Team : meeting.team1Team;
-  const leftId = team1WasCurrentLeft ? meeting.team1Id : meeting.team2Id;
-  const rightId = team1WasCurrentLeft ? meeting.team2Id : meeting.team1Id;
-  const leftScore = historyScore(
-    team1WasCurrentLeft ? meeting.team1Score : meeting.team2Score,
-  );
-  const rightScore = historyScore(
-    team1WasCurrentLeft ? meeting.team2Score : meeting.team1Score,
-  );
-  const winnerId = getHistoricalWinnerId(meeting);
+  const leftScore = team1WasCurrentLeft ? meeting.team1Score : meeting.team2Score;
+  const rightScore = team1WasCurrentLeft ? meeting.team2Score : meeting.team1Score;
 
   return (
     <div className="game-center-history-row">
-      <div className="game-center-history-row-meta">
+      <div>
         <span>{meeting.season} • Week {meeting.week}</span>
-        <strong>{describeHistoryType(meeting)}</strong>
+        <strong>
+          {isPostseasonGame(meeting)
+            ? getPostseasonRound(meeting)
+            : meeting.gameType || meeting.gameCategory || "Matchup"}
+        </strong>
       </div>
 
       <div className="game-center-history-score">
         <span>{leftName}</span>
-        <strong className={winnerId === leftId ? "history-winning-score" : ""}>
-          {leftScore === null ? "—" : leftScore.toFixed(1)}
-        </strong>
-
+        <strong>{leftScore === null ? "—" : Number(leftScore).toFixed(1)}</strong>
         <span className="game-center-history-vs">vs</span>
-
-        <strong className={winnerId === rightId ? "history-winning-score" : ""}>
-          {rightScore === null ? "—" : rightScore.toFixed(1)}
-        </strong>
+        <strong>{rightScore === null ? "—" : Number(rightScore).toFixed(1)}</strong>
         <span>{rightName}</span>
       </div>
     </div>
@@ -1083,11 +751,13 @@ function GameCenter() {
     );
   }
 
-  const matchupLabel =
-    game.bowlName ||
-    game.gameType ||
-    game.gameCategory ||
-    "MESH Matchup";
+  const postseason = isPostseasonGame(game);
+  const postseasonRound = postseason ? getPostseasonRound(game) : "";
+  const matchupLabel = postseason
+    ? postseasonRound
+    : game.gameType ||
+      game.gameCategory ||
+      "MESH Matchup";
 
   return (
     <main className="game-center-page">
@@ -1097,7 +767,11 @@ function GameCenter() {
       </button>
 
       <PageHeader
-        eyebrow={`${game.tier} • Week ${game.week}`}
+        eyebrow={
+          postseason
+            ? `${game.tier} • Postseason • Week ${game.week}`
+            : `${game.tier} • Week ${game.week}`
+        }
         title="Game Center"
         description={matchupLabel}
         imageSrc={meshShield}
@@ -1135,10 +809,30 @@ function GameCenter() {
       <section className="game-center-history">
         <div className="game-center-section-heading">
           <span>Series</span>
-          <h2>Matchup History</h2>
+          <h2>Head-to-Head History & Prior Meetings</h2>
         </div>
 
-        <SeriesHistoryPanel game={game} history={history} />
+        {history.length > 0 ? (
+          <div className="game-center-history-list">
+            {history.slice(0, 8).map((meeting) => (
+              <HistoryCard
+                key={meeting.gameId}
+                meeting={meeting}
+                currentTeam1Id={game.team1Id}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="game-center-history-empty">
+            <History size={20} />
+            <div>
+              <strong>No prior meetings found</strong>
+              <span>
+                Historical meetings will populate as earlier GAME_RESULTS seasons are added.
+              </span>
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="game-center-details">
@@ -1151,6 +845,27 @@ function GameCenter() {
           <div><span>Season</span><strong>{game.season}</strong></div>
           <div><span>Week</span><strong>Week {game.week}</strong></div>
           <div><span>Tier</span><strong>{game.tier}</strong></div>
+          {postseason ? (
+            <div>
+              <span>Postseason Round</span>
+              <strong>{postseasonRound}</strong>
+            </div>
+          ) : null}
+          {postseason &&
+          (Number(game.team1GameRank) > 0 || Number(game.team2GameRank) > 0) ? (
+            <div>
+              <span>Seeds</span>
+              <strong>
+                {Number(game.team1GameRank) > 0
+                  ? `#${game.team1GameRank}`
+                  : "—"}
+                {" vs "}
+                {Number(game.team2GameRank) > 0
+                  ? `#${game.team2GameRank}`
+                  : "—"}
+              </strong>
+            </div>
+          ) : null}
           {game.gameCategory ? (
             <div><span>Category</span><strong>{game.gameCategory}</strong></div>
           ) : null}

@@ -749,818 +749,250 @@
   left: auto;
 }
 
-/* =========================================================
-   GAME CENTER — RANK BADGE / TEAM NAME ALIGNMENT
-========================================================= */
-
-.game-center-logo-wrap {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-  margin: 0 auto;
-}
-
-.game-center-logo-rank {
-  position: absolute;
-  top: -7px;
-  left: -10px;
-  z-index: 2;
-  min-width: 25px;
-  padding: 4px 6px;
-  border: 1px solid rgba(255, 211, 79, .24);
-  border-radius: 999px;
-  color: #ffd34f;
-  background: rgba(7, 20, 33, .96);
-  box-shadow: 0 4px 10px rgba(0,0,0,.22);
-  font-size: .53rem;
-  font-weight: 950;
-  line-height: 1;
-  text-align: center;
-}
-
-.game-center-team-name {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  min-height: 2.55em;
-  margin: 10px 0 0;
-  text-align: center;
-  line-height: 1.18;
-}
-
-.game-center-team-name > span {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-}
-
-.game-center-inline-rank {
-  display: none !important;
-}
-
-@media (max-width: 430px) {
-  .game-center-logo-rank {
-    top: -6px;
-    left: -8px;
-    min-width: 23px;
-    padding: 3px 5px;
-    font-size: .48rem;
-  }
-
-  .game-center-team-name {
-    min-height: 2.65em;
-  }
-}
 
 /* =========================================================
-   GAME CENTER — CONFERENCE PATCH SIZE
+   GAME CENTER V9 — TIER / CONFERENCE PATCH HEADER
 ========================================================= */
 
-.game-center-hero-patch {
-  width: 42px !important;
-  height: 42px !important;
-  max-width: 42px !important;
-  max-height: 42px !important;
-  object-fit: contain;
-  flex: 0 0 42px;
+.game-center-hero-top-patched {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
 }
 
-@media (max-width: 430px) {
-  .game-center-hero-patch {
-    width: 34px !important;
-    height: 34px !important;
-    max-width: 34px !important;
-    max-height: 34px !important;
-    flex-basis: 34px;
-  }
-}
-
-/* =========================================================
-   GAME CENTER — RESTORED PHONE REFERENCE DESIGN
-========================================================= */
-
-/* Matchup card header */
-.game-center-hero-top.game-center-hero-top-patched {
-  min-height: 82px;
-  padding: 14px 18px;
-  grid-template-columns: minmax(92px, 1fr) auto minmax(58px, 1fr);
+.game-center-hero-status {
+  min-width: 0;
 }
 
 .game-center-hero-title {
+  min-width: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-}
-
-.game-center-hero-title-copy {
-  text-align: center;
-}
-
-.game-center-hero-title-copy > span {
-  display: block;
-  margin-bottom: 3px;
-  color: #8ea0af;
-  font-size: .48rem;
-  font-weight: 900;
-  letter-spacing: .10em;
-  text-transform: uppercase;
-}
-
-.game-center-hero-title-copy h2 {
-  margin: 0;
-  color: #fff;
-  font-family: var(--heading-font, "Graduate", serif);
-  font-size: .72rem;
-  font-weight: 400;
-  letter-spacing: .035em;
+  gap: 8px;
 }
 
 .game-center-hero-patch {
-  width: 44px !important;
-  height: 44px !important;
-  max-width: 44px !important;
-  max-height: 44px !important;
-  object-fit: contain;
-  flex: 0 0 44px;
-}
-
-/* Historical section */
-.game-center-history {
-  margin-top: 30px;
-}
-
-.game-center-history .game-center-section-heading {
-  margin-bottom: 12px;
-}
-
-.game-center-history .game-center-section-heading > span {
-  color: #7890a4;
-}
-
-.game-center-history .game-center-section-heading h2 {
-  font-size: 1.02rem;
-}
-
-.game-center-series-card {
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,.11);
-  border-top: 3px solid var(--tier-accent, #a068ff);
-  border-radius: 16px;
-  background: linear-gradient(145deg, rgba(20,38,57,.98), rgba(10,24,38,.99));
-}
-
-.game-center-hero-nfl ~ .game-center-rosters ~ .game-center-history .game-center-series-card {
-  border-top-color: #24b86d;
-}
-
-.game-center-hero-fbs ~ .game-center-rosters ~ .game-center-history .game-center-series-card {
-  border-top-color: #4287ff;
-}
-
-.game-center-hero-fcs ~ .game-center-rosters ~ .game-center-history .game-center-series-card {
-  border-top-color: #a068ff;
-}
-
-.game-center-series-card-heading {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  padding: 17px 18px 15px;
-  border-bottom: 1px solid rgba(255,255,255,.075);
-}
-
-.game-center-series-card-heading > svg {
+  width: 46px;
+  height: 46px;
   flex: 0 0 auto;
-  color: #f0c94e;
-}
 
-.game-center-series-card-heading span,
-.game-center-series-stat-card > span,
-.game-center-postseason-series > span {
   display: block;
-  margin-bottom: 4px;
-  color: #869aaa;
-  font-size: .53rem;
-  font-weight: 900;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  object-fit: contain;
+  object-position: center;
+
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.3));
 }
 
-.game-center-series-card-heading strong {
-  display: block;
-  color: #f6f8fa;
-  font-family: var(--heading-font, "Graduate", serif);
-  font-size: 1.02rem;
-  font-weight: 400;
-  line-height: 1.2;
-}
-
-.game-center-series-scoreboard {
-  display: grid;
-  grid-template-columns: minmax(0,1fr) minmax(112px,.8fr) minmax(0,1fr);
-  align-items: center;
-  gap: 10px;
-  padding: 15px 16px 17px;
-}
-
-.game-center-series-team {
+.game-center-hero-title > div {
   min-width: 0;
-  text-align: center;
 }
 
-.game-center-series-team strong {
+.game-center-hero-title > div > span {
   display: block;
-  color: #fff;
-  font-size: 1.45rem;
-  line-height: 1;
-}
 
-.game-center-series-team span {
-  display: block;
-  margin-top: 7px;
-  overflow: hidden;
-  color: #8ea0af;
-  font-size: .55rem;
-  font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+  margin-bottom: 2px;
 
-.game-center-series-meetings {
-  padding: 10px 8px;
-  border: 1px solid rgba(255,255,255,.11);
-  border-radius: 12px;
-  text-align: center;
-  background: rgba(255,255,255,.028);
-}
-
-.game-center-series-meetings strong {
-  display: block;
-  color: #f0c94e;
-  font-size: 1.18rem;
-}
-
-.game-center-series-meetings span {
-  display: block;
-  margin-top: 4px;
-  color: #899aaa;
-  font-size: .48rem;
+  font-size: .43rem;
   font-weight: 900;
-  letter-spacing: .05em;
+  letter-spacing: .06em;
   text-transform: uppercase;
+
+  color: #8294a4;
 }
 
-.game-center-series-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0,1fr));
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.game-center-series-stat-card,
-.game-center-postseason-series {
-  min-width: 0;
-  padding: 14px 15px;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 14px;
-  background: rgba(9,21,34,.96);
-}
-
-.game-center-series-stat-card strong,
-.game-center-postseason-series strong {
-  display: block;
-  overflow: hidden;
-  color: #f5f8fa;
-  font-size: .68rem;
-  font-weight: 850;
-  line-height: 1.25;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.game-center-series-stat-card em,
-.game-center-postseason-series em {
-  display: block;
-  margin-top: 5px;
-  overflow: hidden;
-  color: #758a9b;
-  font-size: .54rem;
-  font-style: normal;
-  line-height: 1.25;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.game-center-series-stat-card small {
-  display: block;
-  margin-top: 5px;
-  overflow: hidden;
-  color: #687d8e;
-  font-size: .49rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.game-center-postseason-series {
-  margin-top: 10px;
-  padding-block: 16px;
-}
-
-.game-center-history-archive-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 24px 0 10px;
-}
-
-.game-center-history-archive-heading > div > span {
-  display: block;
-  color: #71889b;
-  font-size: .52rem;
-  font-weight: 900;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-
-.game-center-history-archive-heading h3 {
-  margin: 2px 0 0;
-  color: #fff;
-  font-family: var(--heading-font, "Graduate", serif);
-  font-size: 1rem;
-  font-weight: 400;
-}
-
-.game-center-history-archive-heading small {
-  color: #728697;
-  font-size: .54rem;
-}
-
-.game-center-history-list-restored {
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 15px;
-  background: rgba(9,21,34,.96);
-}
-
-.game-center-history-list-restored .game-center-history-row {
-  display: block;
-  padding: 14px 15px 15px;
-  border: 0;
-  border-bottom: 1px solid rgba(255,255,255,.075);
-  border-radius: 0;
-  background: transparent;
-}
-
-.game-center-history-list-restored .game-center-history-row:last-child {
-  border-bottom: 0;
-}
-
-.game-center-history-row-meta {
-  margin-bottom: 13px;
-}
-
-.game-center-history-row-meta span {
-  display: block;
-  margin-bottom: 3px;
-  color: #758b9d;
-  font-size: .52rem;
-}
-
-.game-center-history-row-meta strong {
-  color: #dce4eb;
-  font-size: .61rem;
-}
-
-.game-center-history-list-restored .game-center-history-score {
-  display: grid;
-  grid-template-columns: minmax(0,1fr) auto 22px auto minmax(0,1fr);
-  align-items: center;
-  gap: 6px;
-}
-
-.game-center-history-list-restored .game-center-history-score > span:first-child {
-  text-align: right;
-}
-
-.game-center-history-list-restored .game-center-history-score > span:last-child {
-  text-align: left;
-}
-
-.game-center-history-list-restored .game-center-history-score > span:not(.game-center-history-vs) {
+.game-center-hero-title h2 {
   min-width: 0;
   overflow: hidden;
-  color: #e1e7ec;
-  font-size: .57rem;
-  text-overflow: ellipsis;
+
   white-space: nowrap;
-}
-
-.game-center-history-list-restored .game-center-history-score strong {
-  color: #f1f5f8;
-  font-size: .62rem;
-}
-
-.game-center-history-list-restored .game-center-history-score strong.history-winning-score {
-  color: #43da8a;
-}
-
-.game-center-history-list-restored .game-center-history-vs {
-  color: #667c8e;
-  font-size: .51rem;
-  text-align: center;
+  text-overflow: ellipsis;
 }
 
 @media (max-width: 430px) {
-  .game-center-hero-top.game-center-hero-top-patched {
-    grid-template-columns: minmax(78px,1fr) auto minmax(48px,1fr);
-    padding-inline: 12px;
+  .game-center-hero-top-patched {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 5px;
+  }
+
+  .game-center-hero-title {
+    gap: 5px;
   }
 
   .game-center-hero-patch {
-    width: 38px !important;
-    height: 38px !important;
-    max-width: 38px !important;
-    max-height: 38px !important;
-    flex-basis: 38px;
+    width: 38px;
+    height: 38px;
   }
 
-  .game-center-series-card-heading {
-    padding-inline: 14px;
+  .game-center-hero-title > div > span {
+    font-size: .37rem;
   }
 
-  .game-center-series-scoreboard {
-    grid-template-columns: minmax(0,1fr) 102px minmax(0,1fr);
-    padding-inline: 12px;
+  .game-center-hero-title h2 {
+    font-size: .62rem;
   }
 
-  .game-center-series-stat-grid {
-    gap: 8px;
-  }
-
-  .game-center-series-stat-card,
-  .game-center-postseason-series {
-    padding-inline: 12px;
+  .game-center-hero-status .gc-home-state-pill,
+  .game-center-hero-top-patched .gc-home-tier-pill {
+    padding-inline: 7px;
+    font-size: .46rem;
   }
 }
 
+@media (min-width: 700px) {
+  .game-center-hero-patch {
+    width: 54px;
+    height: 54px;
+  }
+}
+
+
 /* =========================================================
-   GAME CENTER — MOBILE SIDE-BY-SIDE ROSTERS EXPERIMENT
+   GAME CENTER V9B — CROSS-CONFERENCE HEADER
 ========================================================= */
+
+.game-center-hero-title-cross-conference {
+  gap: 7px;
+}
+
+.game-center-hero-title-copy {
+  min-width: 0;
+  text-align: center;
+}
+
+.game-center-hero-title-cross-conference .game-center-hero-title-copy > span {
+  color: #d7e0e7;
+}
+
+.game-center-hero-title-cross-conference .game-center-hero-patch {
+  width: 42px;
+  height: 42px;
+}
 
 @media (max-width: 430px) {
-  /* Override the older mobile stack rule. */
-  .game-center-roster-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 6px;
-  }
-
-  .game-center-roster-panel {
-    min-width: 0;
-    border-radius: 10px;
-  }
-
-  .game-center-roster-panel-heading {
+  .game-center-hero-title-cross-conference {
     gap: 4px;
-    padding: 8px 6px;
   }
 
-  .game-center-roster-panel-heading svg {
-    width: 13px;
-    height: 13px;
-    flex: 0 0 13px;
+  .game-center-hero-title-cross-conference .game-center-hero-patch {
+    width: 34px;
+    height: 34px;
   }
 
-  .game-center-roster-panel-heading strong {
-    font-size: .49rem;
-    line-height: 1.15;
-  }
-
-  .game-center-roster-table-head {
-    grid-template-columns: 24px minmax(0, 1fr) 30px;
-    gap: 3px;
-    padding: 7px 5px;
-  }
-
-  .game-center-roster-table-head span {
-    font-size: .38rem;
-    letter-spacing: .045em;
-  }
-
-  .game-center-player-row {
-    grid-template-columns: 24px minmax(0, 1fr) 30px;
-    gap: 3px;
-    padding: 7px 5px;
-  }
-
-  .game-center-lineup-position {
-    font-size: .42rem;
-  }
-
-  .game-center-player-copy {
-    min-width: 0;
-  }
-
-  .game-center-player-copy strong {
-    display: block;
-    overflow: hidden;
-    font-size: .48rem;
-    line-height: 1.12;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .game-center-player-copy span {
-    display: block;
-    overflow: hidden;
-    margin-top: 2px;
+  .game-center-hero-title-cross-conference .game-center-hero-title-copy > span {
     font-size: .34rem;
-    line-height: 1.1;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
-  .game-center-player-points {
-    min-width: 0;
-  }
-
-  .game-center-player-points strong {
-    font-size: .48rem;
-  }
-
-  .game-center-player-points span {
-    font-size: .32rem;
-    white-space: nowrap;
-  }
-
-  .game-center-roster-empty {
-    padding: 12px 7px;
-    font-size: .45rem;
+  .game-center-hero-title-cross-conference .game-center-hero-title-copy h2 {
+    font-size: .58rem;
   }
 }
 
-/*
- * On extremely narrow screens, keep both rosters side by side but make
- * the typography slightly tighter rather than switching back to stacked.
- */
-@media (max-width: 360px) {
-  .game-center-roster-grid {
-    gap: 4px;
-  }
-
-  .game-center-roster-panel-heading {
-    padding-inline: 5px;
-  }
-
-  .game-center-roster-panel-heading strong {
-    font-size: .45rem;
-  }
-
-  .game-center-player-row,
-  .game-center-roster-table-head {
-    grid-template-columns: 21px minmax(0, 1fr) 28px;
-    gap: 2px;
-    padding-inline: 4px;
-  }
-
-  .game-center-player-copy strong {
-    font-size: .44rem;
-  }
-
-  .game-center-player-points strong {
-    font-size: .44rem;
+@media (min-width: 700px) {
+  .game-center-hero-title-cross-conference .game-center-hero-patch {
+    width: 50px;
+    height: 50px;
   }
 }
-
 
 /* =========================================================
-   MATCHUP HISTORY — LONG TEAM NAME / FOUR-LINE CARD PATCH
+   PHASE 4H — POSTSEASON GAME CENTER
 ========================================================= */
 
-.game-center-series-team span {
-  overflow: visible !important;
-  text-overflow: clip !important;
-  white-space: normal !important;
-  line-height: 1.2;
-  overflow-wrap: anywhere;
+.game-center-hero-postseason {
+  border-top-color: rgba(232, 198, 91, .18);
 }
 
-.game-center-series-stat-card {
+.game-center-hero-postseason .game-center-hero-title-copy > span {
+  color: #e8c65b;
+}
+
+.game-center-hero-postseason .game-center-hero-title-copy h2 {
+  font-size: clamp(.66rem, 1.6vw, .86rem);
+  color: #ffffff;
+}
+
+.game-center-postseason-strip {
   display: grid;
-  grid-template-rows: auto minmax(2.5em, auto) auto auto;
-  align-content: start;
-  min-height: 142px;
-}
-
-.game-center-series-stat-card strong,
-.game-center-series-stat-card em,
-.game-center-series-stat-card small {
-  overflow: visible !important;
-  text-overflow: clip !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere;
-}
-
-.game-center-series-stat-card strong {
-  min-height: 2.5em;
-  line-height: 1.25;
-}
-
-.game-center-series-stat-card em,
-.game-center-series-stat-card small {
-  line-height: 1.3;
-}
-
-@media (max-width: 560px) {
-  .game-center-series-stat-card {
-    min-height: 150px;
-    padding: 13px 12px;
-  }
-
-  .game-center-series-stat-card strong {
-    font-size: .64rem;
-  }
-
-  .game-center-series-team span {
-    font-size: .50rem;
-  }
-}
-
-/* =========================================================
-   MATCHUP HISTORY — TEAM/SCORE DETAIL CARD FINAL
-========================================================= */
-
-.game-center-series-stat-card {
-  display: flex !important;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-start;
-  min-height: 172px !important;
-}
-
-.game-center-series-team-score {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 8px;
-  margin-top: 6px;
-}
-
-.game-center-series-team-score strong {
-  min-height: 0 !important;
-  margin: 0 !important;
-  overflow: visible !important;
-  color: #f5f8fa;
-  font-size: .66rem !important;
-  font-weight: 850;
-  line-height: 1.2 !important;
-  text-overflow: clip !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere;
-}
-
-.game-center-series-team-score strong:last-child {
-  text-align: right;
-  white-space: nowrap !important;
-}
-
-.game-center-series-single-team {
-  margin-top: 8px;
-}
-
-.game-center-series-single-team strong {
-  display: block;
-  min-height: 0 !important;
-  margin: 0 !important;
-  overflow: visible !important;
-  color: #f5f8fa;
-  font-size: .68rem !important;
-  font-weight: 850;
-  line-height: 1.2 !important;
-  text-overflow: clip !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere;
-}
-
-.game-center-series-major-stat {
-  margin-top: 8px;
-  color: #f5f8fa;
-  font-size: .68rem;
-  font-weight: 900;
-  line-height: 1.2;
-}
-
-.game-center-series-major-stat-muted {
-  color: #8ea0af;
-  font-size: .57rem;
-  font-weight: 800;
-}
-
-.game-center-series-stat-card > small {
-  display: block;
-  margin-top: auto !important;
-  padding-top: 8px;
-  color: #758a9b;
-  font-size: .50rem;
-  line-height: 1.2;
-}
-
-@media (max-width: 560px) {
-  .game-center-series-stat-card {
-    min-height: 184px !important;
-  }
-
-  .game-center-series-team-score strong,
-  .game-center-series-single-team strong,
-  .game-center-series-major-stat {
-    font-size: .61rem !important;
-  }
-
-  .game-center-series-major-stat-muted {
-    font-size: .53rem !important;
-  }
-}
-
-/* =========================================================
-   MATCHUP HISTORY — FINAL FOUR-LINE CARD FORMAT
-========================================================= */
-
-.game-center-series-stat-card {
-  min-height: 150px !important;
-}
-
-.game-center-series-stat-card > small {
-  margin-top: auto !important;
-  padding-top: 8px;
-}
-
-@media (max-width: 560px) {
-  .game-center-series-stat-card {
-    min-height: 158px !important;
-  }
-}
-
-/* =========================================================
-   PHASE 3A — GAME CENTER PROFILE LINKS
-========================================================= */
-
-.game-center-profile-logo-link {
-  display: inline-flex;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: center;
-  color: inherit;
-  text-decoration: none;
-  border-radius: 50%;
+  gap: 9px;
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.065);
+  background: rgba(255,255,255,.022);
 }
 
-.game-center-profile-logo-link .game-center-logo-wrap {
-  transition: transform .16s ease, filter .16s ease;
+.game-center-postseason-strip > span,
+.game-center-postseason-strip > small {
+  font-size: .44rem;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-transform: uppercase;
 }
 
-.game-center-profile-logo-link:hover .game-center-logo-wrap,
-.game-center-profile-logo-link:focus-visible .game-center-logo-wrap {
-  transform: translateY(-2px) scale(1.025);
-  filter: brightness(1.08);
+.game-center-postseason-strip > span {
+  color: #e8c65b;
 }
 
-.game-center-franchise-link,
-.game-center-coach-link {
-  color: inherit;
-  text-decoration: none;
+.game-center-postseason-strip > strong {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: center;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: .61rem;
+  font-weight: 400;
+  letter-spacing: .03em;
+  color: #ffffff;
 }
 
-.game-center-franchise-link {
-  display: inline;
-  font: inherit;
-  line-height: inherit;
+.game-center-postseason-strip > small {
+  color: #8798a8;
 }
 
-.game-center-franchise-link:hover,
-.game-center-franchise-link:focus-visible,
-.game-center-coach-link:hover,
-.game-center-coach-link:focus-visible {
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.game-center-postseason-strip-nfl {
+  box-shadow: inset 3px 0 0 rgba(31,178,101,.72);
 }
 
-.game-center-franchise-link:focus-visible,
-.game-center-coach-link:focus-visible,
-.game-center-profile-logo-link:focus-visible {
-  outline: 1px solid rgba(255,255,255,.42);
-  outline-offset: 3px;
+.game-center-postseason-strip-fbs {
+  box-shadow: inset 3px 0 0 rgba(66,135,255,.78);
 }
 
-/* Keep mobile tap targets usable without changing the existing layout. */
-@media (max-width: 560px) {
-  .game-center-profile-logo-link {
-    -webkit-tap-highlight-color: transparent;
+.game-center-postseason-strip-fcs {
+  box-shadow: inset 3px 0 0 rgba(160,104,255,.78);
+}
+
+/* In postseason games, the existing inline rank circle is the playoff seed. */
+.game-center-hero-postseason .game-center-inline-rank {
+  color: #ffffff;
+  border: 1px solid rgba(232,198,91,.2);
+  background: rgba(232,198,91,.12);
+}
+
+/* Bowl / title games receive a subtle championship treatment without
+   changing the underlying Game Center layout. */
+.game-center-hero-postseason .game-center-team-side.winner {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(232,198,91,.045),
+      rgba(31,178,101,.025)
+    );
+}
+
+@media (max-width: 430px) {
+  .game-center-postseason-strip {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 5px 8px;
+    padding-inline: 10px;
   }
 
-  .game-center-franchise-link,
-  .game-center-coach-link {
-    -webkit-tap-highlight-color: rgba(255,255,255,.08);
+  .game-center-postseason-strip > small {
+    grid-column: 1 / -1;
+    text-align: center;
+  }
+
+  .game-center-postseason-strip > strong {
+    font-size: .55rem;
   }
 }

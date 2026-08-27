@@ -992,156 +992,279 @@
     padding-left: 9px;
   }
 }
+
 /* =========================================================
-   SCORES POLISH — LIVE DATA CARD REFINEMENTS
-   ========================================================= */
+   PHASE 4I — POSTSEASON SCORES PRESENTATION
+========================================================= */
 
-.score-team-info {
-  gap: 2px;
-}
-
-.score-team-info > strong {
-  color: #ffffff;
-}
-
-.score-team-coach {
+.scores-postseason-banner {
+  position: relative;
   overflow: hidden;
-  font-size: 0.57rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 14px;
+  padding: 15px 16px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 16px;
+  background:
+    radial-gradient(
+      circle at 88% 10%,
+      rgba(255,255,255,.055),
+      transparent 31%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(24,43,64,.98),
+      rgba(8,20,34,.995)
+    );
+  box-shadow: 0 14px 32px rgba(0,0,0,.15);
+}
+
+.scores-postseason-banner-nfl {
+  border-left: 3px solid #24b86d;
+}
+
+.scores-postseason-banner-fbs {
+  border-left: 3px solid #4287ff;
+}
+
+.scores-postseason-banner-fcs {
+  border-left: 3px solid #a068ff;
+}
+
+.scores-postseason-banner-main {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.scores-postseason-banner-patch {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 9px rgba(0,0,0,.28));
+}
+
+.scores-postseason-banner-icon {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #efc85a;
+  border: 1px solid rgba(232,198,91,.18);
+  background: rgba(232,198,91,.08);
+}
+
+.scores-postseason-banner-main > div {
+  min-width: 0;
+}
+
+.scores-postseason-banner-main span {
+  display: block;
+  margin-bottom: 3px;
+  color: #efc85a;
+  font-size: .49rem;
+  font-weight: 900;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+
+.scores-postseason-banner-main h2 {
+  margin: 0;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: clamp(.88rem, 2vw, 1.05rem);
+  font-weight: 400;
+  letter-spacing: .025em;
+}
+
+.scores-postseason-banner-main p {
+  margin: 5px 0 0;
+  max-width: 590px;
+  color: var(--color-muted, #94a4b3);
+  font-size: .56rem;
+  line-height: 1.45;
+}
+
+.scores-postseason-bracket-button {
+  flex: 0 0 auto;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid rgba(232,198,91,.22);
+  border-radius: 999px;
+  color: #f4d77a;
+  background: rgba(232,198,91,.075);
+  text-decoration: none;
+  font-size: .55rem;
+  font-weight: 900;
   white-space: nowrap;
-  text-overflow: ellipsis;
-  color: rgba(218, 227, 235, 0.82) !important;
 }
 
-.score-team-records {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap;
-  gap: 4px 10px !important;
-  font-size: 0.53rem !important;
-  font-weight: 750;
-  letter-spacing: 0.015em;
-  color: var(--color-muted, #94a4b3) !important;
+.scores-postseason-bracket-button:hover {
+  color: #fff;
+  background: rgba(232,198,91,.13);
 }
 
-.score-team-numbers {
-  min-width: 70px;
+/* ---------------------------------------------------------
+   FBS WEEK 13 — CONFERENCE CHAMPIONSHIP SHOWCASE
+--------------------------------------------------------- */
+
+.scores-fbs-championship-list {
+  display: grid;
+  gap: 18px;
 }
 
-.score-team-numbers > strong {
-  font-size: 1rem;
+.scores-fbs-championship-matchup {
+  overflow: hidden;
+  border: 1px solid rgba(66,135,255,.13);
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(19,36,55,.72),
+      rgba(8,20,34,.72)
+    );
 }
 
-.score-team-numbers > span {
-  font-size: 0.5rem;
-  text-transform: none;
+.scores-fbs-championship-header {
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(66,135,255,.10),
+      transparent 68%
+    );
 }
 
-.score-team-row.winner .score-team-info > strong {
-  color: #ffffff;
+.scores-fbs-championship-logo {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 10px rgba(0,0,0,.30));
 }
 
-.score-team-row.winner .score-team-numbers > strong {
-  color: #54dc8e;
+.scores-fbs-championship-header > div {
+  min-width: 0;
 }
 
-.score-team-row.loser .score-team-info > strong,
-.score-team-row.loser .score-team-coach,
-.score-team-row.loser .score-team-records,
-.score-team-row.loser .score-team-numbers > strong,
-.score-team-row.loser .score-team-numbers > span {
-  color: rgba(172, 184, 195, 0.58) !important;
+.scores-fbs-championship-header span {
+  display: block;
+  margin-bottom: 4px;
+  color: #8fa4b8;
+  font-size: .46rem;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-transform: uppercase;
 }
 
-.score-featured-label-game-of-week {
-  color: #ffd76a;
-  font-weight: 950;
+.scores-fbs-championship-header strong {
+  display: block;
+  color: #efc85a;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: clamp(.72rem, 2vw, .9rem);
+  font-weight: 400;
+  letter-spacing: .035em;
 }
 
-@media (max-width: 560px) {
-  .score-card {
-    padding: 13px;
+.scores-fbs-championship-matchup > .score-card {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+@media (min-width: 800px) {
+  .scores-fbs-championship-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .scores-postseason-banner {
+    display: grid;
   }
 
-  .score-card-header {
-    gap: 8px;
-    margin-bottom: 6px;
+  .scores-postseason-bracket-button {
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  .score-team-row {
-    grid-template-columns: 34px minmax(0, 1fr) 70px;
-    gap: 8px;
-    min-height: 70px;
-    padding: 8px 0;
+  .scores-fbs-championship-header {
+    justify-content: flex-start;
   }
 
-  .score-team-logo {
-    width: 32px;
-    height: 32px;
-    font-size: 0.66rem;
-  }
-
-  .score-team-info > strong {
-    font-size: 0.72rem;
-  }
-
-  .score-team-coach {
-    font-size: 0.53rem !important;
-  }
-
-  .score-team-records {
-    gap: 3px 7px !important;
-    font-size: 0.49rem !important;
-  }
-
-  .score-team-numbers {
-    min-width: 62px;
-  }
-
-  .score-team-numbers > strong {
-    font-size: 0.9rem;
-  }
-
-  .score-team-numbers > span {
-    font-size: 0.46rem;
+  .scores-fbs-championship-logo {
+    width: 46px;
+    height: 46px;
   }
 }
 
 /* =========================================================
-   SCORES POLISH V2 — FILTERS, TYPOGRAPHY, NEUTRAL CARDS
-   ========================================================= */
+   PHASE 4I.1 — RESTORE SCORES PATCH + NFL MATCHUP STYLES
+========================================================= */
 
-/* Keep the filter panel crisp and neutral in every tier/view. */
-.scores-secondary-filter,
-.scores-secondary-filter-nfl,
-.scores-secondary-filter-fbs,
-.scores-secondary-filter-fcs {
-  border-color: rgba(255, 255, 255, 0.09);
-  background: rgba(8, 18, 30, 0.72);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
-}
-
-.scores-secondary-filter-heading {
+/* Existing tier / conference patch headings from the pre-postseason Scores UI. */
+.scores-section-heading-patched {
   align-items: center;
 }
 
-.scores-secondary-heading-copy {
+.scores-section-identity {
   min-width: 0;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 11px;
 }
 
-.scores-secondary-heading-copy > span {
-  font-size: 0.54rem;
-  font-weight: 850;
-  letter-spacing: 0.08em;
+.scores-section-patch {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.3));
+}
+
+.scores-section-identity > div {
+  min-width: 0;
+}
+
+.scores-section-identity > div > span {
+  display: block;
+  margin-bottom: 3px;
+  font-size: .47rem;
+  font-weight: 900;
+  letter-spacing: .075em;
   text-transform: uppercase;
-  color: var(--color-muted, #93a3b3);
+  color: #8294a4;
 }
 
-.scores-secondary-heading-copy > strong {
-  font-size: 0.64rem;
-  color: #ffffff;
+.scores-section-identity h2 {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* NFL double-matchup selector used in Weeks 3, 6, 9 and 12. */
+.scores-secondary-heading-copy {
+  min-width: 0;
 }
 
 .scores-nfl-matchup-switch {
@@ -1150,66 +1273,42 @@
   align-items: center;
   gap: 4px;
   padding: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255,255,255,.075);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(255,255,255,.028);
 }
 
 .scores-nfl-matchup-button {
   min-height: 30px;
-  padding: 6px 9px;
+  padding: 5px 9px;
   border: 1px solid transparent;
   border-radius: 7px;
+  color: #8fa0af;
+  background: transparent;
   font: inherit;
-  font-size: 0.53rem;
+  font-size: .52rem;
   font-weight: 850;
   white-space: nowrap;
-  color: var(--color-muted, #98a8b7);
-  background: transparent;
   cursor: pointer;
 }
 
 .scores-nfl-matchup-button:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.055);
+  background: rgba(255,255,255,.055);
 }
 
 .scores-nfl-matchup-button.active {
   color: #d8f8e7;
-  border-color: rgba(31, 178, 101, 0.25);
-  background: rgba(31, 178, 101, 0.13);
-}
-
-/* Remove the bright tier stripe from each individual game card. */
-.score-card::before,
-.score-card-nfl::before,
-.score-card-fbs::before,
-.score-card-fcs::before {
-  background: rgba(210, 219, 228, 0.2);
-}
-
-/* Slightly darker/crisper card surface across every filter. */
-.score-card {
-  background:
-    linear-gradient(
-      145deg,
-      rgba(20, 38, 58, 0.98),
-      rgba(7, 18, 31, 0.995)
-    );
-}
-
-/* Improve readability without making the card feel oversized. */
-.score-team-info > strong {
-  font-size: 0.84rem;
-  line-height: 1.18;
-}
-
-.score-team-coach {
-  font-size: 0.63rem !important;
-  line-height: 1.2;
+  border-color: rgba(31,178,101,.25);
+  background: rgba(31,178,101,.13);
 }
 
 @media (max-width: 560px) {
+  .scores-section-patch {
+    width: 50px;
+    height: 50px;
+  }
+
   .scores-secondary-filter-heading {
     gap: 8px;
   }
@@ -1222,225 +1321,6 @@
   .scores-nfl-matchup-button {
     min-height: 28px;
     padding: 5px 7px;
-    font-size: 0.49rem;
-  }
-
-  .score-team-info > strong {
-    font-size: 0.78rem;
-  }
-
-  .score-team-coach {
-    font-size: 0.58rem !important;
-  }
-}
-
-
-
-/* =========================================================
-   V7 SCORE CARD PROJECTIONS
-========================================================= */
-
-/* Team projections now come from LIVE_PLAYER_SCORES.
-   Keep them easy to scan directly beneath the actual score. */
-.score-team-numbers > span {
-  font-size: 0.52rem;
-  font-weight: 800;
-}
-
-
-/* =========================================================
-   SCORES V8 — OFFICIAL FRANCHISE LOGOS
-   Uses the same FRANCHISE_DIRECTORY Logo_URL data as Standings.
-========================================================= */
-
-/*
- * Keep a neutral logo well so team colors do not create inconsistent
- * rings from card to card. This intentionally matches the visual
- * direction used on Standings.
- */
-.score-team-logo,
-.score-team-logo-nfl,
-.score-team-logo-fbs,
-.score-team-logo-fcs {
-  overflow: hidden;
-  flex: 0 0 auto;
-
-  border: 1px solid rgba(225, 231, 237, 0.46);
-
-  background:
-    radial-gradient(
-      circle at 50% 44%,
-      rgba(255, 255, 255, 0.13),
-      rgba(255, 255, 255, 0.05) 72%
-    );
-
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.035);
-}
-
-.score-team-logo img {
-  width: 82%;
-  height: 82%;
-  display: block;
-  object-fit: contain;
-}
-
-.score-team-logo-fallback {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-}
-
-/* Give the official mark a little more presence than the old letter icon. */
-.score-team-row {
-  grid-template-columns: 46px minmax(0, 1fr) auto;
-}
-
-.score-team-logo {
-  width: 44px;
-  height: 44px;
-}
-
-@media (max-width: 560px) {
-  .score-team-row {
-    grid-template-columns: 40px minmax(0, 1fr) 70px;
-  }
-
-  .score-team-logo {
-    width: 38px;
-    height: 38px;
-  }
-
-  .score-team-logo img {
-    width: 84%;
-    height: 84%;
-  }
-}
-
-@media (max-width: 410px) {
-  .score-team-row {
-    grid-template-columns: 38px minmax(0, 1fr) 64px;
-    gap: 7px;
-  }
-
-  .score-team-logo {
-    width: 36px;
-    height: 36px;
-  }
-}
-
-
-/* =========================================================
-   V8C — LOGO FALLBACK VISIBILITY FIX
-========================================================= */
-
-/*
- * The fallback initial carries the HTML hidden attribute whenever an
- * official logo is available. The earlier display:grid rule overrode
- * the browser's default [hidden] behavior, causing both the logo and
- * letter to appear. Keep the fallback completely hidden until an image
- * error explicitly removes the hidden attribute.
- */
-.score-team-logo-fallback[hidden] {
-  display: none !important;
-}
-
-
-/* =========================================================
-   V8G — TRANSPARENT TEAM LOGOS TEST
-========================================================= */
-
-/*
- * Test treatment requested for Scores:
- * keep the logo in the exact same slot, but remove the circular
- * border/background so only the transparent official mark is visible.
- */
-.score-team-logo,
-.score-team-logo-nfl,
-.score-team-logo-fbs,
-.score-team-logo-fcs {
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.score-team-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.22));
-}
-
-/* If an image ever fails, keep the fallback initial legible. */
-.score-team-logo-fallback:not([hidden]) {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(225, 231, 237, 0.34);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.045);
-}
-
-
-/* =========================================================
-   SCORES V9 — TIER / CONFERENCE PATCH HEADERS
-========================================================= */
-
-.scores-section-heading-patched {
-  align-items: center;
-}
-
-.scores-section-identity {
-  min-width: 0;
-
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.scores-section-identity > div {
-  min-width: 0;
-}
-
-.scores-section-patch {
-  width: 56px;
-  height: 56px;
-  flex: 0 0 auto;
-
-  display: block;
-
-  object-fit: contain;
-  object-position: center;
-
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-}
-
-.scores-section-identity h2 {
-  min-width: 0;
-  overflow: hidden;
-
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-@media (max-width: 430px) {
-  .scores-section-identity {
-    gap: 8px;
-  }
-
-  .scores-section-patch {
-    width: 48px;
-    height: 48px;
-  }
-}
-
-@media (min-width: 700px) {
-  .scores-section-patch {
-    width: 64px;
-    height: 64px;
+    font-size: .49rem;
   }
 }

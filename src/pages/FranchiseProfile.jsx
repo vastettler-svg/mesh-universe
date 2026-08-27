@@ -1230,12 +1230,27 @@ function FranchiseProfile() {
       <section className="franchise-profile-hero franchise-profile-hero-clean">
         <div className="franchise-profile-hero-glow" />
 
-        <div className="franchise-profile-logo">
-          {franchise.logo ? (
-            <img src={franchise.logo} alt={`${franchise.team} logo`} />
-          ) : (
-            <span>{franchise.team?.charAt(0) || "M"}</span>
-          )}
+        <div className="franchise-profile-logo-column">
+          <div className="franchise-profile-logo">
+            {franchise.logo ? (
+              <img src={franchise.logo} alt={`${franchise.team} logo`} />
+            ) : (
+              <span>{franchise.team?.charAt(0) || "M"}</span>
+            )}
+          </div>
+
+          <div className="franchise-profile-prestige franchise-profile-prestige-under-logo">
+            <Trophy size={16} />
+            <div>
+              <span>Prestige Points</span>
+              <strong>
+                {franchise.prestigePoints === null ||
+                franchise.prestigePoints === undefined
+                  ? "—"
+                  : Number(franchise.prestigePoints).toFixed(1)}
+              </strong>
+            </div>
+          </div>
         </div>
 
         <div className="franchise-profile-identity">
@@ -1258,31 +1273,10 @@ function FranchiseProfile() {
               <UserRound size={16} />
               <div>
                 <span>Current Coach</span>
-                {franchise.coachId && franchise.coach ? (
-                  <Link
-                    className="franchise-current-coach-link"
-                    to={`/league/coaches/${encodeURIComponent(franchise.coachId)}`}
-                  >
-                    {franchise.coach}
-                  </Link>
-                ) : (
-                  <strong>{franchise.coach || "Coach TBD"}</strong>
-                )}
+                <strong>{franchise.coach || "Coach TBD"}</strong>
               </div>
             </div>
 
-            <div className="franchise-profile-prestige">
-              <Trophy size={16} />
-              <div>
-                <span>Prestige Points</span>
-                <strong>
-                  {franchise.prestigePoints === null ||
-                  franchise.prestigePoints === undefined
-                    ? "—"
-                    : Number(franchise.prestigePoints).toFixed(1)}
-                </strong>
-              </div>
-            </div>
           </div>
 
           {franchise.tier === "NFL" ? (

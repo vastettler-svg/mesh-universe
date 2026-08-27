@@ -159,6 +159,196 @@ function formatTierEventLabel(appSettings, tier, week) {
   return eventLabel || phase || "Schedule";
 }
 
+function isScoresPostseasonWeek(tierClass, week) {
+  if (tierClass === "nfl") return week >= 14 && week <= 17;
+  if (tierClass === "fbs") return week >= 13 && week <= 17;
+  if (tierClass === "fcs") return week >= 13 && week <= 17;
+  return false;
+}
+
+function postseasonBracketLink(tierClass) {
+  if (tierClass === "nfl") {
+    return {
+      to: "/standings?tier=nfl&filter=playoff-bracket",
+      label: "View Playoff Bracket",
+    };
+  }
+
+  if (tierClass === "fbs") {
+    return {
+      to: "/standings?tier=fbs&filter=cfp",
+      label: "View CFP Bracket",
+    };
+  }
+
+  if (tierClass === "fcs") {
+    return {
+      to: "/standings?tier=fcs&filter=playoff-bracket",
+      label: "View Playoff Bracket",
+    };
+  }
+
+  return null;
+}
+
+function postseasonWeekTitle(tierClass, week, phaseLabel) {
+  if (tierClass === "fbs" && week === 13) return "Conference Championships";
+  if (phaseLabel && phaseLabel !== "Schedule") return phaseLabel;
+
+  if (tierClass === "nfl") {
+    const labels = {
+      14: "Wild Card",
+      15: "Divisional Round",
+      16: "Conference Championships",
+      17: "Super Bowl",
+    };
+    return labels[week] || "NFL Playoffs";
+  }
+
+  if (tierClass === "fbs") {
+    const labels = {
+      14: "CFP First Round & Bowl Games",
+      15: "CFP Quarterfinals & Bowl Games",
+      16: "CFP Semifinals",
+      17: "National Championship",
+    };
+    return labels[week] || "FBS Postseason";
+  }
+
+  if (tierClass === "fcs") {
+    const labels = {
+      13: "First Round",
+      14: "Second Round",
+      15: "Quarterfinals",
+      16: "Semifinals",
+      17: "National Championship",
+    };
+    return labels[week] || "FCS Playoffs";
+  }
+
+  return "Postseason";
+}
+
+const FBS_CHAMPIONSHIP_META = {
+  acc: { label: "ACC", patch: MESH_PATCHES.FBS.ACC },
+  "big-ten": { label: "BIG TEN", patch: MESH_PATCHES.FBS["Big Ten"] },
+  "big-12": { label: "BIG 12", patch: MESH_PATCHES.FBS["Big 12"] },
+  mac: { label: "MAC", patch: MESH_PATCHES.FBS.MAC },
+  "mountain-west": {
+    label: "MOUNTAIN WEST",
+    patch: MESH_PATCHES.FBS["Mountain West"],
+  },
+  sec: { label: "SEC", patch: MESH_PATCHES.FBS.SEC },
+  "sun-belt": { label: "SUN BELT", patch: MESH_PATCHES.FBS["Sun Belt"] },
+};
+
+function getFbsChampionshipMeta(game) {
+  const ids = Array.isArray(game?.conferenceIds) ? game.conferenceIds : [];
+
+  const conferenceId = [
+    "acc",
+    "big-ten",
+    "big-12",
+    "mac",
+    "mountain-west",
+    "sec",
+    "sun-belt",
+  ].find((id) => ids.includes(id));
+
+  if (conferenceId && FBS_CHAMPIONSHIP_META[conferenceId]) {
+    return FBS_CHAMPIONSHIP_META[conferenceId];
+  }
+
+  const text = [
+    game?.team1Conference,
+    game?.team2Conference,
+    game?.gameCategory,
+    game?.gameType,
+    game?.label,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  const aliases = [
+    ["mountain west", "mountain-west"],
+    ["big ten", "big-ten"],
+    ["big 10", "big-ten"],
+    ["big 12", "big-12"],
+    ["sun belt", "sun-belt"],
+    ["acc", "acc"],
+    ["sec", "sec"],
+    ["mac", "mac"],
+  ];
+
+  const match = aliases.find(([needle]) => text.includes(needle));
+  return match ? FBS_CHAMPIONSHIP_META[match[1]] : null;
+}
+
+function PostseasonScoresBanner({
+  tierClass,
+  tier,
+  week,
+  phaseLabel,
+}) {
+  const bracket = postseasonBracketLink(tierClass);
+  if (!bracket) return null;
+
+  const patch = MESH_PATCHES.tier[tier] ?? null;
+  const title = postseasonWeekTitle(tierClass, week, phaseLabel);
+
+  return (
+    <section className={`scores-postseason-banner scores-postseason-banner-${tierClass}`}>
+      <div className="scores-postseason-banner-main">
+        {patch ? (
+          <img
+            src={patch}
+            alt={`${tier} postseason patch`}
+            className="scores-postseason-banner-patch"
+          />
+        ) : (
+          <div className="scores-postseason-banner-icon">
+            <Trophy size={23} />
+          </div>
+        )}
+
+        <div>
+          <span>{tier} Postseason · Week {week}</span>
+          <h2>{title}</h2>
+          <p>
+            Follow every matchup here, or open the complete postseason bracket.
+          </p>
+        </div>
+      </div>
+
+      <Link className="scores-postseason-bracket-button" to={bracket.to}>
+        <Trophy size={15} />
+        {bracket.label}
+        <ChevronRight size={15} />
+      </Link>
+    </section>
+  );
+}
+
+function FbsConferenceChampionshipHeader({ game }) {
+  const meta = getFbsChampionshipMeta(game);
+  if (!meta) return null;
+
+  return (
+    <div className="scores-fbs-championship-header">
+      <img
+        src={meta.patch}
+        alt={`${meta.label} conference patch`}
+        className="scores-fbs-championship-logo"
+      />
+      <div>
+        <span>Week 13 · Conference Championship</span>
+        <strong>{meta.label} CONFERENCE CHAMPIONSHIP</strong>
+      </div>
+    </div>
+  );
+}
+
 function TierBadge({ tier, tierClass }) {
   return (
     <span className={`scores-tier-badge scores-tier-badge-${tierClass}`}>
@@ -203,7 +393,6 @@ function formatProjection(projection) {
 function TeamRow({
   team,
   coach,
-  franchiseId,
   initial,
   logo,
   overallRecord,
@@ -229,76 +418,28 @@ function TeamRow({
         .filter(Boolean)
         .join(" ")}
     >
-      {franchiseId ? (
-        <Link
-          to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
-          aria-label={`Open ${team || "franchise"} profile`}
-          style={{
-            display: "block",
-            flex: "0 0 auto",
-            color: "inherit",
-            textDecoration: "none",
-          }}
-        >
-          <div className={`score-team-logo score-team-logo-${tierClass}`}>
-            {logo ? (
-              <img
-                src={logo}
-                alt={`${team || "Team"} logo`}
-                loading="lazy"
-                onError={(event) => {
-                  event.currentTarget.style.display = "none";
-                  event.currentTarget.nextElementSibling?.removeAttribute("hidden");
-                }}
-              />
-            ) : null}
+      <div className={`score-team-logo score-team-logo-${tierClass}`}>
+        {logo ? (
+          <img
+            src={logo}
+            alt={`${team || "Team"} logo`}
+            loading="lazy"
+            onError={(event) => {
+              event.currentTarget.style.display = "none";
+              event.currentTarget.nextElementSibling?.removeAttribute("hidden");
+            }}
+          />
+        ) : null}
 
-            <span className="score-team-logo-fallback" hidden={Boolean(logo)}>
-              {initial}
-            </span>
-          </div>
-        </Link>
-      ) : (
-        <div className={`score-team-logo score-team-logo-${tierClass}`}>
-          {logo ? (
-            <img
-              src={logo}
-              alt={`${team || "Team"} logo`}
-              loading="lazy"
-              onError={(event) => {
-                event.currentTarget.style.display = "none";
-                event.currentTarget.nextElementSibling?.removeAttribute("hidden");
-              }}
-            />
-          ) : null}
-
-          <span className="score-team-logo-fallback" hidden={Boolean(logo)}>
-            {initial}
-          </span>
-        </div>
-      )}
+        <span className="score-team-logo-fallback" hidden={Boolean(logo)}>
+          {initial}
+        </span>
+      </div>
 
       <div className="score-team-info">
         <strong>
-          {franchiseId ? (
-            <Link
-              to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
-              style={{
-                color: "inherit",
-                font: "inherit",
-                lineHeight: "inherit",
-                textDecoration: "none",
-              }}
-            >
-              {rank > 0 && rank <= 25 ? `#${rank} ` : ""}
-              {team || "TBD"}
-            </Link>
-          ) : (
-            <>
-              {rank > 0 && rank <= 25 ? `#${rank} ` : ""}
-              {team || "TBD"}
-            </>
-          )}
+          {rank > 0 && rank <= 25 ? `#${rank} ` : ""}
+          {team || "TBD"}
         </strong>
 
         {coach ? <span className="score-team-coach">{coach}</span> : null}
@@ -405,7 +546,6 @@ function ScoreCard({ game, featured = false, featuredPosition = 0, scoresView })
         <TeamRow
           team={game.team1Team}
           coach={game.team1Coach}
-          franchiseId={game.team1Id}
           initial={game.team1Initial}
           logo={game.team1Logo}
           overallRecord={game.team1OverallRecord}
@@ -423,7 +563,6 @@ function ScoreCard({ game, featured = false, featuredPosition = 0, scoresView })
         <TeamRow
           team={game.team2Team}
           coach={game.team2Coach}
-          franchiseId={game.team2Id}
           initial={game.team2Initial}
           logo={game.team2Logo}
           overallRecord={game.team2OverallRecord}
@@ -932,6 +1071,16 @@ function Scores() {
         </section>
       ) : null}
 
+      {selectedPrimaryFilter !== "featured" &&
+      isScoresPostseasonWeek(selectedPrimaryFilter, selectedWeek) ? (
+        <PostseasonScoresBanner
+          tierClass={selectedPrimaryFilter}
+          tier={activePrimaryLabel}
+          week={selectedWeek}
+          phaseLabel={phaseLabel}
+        />
+      ) : null}
+
       {scoresLoading ? (
         <div className="scores-empty-state">
           <Activity size={28} />
@@ -1003,15 +1152,32 @@ function Scores() {
           </div>
 
           {visibleTierGames.length > 0 ? (
-            <div className="scores-grid">
-              {visibleTierGames.map((game) => (
-                <ScoreCard
-                  key={game.id}
-                  game={game}
-                  scoresView={scoresView}
-                />
-              ))}
-            </div>
+            selectedPrimaryFilter === "fbs" && selectedWeek === 13 ? (
+              <div className="scores-fbs-championship-list">
+                {visibleTierGames.map((game) => (
+                  <section
+                    className="scores-fbs-championship-matchup"
+                    key={game.id}
+                  >
+                    <FbsConferenceChampionshipHeader game={game} />
+                    <ScoreCard
+                      game={game}
+                      scoresView={scoresView}
+                    />
+                  </section>
+                ))}
+              </div>
+            ) : (
+              <div className="scores-grid">
+                {visibleTierGames.map((game) => (
+                  <ScoreCard
+                    key={game.id}
+                    game={game}
+                    scoresView={scoresView}
+                  />
+                ))}
+              </div>
+            )
           ) : (
             <div className="scores-empty-state">
               <Activity size={28} />

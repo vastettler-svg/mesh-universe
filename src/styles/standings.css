@@ -3149,3 +3149,1330 @@ font-weight: 800;
     height: 66px;
   }
 }
+
+/* =========================================================
+   PHASE 4A — POSTSEASON FRAMEWORK
+========================================================= */
+
+.standings-postseason-shell {
+  display: grid;
+  gap: 14px;
+}
+
+.standings-postseason-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 17px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgba(27,48,73,.97), rgba(10,24,41,.99));
+}
+
+.standings-postseason-shell-nfl .standings-postseason-hero {
+  border-color: rgba(31,178,101,.24);
+}
+
+.standings-postseason-shell-fbs .standings-postseason-hero {
+  border-color: rgba(66,135,255,.25);
+}
+
+.standings-postseason-shell-fcs .standings-postseason-hero {
+  border-color: rgba(160,104,255,.25);
+}
+
+.standings-postseason-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #efc85a;
+  background: rgba(239,200,90,.11);
+  border: 1px solid rgba(239,200,90,.18);
+}
+
+.standings-postseason-hero span,
+.standings-postseason-preview-card > span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: .51rem;
+  font-weight: 900;
+  letter-spacing: .085em;
+  text-transform: uppercase;
+  color: var(--color-muted, #93a3b3);
+}
+
+.standings-postseason-hero h3 {
+  margin: 0;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: clamp(1rem, 3vw, 1.35rem);
+  font-weight: 400;
+  letter-spacing: .035em;
+}
+
+.standings-postseason-hero p {
+  max-width: 650px;
+  margin: 7px 0 0;
+  font-size: .65rem;
+  line-height: 1.55;
+  color: var(--color-muted, #9eacba);
+}
+
+.standings-postseason-hero > small {
+  grid-column: 1 / -1;
+  width: fit-content;
+  padding: 4px 7px;
+  border-radius: 999px;
+  font-size: .46rem;
+  font-weight: 900;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+  color: #f5dfa0;
+  background: rgba(232,198,91,.1);
+}
+
+.standings-postseason-preview-grid {
+  display: grid;
+  gap: 9px;
+}
+
+.standings-postseason-preview-card {
+  min-height: 92px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  background: rgba(255,255,255,.028);
+}
+
+.standings-postseason-preview-card strong {
+  font-size: .76rem;
+}
+
+.standings-postseason-preview-card small {
+  margin-top: 5px;
+  font-size: .51rem;
+  color: var(--color-muted, #8fa0b0);
+}
+
+.standings-postseason-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 11px 12px;
+  border: 1px dashed rgba(255,255,255,.11);
+  border-radius: 12px;
+  font-size: .57rem;
+  line-height: 1.45;
+  color: var(--color-muted, #98a7b5);
+  background: rgba(255,255,255,.018);
+}
+
+.standings-postseason-note svg {
+  flex: 0 0 auto;
+  color: #efc85a;
+}
+
+@media (min-width: 700px) {
+  .standings-postseason-hero {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .standings-postseason-hero > small {
+    grid-column: auto;
+    align-self: start;
+  }
+
+  .standings-postseason-preview-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* =========================================================
+   PHASE 4B — NFL PLAYOFF BRACKET
+========================================================= */
+
+.nfl-playoff-bracket { display:grid; gap:14px; }
+.nfl-bracket-topbar {
+  display:flex; justify-content:space-between; align-items:flex-start; gap:16px;
+  padding:17px; border:1px solid rgba(31,178,101,.22); border-radius:16px;
+  background:linear-gradient(145deg,rgba(27,48,73,.97),rgba(10,24,41,.99));
+}
+.nfl-bracket-topbar > div > span { display:block; font-size:.51rem; font-weight:900; letter-spacing:.09em; text-transform:uppercase; color:#55dfa0; }
+.nfl-bracket-topbar h3 { margin:4px 0 0; font-family:var(--heading-font,"Graduate",serif); font-size:1.15rem; font-weight:400; }
+.nfl-bracket-topbar p { margin:7px 0 0; max-width:650px; font-size:.61rem; line-height:1.5; color:var(--color-muted,#9eacba); }
+.nfl-bracket-season-picker { display:grid; gap:4px; flex:0 0 auto; }
+.nfl-bracket-season-picker span { font-size:.47rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--color-muted,#93a3b3); }
+.nfl-bracket-season-picker select { min-width:92px; padding:8px 9px; border:1px solid rgba(255,255,255,.12); border-radius:9px; color:#fff; background:#102238; font:inherit; font-size:.62rem; font-weight:800; }
+
+.nfl-bracket-scroll { overflow-x:auto; padding-bottom:6px; scrollbar-width:thin; }
+.nfl-bracket-board { min-width:1040px; display:grid; grid-template-columns:minmax(0,1fr) 230px minmax(0,1fr); gap:16px; align-items:center; }
+.nfl-conference-bracket { min-width:0; padding:13px; border:1px solid rgba(255,255,255,.08); border-radius:15px; background:rgba(255,255,255,.02); }
+.nfl-conference-bracket-heading { display:flex; align-items:center; gap:8px; margin-bottom:11px; }
+.nfl-conference-bracket-heading span { padding:4px 7px; border-radius:999px; background:rgba(31,178,101,.15); color:#d8f8e7; font-size:.49rem; font-weight:900; }
+.nfl-conference-bracket-heading strong { font-size:.72rem; }
+.nfl-bracket-rounds { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; align-items:center; }
+.nfl-bracket-round { display:grid; gap:8px; }
+.nfl-bracket-round-heading span { display:block; font-size:.43rem; font-weight:900; text-transform:uppercase; color:var(--color-muted,#91a1b1); }
+.nfl-bracket-round-heading strong { font-size:.62rem; }
+.nfl-bracket-bye,.nfl-bracket-reseed-note { padding:7px 8px; border-radius:8px; font-size:.44rem; line-height:1.35; color:#f5dfa0; background:rgba(232,198,91,.08); border:1px solid rgba(232,198,91,.13); }
+
+.nfl-bracket-game { overflow:hidden; border:1px solid rgba(255,255,255,.09); border-radius:11px; background:linear-gradient(145deg,rgba(24,43,64,.98),rgba(9,21,36,.99)); }
+.nfl-bracket-game-label { display:flex; justify-content:space-between; gap:6px; padding:7px 8px; border-bottom:1px solid rgba(255,255,255,.07); }
+.nfl-bracket-game-label span { font-size:.46rem; font-weight:900; color:#fff; }
+.nfl-bracket-game-label small { font-size:.41rem; color:var(--color-muted,#8fa0b0); }
+.nfl-bracket-team { min-height:38px; display:grid; grid-template-columns:22px minmax(0,1fr) auto; align-items:center; gap:5px; padding:5px 7px; border-bottom:1px solid rgba(255,255,255,.055); }
+.nfl-bracket-team.winner { background:rgba(31,178,101,.09); }
+.nfl-bracket-seed { display:grid; place-items:center; width:20px; height:20px; border-radius:50%; font-size:.46rem; font-weight:900; background:rgba(255,255,255,.07); }
+.nfl-bracket-team-link { min-width:0; display:flex; align-items:center; gap:5px; color:inherit; text-decoration:none; }
+.nfl-bracket-mini-logo { flex:0 0 auto; width:21px; height:21px; display:grid; place-items:center; border-radius:50%; overflow:hidden; font-size:.42rem; background:rgba(255,255,255,.055); }
+.nfl-bracket-mini-logo img { width:100%; height:100%; object-fit:contain; }
+.nfl-bracket-team-name { min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-size:.49rem; font-weight:800; }
+.nfl-bracket-team > strong { font-size:.51rem; }
+.nfl-bracket-team-empty { color:var(--color-muted,#8192a3); }
+.nfl-bracket-game-center { display:flex; align-items:center; justify-content:flex-end; gap:2px; padding:6px 8px; color:#9ed8bb; text-decoration:none; font-size:.43rem; font-weight:850; }
+.nfl-bracket-game-center:hover,.nfl-bracket-team-link:hover { color:#fff; }
+
+.nfl-super-bowl-column { align-self:center; padding:15px 10px; text-align:center; border:1px solid rgba(232,198,91,.2); border-radius:16px; background:linear-gradient(180deg,rgba(232,198,91,.07),rgba(255,255,255,.02)); }
+.nfl-super-bowl-trophy { width:50px; height:50px; margin:0 auto 7px; display:grid; place-items:center; border-radius:50%; color:#efc85a; background:rgba(239,200,90,.1); }
+.nfl-super-bowl-column > span { display:block; font-size:.45rem; font-weight:900; text-transform:uppercase; color:#efc85a; }
+.nfl-super-bowl-column h4 { margin:4px 0 11px; font-family:var(--heading-font,"Graduate",serif); font-size:.85rem; font-weight:400; }
+
+@media (max-width: 700px) {
+  .nfl-bracket-topbar { display:grid; }
+  .nfl-bracket-season-picker { grid-template-columns:auto 1fr; align-items:center; }
+  .nfl-bracket-season-picker select { min-width:110px; }
+  .nfl-bracket-board { min-width:980px; }
+}
+
+/* =========================================================
+   PHASE 4B.1 — MIRRORED NFL BRACKET + READABILITY
+========================================================= */
+
+/*
+ * One true bracket:
+ * AFC flows left -> center.
+ * NFC flows right -> center.
+ * Super Bowl remains between both conference champions.
+ */
+.nfl-bracket-board {
+  min-width: 1540px;
+  grid-template-columns:
+    minmax(590px, 1fr)
+    270px
+    minmax(590px, 1fr);
+  gap: 22px;
+}
+
+.nfl-conference-bracket {
+  padding: 16px;
+}
+
+.nfl-bracket-rounds {
+  grid-template-columns: repeat(3, minmax(185px, 1fr));
+  gap: 14px;
+}
+
+.nfl-conference-bracket-nfc .nfl-conference-bracket-heading {
+  justify-content: flex-end;
+}
+
+.nfl-conference-bracket-nfc .nfl-bracket-round-heading {
+  text-align: right;
+}
+
+/* Give every matchup enough room to identify the franchises. */
+.nfl-bracket-game {
+  min-width: 185px;
+}
+
+.nfl-bracket-game-label {
+  padding: 8px 10px;
+}
+
+.nfl-bracket-game-label span {
+  font-size: .5rem;
+}
+
+.nfl-bracket-team {
+  min-height: 48px;
+  grid-template-columns: 25px minmax(0, 1fr) auto;
+  gap: 7px;
+  padding: 7px 9px;
+}
+
+.nfl-bracket-seed {
+  width: 23px;
+  height: 23px;
+  font-size: .5rem;
+}
+
+.nfl-bracket-mini-logo {
+  width: 27px;
+  height: 27px;
+}
+
+.nfl-bracket-team-link {
+  gap: 7px;
+  align-items: center;
+}
+
+/*
+ * Do not squeeze names into one unreadable line.
+ * Two lines gives long NFL franchise names room while keeping
+ * each matchup compact enough for the bracket.
+ */
+.nfl-bracket-team-name {
+  display: -webkit-box;
+  min-width: 0;
+  overflow: hidden;
+  white-space: normal;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  font-size: .55rem;
+  font-weight: 850;
+  line-height: 1.18;
+}
+
+.nfl-bracket-team > strong {
+  font-size: .56rem;
+}
+
+.nfl-bracket-game-center {
+  min-height: 28px;
+  padding: 7px 9px;
+  font-size: .46rem;
+}
+
+.nfl-super-bowl-column {
+  padding: 18px 13px;
+}
+
+/*
+ * Mobile intentionally keeps the full wide bracket.
+ * Horizontal swipe/scroll is the desired presentation so the
+ * matchup cards do not have to become tiny.
+ */
+@media (max-width: 700px) {
+  .nfl-bracket-scroll {
+    margin-inline: -4px;
+    padding: 0 4px 10px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+
+  .nfl-bracket-board {
+    min-width: 1480px;
+    gap: 18px;
+  }
+
+  .nfl-conference-bracket,
+  .nfl-super-bowl-column {
+    scroll-snap-align: center;
+  }
+}
+
+/* =========================================================
+   PHASE 4B.2 — NFL BRACKET FINAL POLISH
+========================================================= */
+
+.super-bowl-trophy-icon {
+  display: block;
+  color: #efc85a;
+  filter: drop-shadow(0 0 7px rgba(239, 200, 90, .18));
+}
+
+.nfl-super-bowl-trophy {
+  width: 56px;
+  height: 66px;
+  border-radius: 18px;
+}
+
+/* =========================================================
+   PHASE 4B.3 — LOMBARDI TROPHY ASSET
+========================================================= */
+
+.nfl-super-bowl-trophy.nfl-super-bowl-trophy-image {
+  width: 72px;
+  height: 92px;
+  margin: 0 auto 8px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.nfl-super-bowl-trophy-image img {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 7px 12px rgba(0, 0, 0, .24));
+}
+
+@media (max-width: 700px) {
+  .nfl-super-bowl-trophy.nfl-super-bowl-trophy-image {
+    width: 68px;
+    height: 88px;
+  }
+}
+
+/* =========================================================
+   PHASE 4C/4D — FBS CFP + BOWL GAMES
+========================================================= */
+
+.fbs-cfp-bracket,.fbs-bowl-games { display:grid; gap:14px; }
+.fbs-postseason-topbar {
+  display:flex; justify-content:space-between; align-items:flex-start; gap:16px;
+  padding:17px; border:1px solid rgba(66,135,255,.25); border-radius:16px;
+  background:linear-gradient(145deg,rgba(27,48,73,.97),rgba(10,24,41,.99));
+}
+.fbs-postseason-topbar > div > span { display:block; font-size:.51rem; font-weight:900; letter-spacing:.09em; text-transform:uppercase; color:#72a8ff; }
+.fbs-postseason-topbar h3 { margin:4px 0 0; font-family:var(--heading-font,"Graduate",serif); font-size:1.15rem; font-weight:400; }
+.fbs-postseason-topbar p { margin:7px 0 0; max-width:680px; font-size:.61rem; line-height:1.5; color:var(--color-muted,#9eacba); }
+
+.fbs-cfp-scroll { overflow-x:auto; padding-bottom:8px; -webkit-overflow-scrolling:touch; }
+.fbs-cfp-board { min-width:1100px; display:grid; grid-template-columns:repeat(4,minmax(230px,1fr)); gap:16px; align-items:center; }
+.fbs-cfp-round { display:grid; gap:9px; }
+.fbs-cfp-round-heading span { display:block; font-size:.45rem; font-weight:900; text-transform:uppercase; color:#72a8ff; }
+.fbs-cfp-round-heading strong { font-size:.68rem; }
+.fbs-cfp-bye,.fbs-cfp-fixed-note { padding:8px 9px; border-radius:9px; font-size:.46rem; line-height:1.35; color:#f5dfa0; background:rgba(232,198,91,.08); border:1px solid rgba(232,198,91,.13); }
+.fbs-cfp-round-championship { padding:15px 12px; border:1px solid rgba(232,198,91,.2); border-radius:16px; background:linear-gradient(180deg,rgba(232,198,91,.06),rgba(255,255,255,.02)); }
+.fbs-cfp-championship-icon { width:48px; height:48px; display:grid; place-items:center; margin:0 auto 2px; border-radius:50%; color:#efc85a; background:rgba(239,200,90,.1); }
+
+.fbs-postseason-game { overflow:hidden; min-width:220px; border:1px solid rgba(255,255,255,.09); border-radius:11px; background:linear-gradient(145deg,rgba(24,43,64,.98),rgba(9,21,36,.99)); }
+.fbs-postseason-game-label { display:flex; justify-content:space-between; gap:7px; padding:8px 9px; border-bottom:1px solid rgba(255,255,255,.07); }
+.fbs-postseason-game-label span { min-width:0; font-size:.5rem; font-weight:900; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.fbs-postseason-game-label small { flex:0 0 auto; font-size:.42rem; color:var(--color-muted,#8fa0b0); }
+.fbs-postseason-team { min-height:48px; display:grid; grid-template-columns:25px minmax(0,1fr) auto; align-items:center; gap:7px; padding:7px 9px; border-bottom:1px solid rgba(255,255,255,.055); }
+.fbs-postseason-team.winner { background:rgba(66,135,255,.1); }
+.fbs-postseason-seed { display:grid; place-items:center; width:23px; height:23px; border-radius:50%; font-size:.5rem; font-weight:900; background:rgba(255,255,255,.07); }
+.fbs-postseason-team-link { min-width:0; display:flex; align-items:center; gap:7px; color:inherit; text-decoration:none; }
+.fbs-postseason-mini-logo { flex:0 0 auto; width:27px; height:27px; display:grid; place-items:center; overflow:hidden; border-radius:50%; background:rgba(255,255,255,.055); }
+.fbs-postseason-mini-logo img { width:100%; height:100%; object-fit:contain; }
+.fbs-postseason-team-name { display:-webkit-box; min-width:0; overflow:hidden; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; font-size:.55rem; font-weight:850; line-height:1.18; }
+.fbs-postseason-team > strong { font-size:.56rem; }
+.fbs-postseason-team-empty { color:var(--color-muted,#8192a3); }
+.fbs-postseason-game-center { display:flex; align-items:center; justify-content:flex-end; gap:2px; min-height:28px; padding:7px 9px; color:#8eb8ff; text-decoration:none; font-size:.46rem; font-weight:850; }
+
+.fbs-bowl-week { display:grid; gap:10px; }
+.fbs-bowl-week-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; padding:2px 2px 0; }
+.fbs-bowl-week-heading span { display:block; font-size:.46rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:#72a8ff; }
+.fbs-bowl-week-heading strong { display:block; margin-top:2px; font-family:var(--heading-font,"Graduate",serif); font-size:.9rem; font-weight:400; }
+.fbs-bowl-week-heading small { font-size:.49rem; color:var(--color-muted,#8fa0b0); }
+.fbs-bowl-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.fbs-bowl-game-card { min-width:0; }
+.fbs-bowl-empty { grid-column:1/-1; min-height:130px; display:grid; place-items:center; align-content:center; gap:5px; padding:18px; text-align:center; border:1px dashed rgba(255,255,255,.11); border-radius:14px; color:var(--color-muted,#98a7b5); background:rgba(255,255,255,.018); }
+.fbs-bowl-empty svg { color:#efc85a; }
+.fbs-bowl-empty strong { color:#fff; font-size:.72rem; }
+.fbs-bowl-empty span { font-size:.54rem; }
+
+@media (max-width:700px) {
+  .fbs-postseason-topbar { display:grid; }
+  .fbs-cfp-board { min-width:1050px; }
+  .fbs-bowl-grid { grid-template-columns:1fr; }
+}
+
+/* =========================================================
+   PHASE 4C.1 — CFP FLOW BRACKET + BOWL CARD POLISH
+========================================================= */
+
+.fbs-cfp-flow-board {
+  min-width: 1240px;
+  display: grid;
+  grid-template-columns: 270px 290px 260px 285px;
+  gap: 28px;
+  align-items: stretch;
+  padding: 8px 2px 14px;
+}
+
+.fbs-cfp-flow-column {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.fbs-cfp-flow-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.fbs-cfp-path-row {
+  min-height: 150px;
+  display: grid;
+  align-content: center;
+  position: relative;
+}
+
+/* Subtle connector from each opening-round game toward its fixed QF path. */
+.fbs-cfp-first-column .fbs-cfp-path-row::after {
+  content: "";
+  position: absolute;
+  right: -28px;
+  top: 50%;
+  width: 28px;
+  border-top: 2px solid rgba(66, 169, 255, .55);
+}
+
+.fbs-cfp-quarter-column .fbs-cfp-path-row::before {
+  content: "";
+  position: absolute;
+  left: -28px;
+  top: 50%;
+  width: 28px;
+  border-top: 2px solid rgba(66, 169, 255, .55);
+}
+
+.fbs-cfp-bye-seed {
+  width: fit-content;
+  margin: 0 0 5px 7px;
+  padding: 4px 7px;
+  border: 1px solid rgba(232, 198, 91, .17);
+  border-radius: 999px;
+  background: rgba(232, 198, 91, .08);
+  color: #f3d77d;
+  font-size: .44rem;
+  font-weight: 900;
+  letter-spacing: .02em;
+}
+
+.fbs-cfp-semi-stack {
+  min-height: 650px;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 34px;
+  align-items: center;
+}
+
+.fbs-cfp-semi-slot {
+  position: relative;
+  align-self: center;
+}
+
+.fbs-cfp-semi-slot::before {
+  content: "";
+  position: absolute;
+  left: -28px;
+  top: 50%;
+  width: 28px;
+  border-top: 2px solid rgba(66, 169, 255, .55);
+}
+
+.fbs-cfp-champ-column {
+  align-content: center;
+}
+
+.fbs-cfp-championship-showcase {
+  min-height: 230px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 14px;
+  border: 1px solid rgba(232, 198, 91, .2);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(232,198,91,.055), rgba(255,255,255,.015));
+}
+
+.fbs-cfp-championship-showcase img {
+  display: block;
+  width: auto;
+  height: 175px;
+  max-width: 150px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 13px rgba(0,0,0,.28));
+}
+
+.fbs-cfp-championship-showcase span {
+  color: #efc85a;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: .7rem;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* Bowl cards have room for the coach and do not show a fake dash rank. */
+.fbs-bowl-game-card .fbs-postseason-team {
+  min-height: 62px;
+}
+
+.fbs-postseason-rank-space {
+  width: 23px;
+  height: 23px;
+}
+
+.fbs-postseason-team-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.fbs-postseason-coach {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--color-muted, #8fa0b0);
+  font-size: .43rem;
+  line-height: 1.2;
+}
+
+.fbs-bowl-game-card .fbs-postseason-game-label span {
+  color: #f0cf6b;
+}
+
+@media (max-width: 700px) {
+  .fbs-cfp-flow-board {
+    min-width: 1200px;
+    gap: 24px;
+  }
+}
+
+/* =========================================================
+   PHASE 4C.2 — CFP PATH ALIGNMENT + RECORDS
+========================================================= */
+
+/* CFP Bowl_Name labels get the same gold treatment as Bowl Games. */
+.fbs-postseason-game-has-bowl-name .fbs-postseason-game-label span {
+  color: #f0cf6b;
+}
+
+/* Overall record under CFP team names. */
+.fbs-postseason-record {
+  display: block;
+  color: var(--color-muted, #8fa0b0);
+  font-size: .43rem;
+  line-height: 1.2;
+}
+
+/* The waiting-seed pill is no longer rendered. */
+.fbs-cfp-quarter-column .fbs-cfp-path-row {
+  align-content: center;
+}
+
+/* Slightly more breathing room because CFP cards now carry records. */
+.fbs-cfp-bracket-flow .fbs-postseason-team {
+  min-height: 58px;
+}
+
+.fbs-cfp-bracket-flow .fbs-postseason-team-copy {
+  gap: 3px;
+}
+
+/* =========================================================
+   PHASE 4C.3 — CFP COACH SUBLINES + CHAMPIONSHIP CENTERING
+========================================================= */
+
+/* CFP cards use coach name under the team instead of historical 0-0 records. */
+.fbs-cfp-bracket-flow .fbs-postseason-record {
+  display: none;
+}
+
+/*
+ * Center the Week 17 championship vertically between the two semifinal
+ * matchups. The trophy remains above the championship card.
+ */
+.fbs-cfp-champ-column {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fbs-cfp-champ-center {
+  width: 100%;
+  display: grid;
+  gap: 10px;
+  align-content: center;
+}
+
+.fbs-cfp-championship-showcase {
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   PHASE 4C.4 — HISTORICAL COACHES + TRUE TITLE-GAME CENTER
+========================================================= */
+
+.fbs-cfp-champ-column {
+  min-height: 690px;
+  align-self: stretch;
+}
+
+.fbs-cfp-champ-center {
+  position: relative;
+  width: 100%;
+  min-height: 690px;
+  display: block;
+}
+
+/* Keep the round label at the top of the championship column. */
+.fbs-cfp-champ-center > .fbs-cfp-round-heading {
+  position: absolute;
+  inset: 0 0 auto 0;
+}
+
+/*
+ * The title-game CARD itself sits on the exact vertical midpoint
+ * between Semifinal 1 and Semifinal 2.
+ */
+.fbs-cfp-champ-center > .fbs-postseason-game {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  transform: translateY(-50%);
+}
+
+/* Trophy floats above the centered title game and no longer pushes it down. */
+.fbs-cfp-champ-center > .fbs-cfp-championship-showcase {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(50% + 72px);
+  min-height: 0;
+  height: 205px;
+  margin: 0;
+  padding: 10px;
+}
+
+.fbs-cfp-champ-center > .fbs-cfp-championship-showcase img {
+  height: 155px;
+}
+
+@media (max-width: 700px) {
+  .fbs-cfp-champ-column,
+  .fbs-cfp-champ-center {
+    min-height: 690px;
+  }
+}
+
+/* =========================================================
+   PHASE 4E.1 — FCS WINNER-DRIVEN BRACKET ALIGNMENT
+========================================================= */
+
+.fcs-playoff-bracket {
+  display: grid;
+  gap: 14px;
+}
+
+.fcs-postseason-topbar {
+  border-color: rgba(167, 92, 255, .28);
+}
+
+.fcs-postseason-topbar > div > span {
+  color: #bd7cff;
+}
+
+.fcs-playoff-scroll {
+  overflow-x: auto;
+  padding-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fcs-playoff-board {
+  --fcs-row-h: 132px;
+  --fcs-row-gap: 10px;
+
+  min-width: 1500px;
+  display: grid;
+  grid-template-columns: 270px 285px 260px 250px 285px;
+  gap: 28px;
+  align-items: stretch;
+  padding: 8px 2px 16px;
+}
+
+.fcs-playoff-column {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.fcs-playoff-column .fbs-cfp-round-heading span {
+  color: #bd7cff;
+}
+
+/* Week 13 and Week 14 stay on identical eight-row tracks. */
+.fcs-opening-stack {
+  display: grid;
+  grid-template-rows: repeat(8, var(--fcs-row-h));
+  gap: var(--fcs-row-gap);
+}
+
+.fcs-path-row {
+  min-height: var(--fcs-row-h);
+  display: grid;
+  align-content: center;
+  position: relative;
+}
+
+/* Direct Week 13 -> Week 14 connector. */
+.fcs-first-column .fcs-path-row::after {
+  content: "";
+  position: absolute;
+  right: -28px;
+  top: 50%;
+  width: 28px;
+  border-top: 2px solid rgba(177, 83, 255, .62);
+}
+
+.fcs-second-column .fcs-path-row::before {
+  content: "";
+  position: absolute;
+  left: -28px;
+  top: 50%;
+  width: 28px;
+  border-top: 2px solid rgba(177, 83, 255, .62);
+}
+
+/*
+ * Each QF consumes exactly two Week 14 row tracks plus the gap.
+ * This physically centers:
+ * QF1 between R2 games 1/2,
+ * QF2 between R2 games 3/4, etc.
+ */
+.fcs-quarter-stack {
+  display: grid;
+  grid-template-rows: repeat(
+    4,
+    calc((var(--fcs-row-h) * 2) + var(--fcs-row-gap))
+  );
+  gap: var(--fcs-row-gap);
+}
+
+.fcs-quarter-slot {
+  position: relative;
+  display: grid;
+  align-content: center;
+}
+
+/* Incoming horizontal stem from the midpoint of each R2 pair. */
+.fcs-quarter-slot::before {
+  content: "";
+  position: absolute;
+  left: -28px;
+  top: 50%;
+  width: 28px;
+  border-top: 2px solid rgba(177, 83, 255, .62);
+}
+
+/* Small vertical merge bar visually joins each pair of R2 games. */
+.fcs-quarter-slot::after {
+  content: "";
+  position: absolute;
+  left: -28px;
+  top: 25%;
+  height: 50%;
+  border-left: 2px solid rgba(177, 83, 255, .62);
+}
+
+/*
+ * Each semifinal consumes exactly two QF tracks plus their gap,
+ * putting SF1 between QF1/QF2 and SF2 between QF3/QF4.
+ */
+.fcs-semi-stack {
+  display: grid;
+  grid-template-rows: repeat(
+    2,
+    calc(
+      (((var(--fcs-row-h) * 2) + var(--fcs-row-gap)) * 2) +
+      var(--fcs-row-gap)
+    )
+  );
+  gap: var(--fcs-row-gap);
+}
+
+.fcs-semi-slot {
+  position: relative;
+  display: grid;
+  align-content: center;
+}
+
+.fcs-semi-slot::before {
+  content: "";
+  position: absolute;
+  left: -28px;
+  top: 50%;
+  width: 28px;
+  border-top: 2px solid rgba(177, 83, 255, .62);
+}
+
+.fcs-semi-slot::after {
+  content: "";
+  position: absolute;
+  left: -28px;
+  top: 25%;
+  height: 50%;
+  border-left: 2px solid rgba(177, 83, 255, .62);
+}
+
+/* Championship vertically centers against the two semifinal tracks. */
+.fcs-title-column {
+  display: flex;
+  align-items: center;
+  min-height: calc(
+    (
+      (
+        (((var(--fcs-row-h) * 2) + var(--fcs-row-gap)) * 2) +
+        var(--fcs-row-gap)
+      ) * 2
+    ) + var(--fcs-row-gap)
+  );
+}
+
+.fcs-title-center {
+  width: 100%;
+  display: grid;
+  gap: 10px;
+  align-content: center;
+}
+
+.fcs-championship-showcase {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(232, 198, 91, .22);
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(232, 198, 91, .055),
+      rgba(255, 255, 255, .015)
+    );
+}
+
+.fcs-championship-showcase img {
+  display: block;
+  width: auto;
+  height: 190px;
+  max-width: 175px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 13px rgba(0, 0, 0, .3));
+}
+
+.fcs-championship-showcase span {
+  color: #efc85a;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: .68rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.fcs-playoff-bracket .fbs-postseason-game {
+  border-color: rgba(167, 92, 255, .12);
+}
+
+.fcs-playoff-bracket .fbs-postseason-game-center {
+  color: #c28aff;
+}
+
+@media (max-width: 700px) {
+  .fcs-playoff-board {
+    min-width: 1470px;
+    gap: 26px;
+  }
+}
+
+/* =========================================================
+   PHASE 4F — CHAMPIONSHIP WINNER LOGOS
+========================================================= */
+
+.championship-winner-showcase {
+  display: grid;
+  place-items: center;
+  gap: 9px;
+  margin: 0 auto 10px;
+  padding: 14px 12px;
+  border: 1px solid rgba(232, 198, 91, .22);
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(232, 198, 91, .055),
+      rgba(255, 255, 255, .015)
+    );
+}
+
+.championship-winner-logo {
+  width: 116px;
+  height: 116px;
+  display: grid;
+  place-items: center;
+}
+
+.championship-winner-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 13px rgba(0, 0, 0, .28));
+}
+
+.championship-winner-logo > span {
+  display: grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #7e8e9d;
+  border: 1px dashed rgba(255,255,255,.16);
+  background: rgba(255,255,255,.025);
+}
+
+.championship-winner-showcase > strong {
+  color: #efc85a;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: .68rem;
+  font-weight: 400;
+  text-align: center;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.championship-winner-showcase-nfl {
+  margin-top: 8px;
+}
+
+.nfl-super-bowl-column .championship-winner-logo {
+  width: 102px;
+  height: 102px;
+}
+
+.fbs-cfp-champ-center > .championship-winner-showcase {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(50% + 72px);
+  height: 178px;
+  margin: 0;
+  align-content: center;
+}
+
+.fbs-cfp-champ-center > .championship-winner-showcase .championship-winner-logo {
+  width: 112px;
+  height: 112px;
+}
+
+.fcs-title-center .championship-winner-showcase {
+  min-height: 178px;
+}
+
+@media (max-width: 700px) {
+  .championship-winner-logo {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* =========================================================
+   PHASE 4G — NFL BRACKET PRESENTATION MATCHES CFP/FCS
+========================================================= */
+
+.nfl-playoff-bracket-modern {
+  display: grid;
+  gap: 14px;
+}
+
+.nfl-modern-scroll {
+  overflow-x: auto;
+  padding-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.nfl-modern-board {
+  min-width: 1500px;
+  display: grid;
+  grid-template-columns: 1fr 285px 1fr;
+  gap: 28px;
+  align-items: center;
+  padding: 8px 2px 16px;
+}
+
+.nfl-modern-conference {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  background: rgba(255,255,255,.018);
+}
+
+.nfl-modern-conference-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.nfl-modern-conference-heading > span {
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #d8f8e7;
+  background: rgba(31,178,101,.15);
+  font-size: .49rem;
+  font-weight: 900;
+}
+
+.nfl-modern-conference-heading > strong {
+  font-size: .72rem;
+}
+
+.nfl-modern-conference-mirrored .nfl-modern-conference-heading {
+  justify-content: flex-end;
+}
+
+.nfl-modern-conference-columns {
+  --nfl-track-h: 182px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(215px,1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+.nfl-modern-round {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 9px;
+}
+
+.nfl-modern-bye,
+.nfl-modern-reseed {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  padding: 7px 8px;
+  border: 1px solid rgba(232,198,91,.14);
+  border-radius: 9px;
+  color: #f5dfa0;
+  background: rgba(232,198,91,.07);
+  font-size: .44rem;
+  line-height: 1.3;
+}
+
+.nfl-modern-wild-stack {
+  display: grid;
+  grid-template-rows: repeat(3, var(--nfl-track-h));
+  gap: 12px;
+}
+
+.nfl-modern-wild-slot {
+  position: relative;
+  display: grid;
+  align-content: center;
+}
+
+.nfl-modern-divisional-stack {
+  min-height: calc((var(--nfl-track-h) * 3) + 24px);
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.nfl-modern-divisional-slot {
+  position: relative;
+  display: grid;
+  align-content: center;
+}
+
+/*
+ * Divisional cards sit between their feeder Wild Card regions.
+ * NFL reseeding remains data-driven; the connectors are intentionally
+ * presentation-only because the exact feeder can change with upsets.
+ */
+.nfl-modern-divisional-slot::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  width: 20px;
+  border-top: 2px solid rgba(31,178,101,.56);
+}
+
+.nfl-modern-conference-mirrored .nfl-modern-divisional-slot::before {
+  left: auto;
+  right: -20px;
+}
+
+.nfl-modern-title-slot {
+  min-height: calc((var(--nfl-track-h) * 3) + 24px);
+  display: grid;
+  align-content: center;
+  position: relative;
+}
+
+.nfl-modern-title-slot::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  width: 20px;
+  border-top: 2px solid rgba(31,178,101,.56);
+}
+
+.nfl-modern-conference-mirrored .nfl-modern-title-slot::before {
+  left: auto;
+  right: -20px;
+}
+
+.nfl-modern-game {
+  min-width: 0;
+  border-color: rgba(31,178,101,.13);
+}
+
+.nfl-modern-game .fbs-postseason-team.winner {
+  background: rgba(31,178,101,.1);
+}
+
+.nfl-modern-game-center {
+  color: #91d6b4;
+}
+
+.nfl-modern-super-bowl {
+  align-self: center;
+  display: grid;
+  gap: 12px;
+}
+
+.nfl-modern-super-bowl > .fbs-cfp-round-heading {
+  text-align: center;
+}
+
+.nfl-modern-super-bowl > .fbs-cfp-round-heading span {
+  color: #efc85a;
+}
+
+.nfl-modern-super-bowl-center {
+  display: grid;
+  gap: 10px;
+  align-content: center;
+}
+
+.nfl-modern-super-bowl .championship-winner-showcase {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.nfl-modern-super-bowl .championship-winner-logo {
+  width: 112px;
+  height: 112px;
+}
+
+/* NFC reads from outside-right toward the Super Bowl. */
+.nfl-modern-conference-mirrored .nfl-modern-conference-columns {
+  direction: ltr;
+}
+
+.nfl-modern-conference-mirrored .nfl-modern-round {
+  text-align: left;
+}
+
+@media (max-width: 700px) {
+  .nfl-modern-board {
+    min-width: 1460px;
+    gap: 24px;
+  }
+}
+
+/* =========================================================
+   PHASE 4G.1 — NFL RESEED CLEANUP + CFP TITLE FIX
+========================================================= */
+
+/*
+ * NFL reseeds after Wild Card weekend, so there is intentionally
+ * NO connector line from a specific Wild Card game into a specific
+ * Divisional card.
+ */
+.nfl-modern-divisional-slot::before,
+.nfl-modern-conference-mirrored .nfl-modern-divisional-slot::before {
+  content: none;
+  display: none;
+}
+
+/*
+ * Keep only the progression from Divisional -> Conference Championship.
+ * Wild Card cards remain visually independent because their next opponent
+ * is determined by the surviving seeds.
+ */
+.nfl-modern-wild-slot::after,
+.nfl-modern-wild-slot::before {
+  content: none;
+  display: none;
+}
+
+.nfl-modern-game .fbs-postseason-team {
+  min-height: 58px;
+}
+
+.nfl-modern-game .fbs-postseason-team-copy {
+  gap: 3px;
+}
+
+.nfl-modern-game .fbs-postseason-coach {
+  display: block;
+}
+
+/* =========================================================
+   PHASE 4G.2 — SYMMETRIC NFL CONFERENCE SPACING
+========================================================= */
+
+/*
+ * Each AFC/NFC conference needs enough width for all three internal
+ * playoff columns. Previously the AFC's third column overflowed into
+ * the fixed Super Bowl column because the outer grid tracks were too
+ * narrow. Give both conference panels a true minimum width so the
+ * AFC Championship sits inside its panel exactly like the NFC side.
+ */
+.nfl-modern-board {
+  min-width: 1840px;
+  grid-template-columns:
+    minmax(720px, 1fr)
+    285px
+    minmax(720px, 1fr);
+  column-gap: 36px;
+}
+
+/* Keep each three-round conference grid contained inside its panel. */
+.nfl-modern-conference {
+  min-width: 720px;
+  overflow: hidden;
+}
+
+.nfl-modern-conference-columns {
+  grid-template-columns: repeat(3, minmax(215px, 1fr));
+}
+
+/* Super Bowl stays in its own center lane. */
+.nfl-modern-super-bowl {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 700px) {
+  .nfl-modern-board {
+    min-width: 1800px;
+    column-gap: 32px;
+  }
+}

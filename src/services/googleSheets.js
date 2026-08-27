@@ -1,4 +1,5 @@
 import { getTeamLogoOverride } from "../assets/logos/overrides/teamLogoOverrides";
+import { getCoachSeasonTenureRows } from "./coachData";
 
 const LIVE_PLAYER_SCORES_GID = "1339342815";
 const PUBLISHED_SHEET_BASE_URL =
@@ -665,22 +666,34 @@ export async function getStandingsArchive() {
 
 export async function getGameResults(options = {}) {
   const includeAllSeasons = Boolean(options.allSeasons);
-  const [gameRows, teamRows, franchiseDirectoryAllRows, livePlayerRows] =
-    await Promise.all([
-      fetchCsvRows(GAME_RESULTS_CSV_URL, "GAME_RESULTS"),
-      fetchTeamDataRows(),
-      fetchCsvRows(
-        FRANCHISE_DIRECTORY_CSV_URL,
-        "FRANCHISE_DIRECTORY",
-      ),
-      getLivePlayerScores().catch((error) => {
+  const [
+    gameRows,
+    teamRows,
+    franchiseDirectoryAllRows,
+    livePlayerRows,
+    coachTenureRows,
+  ] = await Promise.all([
+    fetchCsvRows(GAME_RESULTS_CSV_URL, "GAME_RESULTS"),
+    fetchTeamDataRows(),
+    fetchCsvRows(
+      FRANCHISE_DIRECTORY_CSV_URL,
+      "FRANCHISE_DIRECTORY",
+    ),
+    getLivePlayerScores().catch((error) => {
       console.warn(
         "LIVE_PLAYER_SCORES unavailable; score cards will fall back to GAME_RESULTS projections.",
         error,
       );
-        return [];
-      }),
-    ]);
+      return [];
+    }),
+    getCoachSeasonTenureRows().catch((error) => {
+      console.warn(
+        "COACH_SEASON_TENURE unavailable; games will fall back to current coach names.",
+        error,
+      );
+      return [];
+    }),
+  ]);
 
   const franchiseDirectoryRows =
     franchiseDirectoryAllRows.filter((row) =>
@@ -695,6 +708,37 @@ export async function getGameResults(options = {}) {
     buildHistoricalTeamLogoLookup_(franchiseDirectoryAllRows);
 
   const teamLookup = createTeamLookup(teamRows, brandingLookup);
+
+  const historicalCoachForGame = (franchiseId, season, week, fallback = {}) => {
+    const matchingTenures = coachTenureRows.filter(
+      (tenure) =>
+        String(tenure.franchiseId || "").trim() === String(franchiseId || "").trim() &&
+        Number(tenure.season) === Number(season),
+    );
+
+    if (!matchingTenures.length) {
+      return {
+        coachId: fallback.coachId || "",
+        coachName: fallback.coach || "",
+      };
+    }
+
+    const weekMatched =
+      matchingTenures.find((tenure) => {
+        const start = Number(tenure.startWeek);
+        const end = Number(tenure.endWeek);
+
+        const startsInTime = !Number.isFinite(start) || start <= Number(week);
+        const endsInTime = !Number.isFinite(end) || end <= 0 || end >= Number(week);
+
+        return startsInTime && endsInTime;
+      }) || matchingTenures[matchingTenures.length - 1];
+
+    return {
+      coachId: weekMatched.coachId || "",
+      coachName: weekMatched.coachName || "",
+    };
+  };
 
   /*
    * LIVE_PLAYER_SCORES repeats the team totals/projections on every
@@ -766,6 +810,19 @@ export async function getGameResults(options = {}) {
       );
       const gameWeek = toNumber(
         firstValue(row, ["Week", "Schedule_Week"]),
+      );
+
+      const team1GameCoach = historicalCoachForGame(
+        team1Id,
+        rowSeason,
+        gameWeek,
+        team1,
+      );
+      const team2GameCoach = historicalCoachForGame(
+        team2Id,
+        rowSeason,
+        gameWeek,
+        team2,
       );
 
       const team1Live = liveTeamLookup.get(
@@ -942,8 +999,8 @@ export async function getGameResults(options = {}) {
           .trim()
           .charAt(0)
           .toUpperCase(),
-        team1CoachId: team1.coachId || "",
-        team1Coach: team1.coach || "",
+        team1CoachId: team1GameCoach.coachId || team1.coachId || "",
+        team1Coach: team1GameCoach.coachName || team1.coach || "",
         team1Logo:
           (isHistoricalSeason
             ? (
@@ -959,9 +1016,34 @@ export async function getGameResults(options = {}) {
             : "") ||
           team1.logo ||
           "",
-        team1Conference: team1.conference || "",
-        team1ConferenceId: team1.conferenceId || "",
-        team1OverallRecord: team1.overallRecord || "0–0",
+        team1Conference:
+          String(
+            firstValue(row, [
+              "Team1_Conference",
+              "Team1_Game_Conference",
+              "Franchise1_Conference",
+            ]),
+          ).trim() || team1.conference || "",
+        team1ConferenceId: normalizeId(
+          String(
+            firstValue(row, [
+              "Team1_Conference",
+              "Team1_Game_Conference",
+              "Franchise1_Conference",
+            ]),
+          ).trim() || team1.conference || "",
+        ),
+        team1OverallRecord:
+          String(
+            firstValue(row, [
+              "Team1_Overall_Record",
+              "Team1_Record",
+              "Team1_Game_Record",
+              "Team1_Season_Record",
+            ]),
+          ).trim() ||
+          team1.overallRecord ||
+          "0–0",
         team1ConferenceRecord: team1.conferenceRecord || "0–0",
         team1Top25Rank: team1GameRank,
         team1GameRank,
@@ -983,8 +1065,8 @@ export async function getGameResults(options = {}) {
           .trim()
           .charAt(0)
           .toUpperCase(),
-        team2CoachId: team2.coachId || "",
-        team2Coach: team2.coach || "",
+        team2CoachId: team2GameCoach.coachId || team2.coachId || "",
+        team2Coach: team2GameCoach.coachName || team2.coach || "",
         team2Logo:
           (isHistoricalSeason
             ? (
@@ -1000,9 +1082,34 @@ export async function getGameResults(options = {}) {
             : "") ||
           team2.logo ||
           "",
-        team2Conference: team2.conference || "",
-        team2ConferenceId: team2.conferenceId || "",
-        team2OverallRecord: team2.overallRecord || "0–0",
+        team2Conference:
+          String(
+            firstValue(row, [
+              "Team2_Conference",
+              "Team2_Game_Conference",
+              "Franchise2_Conference",
+            ]),
+          ).trim() || team2.conference || "",
+        team2ConferenceId: normalizeId(
+          String(
+            firstValue(row, [
+              "Team2_Conference",
+              "Team2_Game_Conference",
+              "Franchise2_Conference",
+            ]),
+          ).trim() || team2.conference || "",
+        ),
+        team2OverallRecord:
+          String(
+            firstValue(row, [
+              "Team2_Overall_Record",
+              "Team2_Record",
+              "Team2_Game_Record",
+              "Team2_Season_Record",
+            ]),
+          ).trim() ||
+          team2.overallRecord ||
+          "0–0",
         team2ConferenceRecord: team2.conferenceRecord || "0–0",
         team2Top25Rank: team2GameRank,
         team2GameRank,

@@ -1791,20 +1791,94 @@
   }
 }
 
+
 /* =========================================================
-   PHASE 3E — FRANCHISE ↔ COACH CROSS-LINKS
+   PHASE 3 — MOBILE HERO PRESTIGE FIX
 ========================================================= */
 
-.franchise-current-coach-link {
-  color: #fff;
-  font-size: inherit;
-  font-weight: inherit;
-  text-decoration: none;
+.franchise-profile-logo-column {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
 }
 
-.franchise-current-coach-link:hover,
-.franchise-current-coach-link:focus-visible {
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.franchise-profile-prestige-under-logo {
+  width: 100%;
+  max-width: 142px;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
+.franchise-profile-meta-row {
+  width: 100%;
+}
+
+.franchise-profile-meta-row .franchise-profile-coach {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.franchise-profile-meta-row .franchise-profile-coach > div {
+  min-width: 0;
+}
+
+.franchise-profile-meta-row .franchise-profile-coach strong,
+.franchise-profile-meta-row .franchise-current-coach-link {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 560px) {
+  .franchise-profile-logo-column {
+    align-self: start;
+    gap: 7px;
+  }
+
+  .franchise-profile-prestige-under-logo {
+    width: 88px;
+    max-width: 88px;
+    gap: 5px;
+    padding: 7px 5px;
+  }
+
+  .franchise-profile-prestige-under-logo > svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .franchise-profile-prestige-under-logo span {
+    font-size: .29rem;
+    line-height: 1.15;
+  }
+
+  .franchise-profile-prestige-under-logo strong {
+    font-size: .55rem;
+  }
+
+  .franchise-profile-meta-row {
+    grid-column: auto;
+    margin-top: 10px;
+  }
+
+  .franchise-profile-meta-row > * {
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  .franchise-profile-prestige-under-logo {
+    width: 72px;
+    max-width: 72px;
+    padding-inline: 4px;
+  }
+
+  .franchise-profile-prestige-under-logo span {
+    font-size: .27rem;
+  }
+}

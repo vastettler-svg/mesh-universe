@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   Activity,
   ArrowLeft,
@@ -147,26 +147,62 @@ function centerStatusLabel(game) {
   return "Scheduled";
 }
 
-function TeamLogo({ src, initial, team }) {
-  if (src) {
-    return (
-      <div className="game-center-logo">
-        <img src={src} alt={`${team} logo`} />
-      </div>
-    );
-  }
+function TeamLogo({
+  src,
+  initial,
+  team,
+  franchiseId,
+  rank,
+}) {
+  const ranked = Number(rank) >= 1 && Number(rank) <= 25;
 
-  return (
-    <div className="game-center-logo game-center-logo-placeholder">
-      {initial || "?"}
+  const logo = (
+    <div className="game-center-logo-wrap">
+      <div
+        className={[
+          "game-center-logo",
+          src ? "" : "game-center-logo-placeholder",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {src ? (
+          <img src={src} alt={`${team} logo`} />
+        ) : (
+          initial || "?"
+        )}
+      </div>
+
+      {ranked ? (
+        <span
+          className="game-center-logo-rank"
+          aria-label={`Ranked number ${rank}`}
+        >
+          #{rank}
+        </span>
+      ) : null}
     </div>
+  );
+
+  return franchiseId ? (
+    <Link
+      to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
+      className="game-center-franchise-logo-link"
+      aria-label={`Open ${team || "team"} franchise profile`}
+    >
+      {logo}
+    </Link>
+  ) : (
+    logo
   );
 }
 
 function TeamSide({
   side,
+  franchiseId,
   team,
   coach,
+  coachId,
   conference,
   overallRecord,
   conferenceRecord,
@@ -191,17 +227,40 @@ function TeamSide({
         isLoser ? "loser" : "",
       ].filter(Boolean).join(" ")}
     >
-      <TeamLogo src={logo} initial={initial} team={team || "TBD"} />
+      <TeamLogo
+        src={logo}
+        initial={initial}
+        team={team || "TBD"}
+        franchiseId={franchiseId}
+        rank={rank}
+      />
 
       <div className="game-center-team-side-copy">
         <h2 className="game-center-team-name">
-          {rank >= 1 && rank <= 25 ? (
-            <span className="game-center-inline-rank">#{rank}</span>
-          ) : null}
-          <span>{team || "TBD"}</span>
+          {franchiseId ? (
+            <Link
+              to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
+              className="game-center-franchise-name-link"
+            >
+              {team || "TBD"}
+            </Link>
+          ) : (
+            <span>{team || "TBD"}</span>
+          )}
         </h2>
 
-        {coach ? <p className="game-center-coach">{coach}</p> : null}
+        {coach ? (
+          coachId ? (
+            <Link
+              to={`/league/coaches/${encodeURIComponent(coachId)}`}
+              className="game-center-coach game-center-coach-link"
+            >
+              {coach}
+            </Link>
+          ) : (
+            <p className="game-center-coach">{coach}</p>
+          )
+        ) : null}
 
         <div className="game-center-records">
           {isCollege ? (
@@ -487,8 +546,10 @@ function MatchupCard({ game, winnerState, rosters }) {
       <div className="game-center-matchup-row">
         <TeamSide
           side="one"
+          franchiseId={game.team1Id}
           team={game.team1Team}
           coach={game.team1Coach}
+          coachId={game.team1CoachId}
           conference={game.team1Conference}
           overallRecord={game.team1OverallRecord}
           conferenceRecord={game.team1ConferenceRecord}
@@ -511,8 +572,10 @@ function MatchupCard({ game, winnerState, rosters }) {
 
         <TeamSide
           side="two"
+          franchiseId={game.team2Id}
           team={game.team2Team}
           coach={game.team2Coach}
+          coachId={game.team2CoachId}
           conference={game.team2Conference}
           overallRecord={game.team2OverallRecord}
           conferenceRecord={game.team2ConferenceRecord}

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 import PageHeader from "../components/PageHeader";
-import { getGameResults, getStandingsData } from "../services/googleSheets";
+import { getGameResults, getStandingsArchive, getStandingsData } from "../services/googleSheets";
 import meshShield from "../assets/logos/mfl-shield.png";
 
 import { MESH_PATCHES } from "../assets/logos/patches";
@@ -654,6 +654,10 @@ function ChampionshipWinnerLogo({
   );
 }
 
+function canOpenPostseasonGameCenter(game) {
+  return Boolean(game?.gameId) && Number(game?.season) >= 2026;
+}
+
 function NflPlayoffCard({ game, label, placeholder = "Matchup TBD" }) {
   return (
     <div className={`fbs-postseason-game nfl-modern-game ${!game ? "fbs-postseason-game-empty" : ""}`}>
@@ -677,7 +681,7 @@ function NflPlayoffCard({ game, label, placeholder = "Matchup TBD" }) {
         showRecord={false}
       />
 
-      {game?.gameId ? (
+      {canOpenPostseasonGameCenter(game) ? (
         <Link
           className="fbs-postseason-game-center nfl-modern-game-center"
           to={`/game/${encodeURIComponent(game.gameId)}`}
@@ -1061,7 +1065,7 @@ function FbsPostseasonGame({ game, label, placeholder = "Matchup TBD", bowl = fa
         showRecord={!bowl}
       />
 
-      {game?.gameId ? (
+      {canOpenPostseasonGameCenter(game) ? (
         <Link className="fbs-postseason-game-center" to={`/game/${encodeURIComponent(game.gameId)}`}>
           Game Center <ChevronRight size={13} />
         </Link>
@@ -1789,7 +1793,12 @@ function Standings() {
       ? urlDivision
       : "all";
 
+  const urlSeason = Number(searchParams.get("season"));
+  const initialSeason = [2026, 2025, 2024].includes(urlSeason) ? urlSeason : 2026;
+
   const [standingsData, setStandingsData] = useState([]);
+  const [standingsArchive, setStandingsArchive] = useState([]);
+  const [selectedSeason, setSelectedSeason] = useState(initialSeason);
   const [standingsLoading, setStandingsLoading] = useState(true);
   const [standingsError, setStandingsError] = useState("");
   const [playoffGames, setPlayoffGames] = useState([]);
@@ -1806,8 +1815,15 @@ function Standings() {
       try {
         setStandingsLoading(true);
         setStandingsError("");
-        const data = await getStandingsData();
-        if (isMounted) setStandingsData(data);
+        const [liveData, archiveData] = await Promise.all([
+          getStandingsData(),
+          getStandingsArchive(),
+        ]);
+
+        if (isMounted) {
+          setStandingsData(liveData);
+          setStandingsArchive(archiveData);
+        }
       } catch (error) {
         console.error("Unable to load standings:", error);
         if (isMounted) setStandingsError("Standings could not be loaded from Google Sheets.");
@@ -1846,6 +1862,10 @@ function Standings() {
   useEffect(() => {
     const nextParams = new URLSearchParams();
 
+    if (selectedSeason !== 2026) {
+      nextParams.set("season", String(selectedSeason));
+    }
+
     if (selectedPrimaryFilter !== "overview") {
       nextParams.set("tier", selectedPrimaryFilter);
       nextParams.set("filter", selectedSecondaryFilter);
@@ -1863,6 +1883,7 @@ function Standings() {
     selectedPrimaryFilter,
     selectedSecondaryFilter,
     selectedNflDivisionFilter,
+    selectedSeason,
     setSearchParams,
   ]);
 
@@ -2042,6 +2063,28 @@ function Standings() {
     };
   }, [standingsData]);
 
+  const activeStandingsData = useMemo(() => {
+    if (selectedSeason === 2026) return standingsData;
+
+    return standingsArchive
+      .filter((team) => Number(team.season) === selectedSeason)
+      .map((team) => ({
+        ...team,
+        id: `${team.franchiseId}-${selectedSeason}`,
+        conferenceId: normalizeSlug(team.conference),
+        divisionId: normalizeSlug(team.division),
+        movement: 0,
+        previousTop25Rank: 0,
+        top25Movement: 0,
+        isNewTop25: false,
+        top25: Number(team.top25Rank) >= 1 && Number(team.top25Rank) <= 25,
+        status: "neutral",
+        statusLabel: "",
+        record: team.tierStandingsRecord,
+        pointsFor: team.regularSeasonPF,
+      }));
+  }, [selectedSeason, standingsData, standingsArchive]);
+
   const visibleStandings = useMemo(() => {
     if (selectedPrimaryFilter === "overview") return [];
 
@@ -2053,7 +2096,7 @@ function Standings() {
 
     if (postseasonViews.has(selectedSecondaryFilter)) return [];
 
-    return standingsData
+    return activeStandingsData
       .filter((team) => {
         if (team.tierClass !== selectedPrimaryFilter) return false;
 
@@ -2105,7 +2148,7 @@ function Standings() {
 
         return firstTeam.overallRank - secondTeam.overallRank;
       });
-  }, [standingsData, selectedPrimaryFilter, selectedSecondaryFilter, selectedNflDivisionFilter]);
+  }, [activeStandingsData, selectedPrimaryFilter, selectedSecondaryFilter, selectedNflDivisionFilter]);
 
   const displayStandings = useMemo(() => {
     return visibleStandings.map((team, index) => {
@@ -2159,7 +2202,7 @@ function Standings() {
       let status = team.status;
       let statusLabel = team.statusLabel;
 
-      if (team.tierClass === "fbs") {
+      if (team.tierClass === "fbs" && selectedSeason === 2026) {
         if (Number(team.overallRank) >= 91 && Number(team.overallRank) <= 98) {
           status = "relegation";
           statusLabel = "Relegation Zone";
@@ -2194,6 +2237,7 @@ function Standings() {
     selectedPrimaryFilter,
     selectedSecondaryFilter,
     selectedNflDivisionFilter,
+    selectedSeason,
     cfpFranchiseIds,
   ]);
 
@@ -2319,10 +2363,26 @@ function Standings() {
       />
 
       <section className="standings-controls">
-        <button type="button" className="standings-version-selector" aria-label="Choose standings season">
-          <div><span>Season</span><strong>2026 Live</strong></div>
-          <ChevronDown size={18} />
-        </button>
+        <label className="standings-version-selector">
+          <div>
+            <span>Season</span>
+            <strong>{selectedSeason === 2026 ? "2026 Live" : `${selectedSeason} Final`}</strong>
+          </div>
+
+          <div className="standings-season-select-wrap">
+            <select
+              className="standings-season-select"
+              value={selectedSeason}
+              onChange={(event) => setSelectedSeason(Number(event.target.value))}
+              aria-label="Choose standings season"
+            >
+              <option value={2026}>2026 Live</option>
+              <option value={2025}>2025 Final</option>
+              <option value={2024}>2024 Final</option>
+            </select>
+            <ChevronDown size={18} aria-hidden="true" />
+          </div>
+        </label>
 
         <div className="standings-primary-tabs" aria-label="Choose standings view">
           {primaryFilters.map((filter) => (
@@ -2375,6 +2435,40 @@ function Standings() {
       ) : null}
 
       {selectedPrimaryFilter === "overview" ? (
+        selectedSeason !== 2026 ? (
+          <section className="standings-history-overview">
+            <div className="standings-history-overview-copy">
+              <span>Archived Season</span>
+              <h2>{selectedSeason} Final Standings</h2>
+              <p>
+                Select NFL, FBS, or FCS above to explore the final archived standings
+                from the {selectedSeason} MESH season.
+              </p>
+            </div>
+
+            <div className="standings-history-tier-grid">
+              {[
+                ["nfl", "NFL", MESH_PATCHES.tier.NFL],
+                ["fbs", "FBS", MESH_PATCHES.tier.FBS],
+                ["fcs", "FCS", MESH_PATCHES.tier.FCS],
+              ].map(([tierClass, label, patch]) => (
+                <button
+                  type="button"
+                  key={tierClass}
+                  className={`standings-history-tier-card standings-history-tier-card-${tierClass}`}
+                  onClick={() => viewTier(tierClass)}
+                >
+                  <img src={patch} alt={`${label} MESH patch`} />
+                  <div>
+                    <span>{selectedSeason} Final</span>
+                    <strong>{label} Standings</strong>
+                  </div>
+                  <ChevronRight size={17} />
+                </button>
+              ))}
+            </div>
+          </section>
+        ) : (
         <>
           <section className="standings-featured-section standings-pulse-first">
             <div className="standings-featured-heading">
@@ -2493,6 +2587,7 @@ function Standings() {
             </div>
           </section>
         </>
+        )
       ) : (
         <section className={`standings-tier-view standings-tier-view-${selectedPrimaryFilter}`}>
           <div className="standings-section-heading standings-section-heading-patched">
@@ -2506,7 +2601,11 @@ function Standings() {
               ) : null}
 
               <div className="standings-section-title-copy">
-                <span>{activePrimaryLabel} Standings</span>
+                <span>
+                  {selectedSeason === 2026
+                    ? `${activePrimaryLabel} Standings`
+                    : `${selectedSeason} ${activePrimaryLabel} Final Standings`}
+                </span>
                 <h2>{standingsHeading}</h2>
               </div>
             </div>

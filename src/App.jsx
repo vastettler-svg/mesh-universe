@@ -16,6 +16,7 @@ import FranchiseDirectory from "./pages/FranchiseDirectory";
 import FranchiseProfile from "./pages/FranchiseProfile";
 import CoachDirectory from "./pages/CoachDirectory";
 import CoachProfile from "./pages/CoachProfile";
+import Prestige from "./pages/Prestige";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route path="/history" element={<History />} />
         <Route path="/rules" element={<RulesInfo />} />
         <Route path="/league-links" element={<LeagueLinks />} />
+        <Route path="/prestige" element={<Prestige />} />
       </Routes>
     </AppShell>
   );

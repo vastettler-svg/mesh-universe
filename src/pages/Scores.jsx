@@ -391,6 +391,7 @@ function formatProjection(projection) {
 }
 
 function TeamRow({
+  franchiseId,
   team,
   coach,
   initial,
@@ -418,28 +419,66 @@ function TeamRow({
         .filter(Boolean)
         .join(" ")}
     >
-      <div className={`score-team-logo score-team-logo-${tierClass}`}>
-        {logo ? (
-          <img
-            src={logo}
-            alt={`${team || "Team"} logo`}
-            loading="lazy"
-            onError={(event) => {
-              event.currentTarget.style.display = "none";
-              event.currentTarget.nextElementSibling?.removeAttribute("hidden");
-            }}
-          />
-        ) : null}
+      {franchiseId ? (
+        <Link
+          to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
+          className="score-team-franchise-logo-link"
+          aria-label={`Open ${team || "team"} franchise profile`}
+        >
+          <div className={`score-team-logo score-team-logo-${tierClass}`}>
+            {logo ? (
+              <img
+                src={logo}
+                alt={`${team || "Team"} logo`}
+                loading="lazy"
+                onError={(event) => {
+                  event.currentTarget.style.display = "none";
+                  event.currentTarget.nextElementSibling?.removeAttribute("hidden");
+                }}
+              />
+            ) : null}
 
-        <span className="score-team-logo-fallback" hidden={Boolean(logo)}>
-          {initial}
-        </span>
-      </div>
+            <span className="score-team-logo-fallback" hidden={Boolean(logo)}>
+              {initial}
+            </span>
+          </div>
+        </Link>
+      ) : (
+        <div className={`score-team-logo score-team-logo-${tierClass}`}>
+          {logo ? (
+            <img
+              src={logo}
+              alt={`${team || "Team"} logo`}
+              loading="lazy"
+              onError={(event) => {
+                event.currentTarget.style.display = "none";
+                event.currentTarget.nextElementSibling?.removeAttribute("hidden");
+              }}
+            />
+          ) : null}
+
+          <span className="score-team-logo-fallback" hidden={Boolean(logo)}>
+            {initial}
+          </span>
+        </div>
+      )}
 
       <div className="score-team-info">
         <strong>
-          {rank > 0 && rank <= 25 ? `#${rank} ` : ""}
-          {team || "TBD"}
+          {franchiseId ? (
+            <Link
+              to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
+              className="score-team-franchise-name-link"
+            >
+              {rank > 0 && rank <= 25 ? `#${rank} ` : ""}
+              {team || "TBD"}
+            </Link>
+          ) : (
+            <>
+              {rank > 0 && rank <= 25 ? `#${rank} ` : ""}
+              {team || "TBD"}
+            </>
+          )}
         </strong>
 
         {coach ? <span className="score-team-coach">{coach}</span> : null}
@@ -544,6 +583,7 @@ function ScoreCard({ game, featured = false, featuredPosition = 0, scoresView })
 
       <div className="score-team-list">
         <TeamRow
+          franchiseId={game.team1Id}
           team={game.team1Team}
           coach={game.team1Coach}
           initial={game.team1Initial}
@@ -561,6 +601,7 @@ function ScoreCard({ game, featured = false, featuredPosition = 0, scoresView })
         />
 
         <TeamRow
+          franchiseId={game.team2Id}
           team={game.team2Team}
           coach={game.team2Coach}
           initial={game.team2Initial}

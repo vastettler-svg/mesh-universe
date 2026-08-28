@@ -1,0 +1,657 @@
+.prestige-page {
+  padding-bottom: 112px;
+}
+
+.prestige-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid rgba(239, 200, 90, 0.2);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(239, 200, 90, 0.12), transparent 42%),
+    linear-gradient(145deg, rgba(17, 35, 55, 0.98), rgba(8, 20, 34, 0.98));
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
+}
+
+.prestige-hero-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 52px;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgba(239, 200, 90, 0.36);
+  border-radius: 15px;
+  color: #efc85a;
+  background: rgba(239, 200, 90, 0.08);
+}
+
+.prestige-hero .eyebrow {
+  margin: 0 0 3px;
+  color: #efc85a;
+}
+
+.prestige-hero h1 {
+  margin: 0;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: clamp(1.65rem, 5vw, 2.2rem);
+  font-weight: 400;
+}
+
+.prestige-hero p:last-child {
+  margin: 7px 0 0;
+  color: var(--color-muted, #9dabb9);
+  line-height: 1.5;
+}
+
+.prestige-switcher {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.prestige-switcher button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #a8b5c2;
+  background: transparent;
+  cursor: pointer;
+}
+
+.prestige-switcher button.active {
+  border-color: rgba(239, 200, 90, 0.34);
+  color: #fff2be;
+  background: linear-gradient(180deg, rgba(239, 200, 90, 0.18), rgba(239, 200, 90, 0.08));
+  box-shadow: inset 0 0 0 1px rgba(239, 200, 90, 0.05);
+}
+
+.prestige-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.prestige-tier-filters {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.prestige-tier-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.prestige-tier-filters button,
+.prestige-guide-button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.045em;
+  color: #a7b3c0;
+  background: rgba(255, 255, 255, 0.035);
+  cursor: pointer;
+}
+
+.prestige-tier-filters button.active {
+  color: #fff;
+  border-color: rgba(239, 200, 90, 0.34);
+  background: rgba(239, 200, 90, 0.14);
+}
+
+.prestige-tier-filters .prestige-tier-filter-nfl.active {
+  border-color: rgba(31, 178, 101, 0.4);
+  color: #d9f7e7;
+  background: rgba(31, 178, 101, 0.16);
+}
+
+.prestige-tier-filters .prestige-tier-filter-fbs.active {
+  border-color: rgba(66, 135, 255, 0.4);
+  color: #deebff;
+  background: rgba(66, 135, 255, 0.16);
+}
+
+.prestige-tier-filters .prestige-tier-filter-fcs.active {
+  border-color: rgba(160, 104, 255, 0.42);
+  color: #eee2ff;
+  background: rgba(160, 104, 255, 0.16);
+}
+
+.prestige-guide-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #efc85a;
+  border-color: rgba(239, 200, 90, 0.24);
+}
+
+.prestige-guide-button.active {
+  color: #fff1b8;
+  background: rgba(239, 200, 90, 0.12);
+}
+
+.prestige-guide {
+  margin-bottom: 20px;
+  padding: 16px;
+  border: 1px solid rgba(239, 200, 90, 0.2);
+  border-radius: 18px;
+  background: linear-gradient(155deg, rgba(19, 37, 57, 0.98), rgba(8, 20, 34, 0.98));
+}
+
+.prestige-guide-heading,
+.prestige-rankings-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.prestige-guide-heading span,
+.prestige-rankings-heading span {
+  display: block;
+  margin-bottom: 4px;
+  color: #efc85a;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.prestige-guide-heading h2,
+.prestige-rankings-heading h2 {
+  margin: 0;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: clamp(1.05rem, 3vw, 1.35rem);
+  font-weight: 400;
+}
+
+.prestige-guide-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.6rem;
+  font-weight: 850;
+  color: #b8c4cf;
+  background: rgba(255, 255, 255, 0.035);
+  cursor: pointer;
+}
+
+.prestige-guide-intro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.prestige-guide-copy {
+  display: flex;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 13px;
+  color: #c8d1d9;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.prestige-guide-copy svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #efc85a;
+}
+
+.prestige-guide-copy p {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.55;
+}
+
+.prestige-guide-copy-featured {
+  border-color: rgba(239, 200, 90, 0.16);
+  background: rgba(239, 200, 90, 0.055);
+}
+
+.prestige-guide-lead {
+  margin: 15px 2px 11px;
+  color: #b8c4cf;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.prestige-rule-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.prestige-rule-card {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.prestige-rule-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.prestige-rule-card-heading strong {
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+
+.prestige-rule-card-heading span {
+  font-size: 0.55rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.prestige-rule-card-nfl .prestige-rule-card-heading {
+  color: #dcf7e8;
+  background: rgba(31, 178, 101, 0.2);
+}
+
+.prestige-rule-card-fbs .prestige-rule-card-heading {
+  color: #e0ecff;
+  background: rgba(66, 135, 255, 0.2);
+}
+
+.prestige-rule-card-fcs .prestige-rule-card-heading {
+  color: #f0e5ff;
+  background: rgba(160, 104, 255, 0.2);
+}
+
+.prestige-rule-list {
+  display: grid;
+}
+
+.prestige-rule-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 36px;
+  padding: 7px 11px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.66rem;
+}
+
+.prestige-rule-row:last-child {
+  border-bottom: 0;
+}
+
+.prestige-rule-row span {
+  color: #c4ced7;
+  line-height: 1.3;
+}
+
+.prestige-rule-row strong {
+  min-width: 28px;
+  text-align: right;
+  color: #fff;
+}
+
+.prestige-rankings {
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 18px;
+  background: linear-gradient(150deg, rgba(15, 31, 49, 0.96), rgba(8, 20, 34, 0.98));
+}
+
+.prestige-rankings-heading > strong {
+  display: grid;
+  place-items: center;
+  min-width: 36px;
+  height: 30px;
+  padding: 0 9px;
+  border-radius: 999px;
+  color: #efc85a;
+  background: rgba(239, 200, 90, 0.1);
+  font-size: 0.67rem;
+}
+
+.prestige-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 13px 0 10px;
+  padding: 0 11px;
+  min-height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+  color: #7f91a1;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.prestige-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-size: 0.72rem;
+  color: #fff;
+  background: transparent;
+}
+
+.prestige-search input::placeholder {
+  color: #768695;
+}
+
+.prestige-rank-list {
+  display: grid;
+  gap: 7px;
+}
+
+.prestige-rank-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto 12px;
+  gap: 9px;
+  align-items: center;
+  min-height: 70px;
+  padding: 9px 10px 9px 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.025);
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.prestige-rank-row::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.prestige-rank-row-nfl::before {
+  background: #1fb265;
+}
+
+.prestige-rank-row-fbs::before {
+  background: #4287ff;
+}
+
+.prestige-rank-row-fcs::before {
+  background: #a068ff;
+}
+
+.prestige-rank-row:hover {
+  transform: translateY(-1px);
+  border-color: rgba(239, 200, 90, 0.22);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.prestige-rank-row-podium {
+  border-color: rgba(239, 200, 90, 0.13);
+}
+
+.prestige-rank-row-1 {
+  background:
+    linear-gradient(90deg, rgba(239, 200, 90, 0.1), transparent 45%),
+    rgba(255, 255, 255, 0.03);
+}
+
+.prestige-rank-number {
+  display: grid;
+  place-items: center;
+  color: #9cabb8;
+}
+
+.prestige-rank-number strong {
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+
+.prestige-rank-row-1 .prestige-rank-number strong {
+  color: #f3cc57;
+}
+
+.prestige-rank-row-2 .prestige-rank-number strong {
+  color: #c8d0d8;
+}
+
+.prestige-rank-row-3 .prestige-rank-number strong {
+  color: #c99063;
+}
+
+.prestige-rank-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.prestige-team-logo,
+.prestige-coach-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  color: #d9e1e8;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.prestige-team-logo img {
+  width: 31px;
+  height: 31px;
+  object-fit: contain;
+}
+
+.prestige-team-logo-fallback {
+  font-weight: 900;
+}
+
+.prestige-avatar-nfl {
+  border-color: rgba(31, 178, 101, 0.25);
+  background: rgba(31, 178, 101, 0.1);
+}
+
+.prestige-avatar-fbs {
+  border-color: rgba(66, 135, 255, 0.25);
+  background: rgba(66, 135, 255, 0.1);
+}
+
+.prestige-avatar-fcs {
+  border-color: rgba(160, 104, 255, 0.27);
+  background: rgba(160, 104, 255, 0.1);
+}
+
+.prestige-rank-copy {
+  min-width: 0;
+}
+
+.prestige-rank-copy > strong,
+.prestige-rank-copy > span,
+.prestige-rank-copy > small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prestige-rank-copy > strong {
+  color: #f4f7fa;
+  font-size: 0.75rem;
+}
+
+.prestige-rank-copy > span {
+  margin-top: 3px;
+  color: #9eacb8;
+  font-size: 0.62rem;
+}
+
+.prestige-rank-copy > small {
+  margin-top: 3px;
+  color: #738596;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.prestige-rank-points {
+  text-align: right;
+}
+
+.prestige-rank-points strong {
+  display: block;
+  color: #efc85a;
+  font-size: 0.86rem;
+}
+
+.prestige-rank-points span {
+  display: block;
+  margin-top: 2px;
+  color: #738596;
+  font-size: 0.47rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.prestige-rank-chevron {
+  color: #6f8190;
+  font-size: 1.1rem;
+}
+
+.prestige-state-card {
+  padding: 30px 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  text-align: center;
+  color: #98a8b6;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.prestige-state-card-error {
+  border-color: rgba(225, 88, 88, 0.25);
+  color: #f0aaaa;
+  background: rgba(225, 88, 88, 0.05);
+}
+
+@media (max-width: 760px) {
+  .prestige-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .prestige-guide-button {
+    align-self: flex-start;
+  }
+
+  .prestige-guide-intro,
+  .prestige-rule-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .prestige-hero {
+    align-items: flex-start;
+    padding: 15px;
+  }
+
+  .prestige-hero-icon {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .prestige-switcher button {
+    min-height: 42px;
+    font-size: 0.68rem;
+  }
+
+  .prestige-guide {
+    padding: 13px;
+  }
+
+  .prestige-guide-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .prestige-rankings {
+    padding: 12px;
+  }
+
+  .prestige-rank-row {
+    grid-template-columns: 28px minmax(0, 1fr) auto 9px;
+    gap: 7px;
+    min-height: 66px;
+    padding-right: 8px;
+  }
+
+  .prestige-team-logo,
+  .prestige-coach-avatar {
+    flex-basis: 35px;
+    width: 35px;
+    height: 35px;
+  }
+
+  .prestige-team-logo img {
+    width: 27px;
+    height: 27px;
+  }
+
+  .prestige-rank-copy > strong {
+    font-size: 0.69rem;
+  }
+
+  .prestige-rank-copy > span {
+    font-size: 0.57rem;
+  }
+
+  .prestige-rank-points strong {
+    font-size: 0.76rem;
+  }
+
+  .prestige-rank-points span {
+    font-size: 0.42rem;
+  }
+}

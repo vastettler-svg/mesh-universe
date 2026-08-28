@@ -50,8 +50,9 @@ const quickLinks = [
   },
   {
     title: "Prestige",
-    description: "View program prestige and movement",
+    description: "View career prestige rankings and scoring guide",
     icon: Star,
+    path: "/prestige",
   },
   {
     title: "Coach Carousel",
@@ -107,8 +108,6 @@ function formatHomePoints(value) {
 function TeamIdentity({
   team,
   coach,
-  franchiseId,
-  coachId,
   logo,
   initial,
   overallRecord,
@@ -121,62 +120,20 @@ function TeamIdentity({
 
   return (
     <div className="game-team">
-      {franchiseId ? (
-        <Link
-          className="home-franchise-logo-link"
-          to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
-          onClick={(event) => event.stopPropagation()}
-          aria-label={`Open ${team} franchise profile`}
-        >
-          <div className={`game-team-logo game-team-logo-${tierClass}`}>
-            {logo ? (
-              <img src={logo} alt={`${team} logo`} />
-            ) : (
-              <span>{initial}</span>
-            )}
-          </div>
-        </Link>
-      ) : (
-        <div className={`game-team-logo game-team-logo-${tierClass}`}>
-          {logo ? (
-            <img src={logo} alt={`${team} logo`} />
-          ) : (
-            <span>{initial}</span>
-          )}
-        </div>
-      )}
+      <div className={`game-team-logo game-team-logo-${tierClass}`}>
+        {logo ? (
+          <img src={logo} alt={`${team} logo`} />
+        ) : (
+          <span>{initial}</span>
+        )}
+      </div>
 
       <strong title={team}>
-        {franchiseId ? (
-          <Link
-            className="home-franchise-name-link"
-            to={`/league/franchises/${encodeURIComponent(franchiseId)}`}
-            onClick={(event) => event.stopPropagation()}
-          >
-            {ranked ? `#${rank} ` : ""}
-            {team}
-          </Link>
-        ) : (
-          <>
-            {ranked ? `#${rank} ` : ""}
-            {team}
-          </>
-        )}
+        {ranked ? `#${rank} ` : ""}
+        {team}
       </strong>
 
-      <span className="game-team-coach">
-        {coachId && coach ? (
-          <Link
-            className="home-coach-name-link"
-            to={`/league/coaches/${encodeURIComponent(coachId)}`}
-            onClick={(event) => event.stopPropagation()}
-          >
-            {coach}
-          </Link>
-        ) : (
-          coach || "Coach TBD"
-        )}
-      </span>
+      <span className="game-team-coach">{coach || "Coach TBD"}</span>
 
       {tier === "FBS" || tier === "FCS" ? (
         <span className="game-team-records">
@@ -193,8 +150,6 @@ function TeamIdentity({
 }
 
 function GameOfTheWeekCard({ game }) {
-  const navigate = useNavigate();
-
   if (!game) return null;
 
   const isLive = game.status === "live";
@@ -236,23 +191,10 @@ function GameOfTheWeekCard({ game }) {
       ? Math.max(firstProbability, secondProbability)
       : null;
 
-  const openGameCenter = () => {
-    navigate(`/scores/${encodeURIComponent(game.gameId)}`);
-  };
-
   return (
-    <article
-      className={`home-card game-card game-card-${game.tierClass} home-clickable-card`}
-      role="link"
-      tabIndex={0}
-      aria-label={`Open ${game.tier} Game of the Week Game Center`}
-      onClick={openGameCenter}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          openGameCenter();
-        }
-      }}
+    <Link
+      className={`home-card game-card game-card-${game.tierClass}`}
+      to={`/scores/${encodeURIComponent(game.gameId)}`}
     >
       <div className="game-card-top">
         <span
@@ -280,8 +222,6 @@ function GameOfTheWeekCard({ game }) {
         <TeamIdentity
           team={game.team1Team}
           coach={game.team1Coach}
-          franchiseId={game.team1Id}
-          coachId={game.team1CoachId}
           logo={game.team1Logo}
           initial={game.team1Initial}
           overallRecord={game.team1OverallRecord}
@@ -315,8 +255,6 @@ function GameOfTheWeekCard({ game }) {
         <TeamIdentity
           team={game.team2Team}
           coach={game.team2Coach}
-          franchiseId={game.team2Id}
-          coachId={game.team2CoachId}
           logo={game.team2Logo}
           initial={game.team2Initial}
           overallRecord={game.team2OverallRecord}
@@ -352,7 +290,7 @@ function GameOfTheWeekCard({ game }) {
       <div className="game-card-footer">
         View Game Center
       </div>
-    </article>
+    </Link>
   );
 }
 
@@ -452,56 +390,17 @@ function WeeklyHighScorerCard({
       {hasWinner ? (
         <>
           <div className="weekly-award-winner">
-            {winner.id ? (
-              <Link
-                className="home-franchise-logo-link"
-                to={`/league/franchises/${encodeURIComponent(winner.id)}`}
-                aria-label={`Open ${winner.team} franchise profile`}
-              >
-                <div className="weekly-award-logo">
-                  {winner.logo ? (
-                    <img src={winner.logo} alt={`${winner.team} logo`} />
-                  ) : (
-                    <span>{winner.initial}</span>
-                  )}
-                </div>
-              </Link>
-            ) : (
-              <div className="weekly-award-logo">
-                {winner.logo ? (
-                  <img src={winner.logo} alt={`${winner.team} logo`} />
-                ) : (
-                  <span>{winner.initial}</span>
-                )}
-              </div>
-            )}
+            <div className="weekly-award-logo">
+              {winner.logo ? (
+                <img src={winner.logo} alt={`${winner.team} logo`} />
+              ) : (
+                <span>{winner.initial}</span>
+              )}
+            </div>
 
             <div className="weekly-award-team">
-              <strong>
-                {winner.id ? (
-                  <Link
-                    className="home-franchise-name-link"
-                    to={`/league/franchises/${encodeURIComponent(winner.id)}`}
-                  >
-                    {winner.team}
-                  </Link>
-                ) : (
-                  winner.team
-                )}
-              </strong>
-
-              <span>
-                {winner.coachId && winner.coach ? (
-                  <Link
-                    className="home-coach-name-link"
-                    to={`/league/coaches/${encodeURIComponent(winner.coachId)}`}
-                  >
-                    {winner.coach}
-                  </Link>
-                ) : (
-                  winner.coach || "Coach TBD"
-                )}
-              </span>
+              <strong>{winner.team}</strong>
+              <span>{winner.coach || "Coach TBD"}</span>
             </div>
 
             <div className="weekly-award-points">
@@ -1257,7 +1156,6 @@ function buildWeeklyHighScorers(games, week) {
           id: game.team1Id,
           team: game.team1Team,
           coach: game.team1Coach,
-          coachId: game.team1CoachId || "",
           logo: game.team1Logo,
           initial: game.team1Initial,
           score: numericScore(game.team1Score),
@@ -1268,7 +1166,6 @@ function buildWeeklyHighScorers(games, week) {
           id: game.team2Id,
           team: game.team2Team,
           coach: game.team2Coach,
-          coachId: game.team2CoachId || "",
           logo: game.team2Logo,
           initial: game.team2Initial,
           score: numericScore(game.team2Score),
@@ -1283,7 +1180,6 @@ function buildWeeklyHighScorers(games, week) {
             id: appearance.id,
             team: appearance.team,
             coach: appearance.coach,
-            coachId: appearance.coachId || "",
             logo: appearance.logo,
             initial: appearance.initial,
             score: appearance.score,
@@ -1494,34 +1390,36 @@ function Home() {
     };
   }, []);
 
+  const currentWeek = Number(settings?.currentWeek) || 1;
+  const activeWeek = Number(selectedWeek) || currentWeek;
+
   useEffect(() => {
     let cancelled = false;
 
     async function loadHeadlineHistory() {
-      const currentWeek = Number(settings?.currentWeek) || 1;
-      if (!games.length || !currentWeek) return;
+      if (!games.length || !activeWeek) return;
 
       const targetGames = [];
 
-      if (currentWeek <= 1) {
+      if (activeWeek <= 1) {
         const openingGame = games.find(
           (game) =>
             game.tier === "NFL" &&
-            Number(game.week) === currentWeek &&
+            Number(game.week) === activeWeek &&
             Number(game.featuredRank) === 1,
         );
 
         if (openingGame) targetGames.push(openingGame);
       } else {
         ["NFL", "FBS", "FCS"].forEach((tier) => {
-          const recapGame = chooseHeadlineGame(games, tier, currentWeek - 1);
+          const recapGame = chooseHeadlineGame(games, tier, activeWeek - 1);
           if (recapGame) targetGames.push(recapGame);
         });
 
         const upcomingNflGame = getBestUpcomingGame(
           games,
           "NFL",
-          currentWeek,
+          activeWeek,
         );
 
         if (upcomingNflGame) targetGames.push(upcomingNflGame);
@@ -1569,7 +1467,7 @@ function Home() {
     return () => {
       cancelled = true;
     };
-  }, [games, settings?.currentWeek]);
+  }, [games, activeWeek]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1646,9 +1544,6 @@ function Home() {
     };
   }, []);
 
-  const currentWeek = Number(settings?.currentWeek) || 1;
-  const activeWeek = Number(selectedWeek) || currentWeek;
-
   const availableWeeks = useMemo(() => {
     const weeks = [...new Set(
       games
@@ -1684,38 +1579,90 @@ function Home() {
     return event?.phase || "Regular Season";
   }, [settings, activeWeek]);
 
+  const getWeekOneRankedLeader = (tier) => {
+    const candidates = [];
+
+    games
+      .filter(
+        (game) =>
+          game.tier === tier &&
+          Number(game.week) === 1,
+      )
+      .forEach((game) => {
+        [
+          {
+            team: game.team1Team,
+            coach: game.team1Coach,
+            rank: Number(game.team1GameRank) || 0,
+          },
+          {
+            team: game.team2Team,
+            coach: game.team2Coach,
+            rank: Number(game.team2GameRank) || 0,
+          },
+        ].forEach((entry) => {
+          if (
+            entry.team &&
+            entry.rank >= 1 &&
+            entry.rank <= 25
+          ) {
+            candidates.push(entry);
+          }
+        });
+      });
+
+    const best = candidates.sort(
+      (a, b) => a.rank - b.rank,
+    )[0];
+
+    return best
+      ? {
+          team: best.team,
+          coach: best.coach,
+          top25Rank: best.rank,
+          overallRank: best.rank,
+        }
+      : null;
+  };
+
+  /*
+   * HOME WEEK SNAPSHOT
+   * ------------------
+   * Headlines follow the Home week selector just like Games of the Week.
+   *
+   * Week 1:
+   *   Opening-week stories are built from Week 1 GAME_RESULTS snapshots.
+   *
+   * Week 2+:
+   *   - recap = selected week - 1
+   *   - preview = selected week
+   *
+   * Past weeks always show the completed recap + preview package, so returning
+   * to an older Home week feels like reopening MESH at that point in the season.
+   * The current week keeps the Tuesday/Wednesday recap-only and
+   * Thursday-through-Monday recap + preview cadence.
+   */
+  const headlineRecapWeek = activeWeek - 1;
+
   const headlines = useMemo(() => {
     const tiers = ["NFL", "FBS", "FCS"];
-    const previousWeek = currentWeek - 1;
 
-    if (previousWeek < 1) {
+    if (activeWeek <= 1) {
       const nflGame = games.find(
         (item) =>
           item.tier === "NFL" &&
-          Number(item.week) === currentWeek &&
+          Number(item.week) === 1 &&
           Number(item.featuredRank) === 1,
       );
 
-      const fbsLeader = [...standings]
-        .filter(
-          (team) =>
-            team.tier === "FBS" &&
-            Number(team.top25Rank) >= 1 &&
-            Number(team.top25Rank) <= 25,
-        )
-        .sort((a, b) => Number(a.top25Rank) - Number(b.top25Rank))[0];
-
-      const fcsLeader = [...standings]
-        .filter(
-          (team) =>
-            team.tier === "FCS" &&
-            Number(team.top25Rank) >= 1 &&
-            Number(team.top25Rank) <= 25,
-        )
-        .sort((a, b) => Number(a.top25Rank) - Number(b.top25Rank))[0];
+      const fbsLeader = getWeekOneRankedLeader("FBS");
+      const fcsLeader = getWeekOneRankedLeader("FCS");
 
       return [
-        buildWeekOneMatchupStory(nflGame, headlineHistory[nflGame?.gameId] ?? []),
+        buildWeekOneMatchupStory(
+          nflGame,
+          headlineHistory[nflGame?.gameId] ?? [],
+        ),
         buildWeekOneFbsStory(fbsLeader),
         buildWeekOneFcsStory(fcsLeader),
       ].filter(Boolean);
@@ -1723,40 +1670,77 @@ function Home() {
 
     return tiers
       .map((tier) => {
-        const game = chooseHeadlineGame(games, tier, previousWeek);
-        return buildResultHeadline(game, previousWeek, headlineHistory[game?.gameId] ?? []);
+        const game = chooseHeadlineGame(
+          games,
+          tier,
+          headlineRecapWeek,
+        );
+
+        return buildResultHeadline(
+          game,
+          headlineRecapWeek,
+          headlineHistory[game?.gameId] ?? [],
+        );
       })
       .filter(Boolean);
-  }, [games, standings, currentWeek, headlineHistory]);
-
-  const previousWeek = currentWeek - 1;
+  }, [
+    games,
+    activeWeek,
+    headlineRecapWeek,
+    headlineHistory,
+  ]);
 
   const showUpcomingHeadlines = useMemo(() => {
-    if (currentWeek <= 1) return false;
+    if (activeWeek <= 1) return false;
+
+    // Future weeks should not reveal a headline package before MESH reaches them.
+    if (activeWeek > currentWeek) return false;
+
+    // Once a week is historical, preserve its completed Thursday look-ahead package.
+    if (activeWeek < currentWeek) return true;
 
     const day = new Date().getDay();
 
-    // Thursday through Monday. Tuesday/Wednesday remain recap-only.
+    // Current week: Thursday through Monday. Tuesday/Wednesday remain recap-only.
     return day === 4 || day === 5 || day === 6 || day === 0 || day === 1;
-  }, [currentWeek]);
+  }, [activeWeek, currentWeek]);
 
   const upcomingHeadlines = useMemo(() => {
     if (!showUpcomingHeadlines) return [];
 
-    const nflGame = getBestUpcomingGame(games, "NFL", currentWeek);
-    const fbsGame = getBestUpcomingGame(games, "FBS", currentWeek);
-    const fcsGame = getBestUpcomingGame(games, "FCS", currentWeek);
+    const nflGame = getBestUpcomingGame(
+      games,
+      "NFL",
+      activeWeek,
+    );
+    const fbsGame = getBestUpcomingGame(
+      games,
+      "FBS",
+      activeWeek,
+    );
+    const fcsGame = getBestUpcomingGame(
+      games,
+      "FCS",
+      activeWeek,
+    );
 
     return [
       buildUpcomingNflStory(
         nflGame,
-        currentWeek,
+        activeWeek,
         headlineHistory[nflGame?.gameId] ?? [],
       ),
-      buildUpcomingFbsStory(fbsGame, currentWeek),
-      buildUpcomingFcsStory(fcsGame, currentWeek),
+      buildUpcomingFbsStory(fbsGame, activeWeek),
+      buildUpcomingFcsStory(fcsGame, activeWeek),
     ].filter(Boolean);
-  }, [games, currentWeek, showUpcomingHeadlines, headlineHistory]);
+  }, [
+    games,
+    activeWeek,
+    showUpcomingHeadlines,
+    headlineHistory,
+  ]);
+
+  const previousWeek = currentWeek - 1;
 
   const weeklyHighScorers = useMemo(() => {
     if (previousWeek < 1) {
@@ -1860,11 +1844,13 @@ function Home() {
       <section className="home-section">
         <SectionHeading
           eyebrow={
-            currentWeek <= 1
+            activeWeek <= 1
               ? "Opening week storylines"
               : showUpcomingHeadlines
-                ? `Thursday preview • Week ${currentWeek}`
-                : `Biggest stories from Week ${currentWeek - 1}`
+                ? activeWeek < currentWeek
+                  ? `Week ${activeWeek} headline archive`
+                  : `Thursday preview • Week ${activeWeek}`
+                : `Biggest stories from Week ${activeWeek - 1}`
           }
           title="MESH Headlines"
         />
@@ -1885,7 +1871,7 @@ function Home() {
                     color: "#9cadbd",
                   }}
                 >
-                  Looking Ahead to Week {currentWeek}
+                  Looking Ahead to Week {activeWeek}
                 </div>
 
                 <div className="headlines-grid">
@@ -1901,7 +1887,7 @@ function Home() {
 
             {headlines.length > 0 ? (
               <div className="home-headline-group">
-                {currentWeek > 1 ? (
+                {activeWeek > 1 ? (
                   <div
                     style={{
                       margin: showUpcomingHeadlines ? "20px 0 10px" : "0 0 10px",
@@ -1912,7 +1898,7 @@ function Home() {
                       color: "#9cadbd",
                     }}
                   >
-                    Week {currentWeek - 1} Recap
+                    Week {activeWeek - 1} Recap
                   </div>
                 ) : null}
 

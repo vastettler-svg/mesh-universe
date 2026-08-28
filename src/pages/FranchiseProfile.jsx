@@ -1074,9 +1074,13 @@ function FranchiseProfile() {
         last.losses += Number(row.overallSeasonLosses) || 0;
         last.ties += Number(row.overallSeasonTies) || 0;
         last.isCurrent = last.isCurrent || Boolean(row.isCurrent);
+        if (!last.coachId && row.coachId) {
+          last.coachId = row.coachId;
+        }
       } else {
         tenures.push({
           coachKey,
+          coachId: row.coachId || "",
           coachName,
           startSeason: Number(row.season),
           endSeason: Number(row.season),
@@ -1230,27 +1234,12 @@ function FranchiseProfile() {
       <section className="franchise-profile-hero franchise-profile-hero-clean">
         <div className="franchise-profile-hero-glow" />
 
-        <div className="franchise-profile-logo-column">
-          <div className="franchise-profile-logo">
-            {franchise.logo ? (
-              <img src={franchise.logo} alt={`${franchise.team} logo`} />
-            ) : (
-              <span>{franchise.team?.charAt(0) || "M"}</span>
-            )}
-          </div>
-
-          <div className="franchise-profile-prestige franchise-profile-prestige-under-logo">
-            <Trophy size={16} />
-            <div>
-              <span>Prestige Points</span>
-              <strong>
-                {franchise.prestigePoints === null ||
-                franchise.prestigePoints === undefined
-                  ? "—"
-                  : Number(franchise.prestigePoints).toFixed(1)}
-              </strong>
-            </div>
-          </div>
+        <div className="franchise-profile-logo">
+          {franchise.logo ? (
+            <img src={franchise.logo} alt={`${franchise.team} logo`} />
+          ) : (
+            <span>{franchise.team?.charAt(0) || "M"}</span>
+          )}
         </div>
 
         <div className="franchise-profile-identity">
@@ -1273,10 +1262,31 @@ function FranchiseProfile() {
               <UserRound size={16} />
               <div>
                 <span>Current Coach</span>
-                <strong>{franchise.coach || "Coach TBD"}</strong>
+                {franchise.coachId ? (
+                  <Link
+                    className="franchise-coach-profile-link"
+                    to={`/league/coaches/${encodeURIComponent(franchise.coachId)}`}
+                  >
+                    {franchise.coach || "Coach TBD"}
+                  </Link>
+                ) : (
+                  <strong>{franchise.coach || "Coach TBD"}</strong>
+                )}
               </div>
             </div>
 
+            <div className="franchise-profile-prestige">
+              <Trophy size={16} />
+              <div>
+                <span>Prestige Points</span>
+                <strong>
+                  {franchise.prestigePoints === null ||
+                  franchise.prestigePoints === undefined
+                    ? "—"
+                    : Number(franchise.prestigePoints).toFixed(1)}
+                </strong>
+              </div>
+            </div>
           </div>
 
           {franchise.tier === "NFL" ? (
@@ -1492,7 +1502,16 @@ function FranchiseProfile() {
                   ) : null}
                   <div>
                     <strong>{seasonRow.franchiseName || seasonRow.team}</strong>
-                    <span>{seasonRow.coachName || seasonRow.coach || "Coach TBD"}</span>
+                    {seasonRow.coachId ? (
+                      <Link
+                        className="franchise-season-coach-link"
+                        to={`/league/coaches/${encodeURIComponent(seasonRow.coachId)}`}
+                      >
+                        {seasonRow.coachName || seasonRow.coach || "Coach TBD"}
+                      </Link>
+                    ) : (
+                      <span>{seasonRow.coachName || seasonRow.coach || "Coach TBD"}</span>
+                    )}
                   </div>
                 </div>
 
@@ -1587,7 +1606,16 @@ function FranchiseProfile() {
 
                 <div>
                   <span>{years}</span>
-                  <strong>{tenure.coachName}</strong>
+                  {tenure.coachId ? (
+                    <Link
+                      className="franchise-coach-history-link"
+                      to={`/league/coaches/${encodeURIComponent(tenure.coachId)}`}
+                    >
+                      {tenure.coachName}
+                    </Link>
+                  ) : (
+                    <strong>{tenure.coachName}</strong>
+                  )}
                   <small>Franchise record: {record}</small>
                 </div>
               </article>

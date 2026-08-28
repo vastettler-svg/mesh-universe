@@ -861,9 +861,30 @@ function CoachProfile() {
 
   const coachName = String(currentTeam.coach || "").trim();
   const tier = String(currentTeam.tier || "").toUpperCase();
+  const rawCoachPrestige = Number(
+    coachData?.raw?.OVR_Prestige_Totals_COACH ??
+      coachData?.raw?.OVR_Prestige_Total_COACH ??
+      coachData?.raw?.Coach_Prestige_Total,
+  );
+
+  const normalizedCoachPrestige = Number(coachData?.prestige);
+
+  const tenureCoachPrestige = coachTenures.reduce(
+    (sum, row) => sum + number(row.prestigePoints),
+    0,
+  );
+
+  const coachPrestigeValue =
+    Number.isFinite(rawCoachPrestige) && rawCoachPrestige > 0
+      ? rawCoachPrestige
+      : Number.isFinite(normalizedCoachPrestige) &&
+          normalizedCoachPrestige > 0
+        ? normalizedCoachPrestige
+        : tenureCoachPrestige;
+
   const prestige =
-    coachData?.prestige !== null && coachData?.prestige !== undefined
-      ? coachData.prestige.toFixed(1)
+    Number.isFinite(coachPrestigeValue)
+      ? coachPrestigeValue.toFixed(1)
       : "—";
 
   const meshWins =
@@ -1244,33 +1265,12 @@ function CoachProfile() {
                   <span>{isCurrent ? "Current" : tenure.movement || "Season"}</span>
                 </div>
 
-                {tenure.franchiseId ? (
-                  <Link
-                    className="coach-career-history-logo coach-career-franchise-link"
-                    to={`/league/franchises/${encodeURIComponent(tenure.franchiseId)}`}
-                    aria-label={`Open ${tenure.franchiseName || "franchise"} profile`}
-                  >
-                    {logo ? <img src={logo} alt="" /> : <Shield size={22} />}
-                  </Link>
-                ) : (
-                  <div className="coach-career-history-logo">
-                    {logo ? <img src={logo} alt="" /> : <Shield size={22} />}
-                  </div>
-                )}
+                <div className="coach-career-history-logo">
+                  {logo ? <img src={logo} alt="" /> : <Shield size={22} />}
+                </div>
 
                 <div className="coach-career-history-copy">
-                  <strong>
-                    {tenure.franchiseId ? (
-                      <Link
-                        className="coach-career-franchise-name-link"
-                        to={`/league/franchises/${encodeURIComponent(tenure.franchiseId)}`}
-                      >
-                        {tenure.franchiseName || "Franchise"}
-                      </Link>
-                    ) : (
-                      tenure.franchiseName || "Franchise"
-                    )}
-                  </strong>
+                  <strong>{tenure.franchiseName || "Franchise"}</strong>
                   <span>
                     {tenure.tier}
                     {tenure.conference ? ` • ${tenure.conference}` : ""}

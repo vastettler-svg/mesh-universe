@@ -1,11 +1,6 @@
 import { Link } from "react-router-dom";
 
-const internalLinks = [
-  {
-    name: "History",
-    description: "Archives, champions, records and trophy rooms",
-    path: "/history",
-  },
+const menuItems = [
   {
     name: "League Rules & Info",
     description: "Official MESH Football rules and league structure",
@@ -13,27 +8,26 @@ const internalLinks = [
   },
   {
     name: "Sleeper Leagues",
-    description: "Open all 15 individual MESH Sleeper leagues",
+    description: "Open all 15 MESH conference leagues",
     path: "/league-links",
-  },
-];
-
-const futureSections = [
-  {
-    name: "Draft HQ",
-    description: "Draft orders, results and archived drafts",
-  },
-  {
-    name: "Coach Carousel",
-    description: "Coaching changes and available franchises",
   },
   {
     name: "Prestige",
-    description: "Current and historical prestige rankings",
+    description: "Career franchise and coach prestige rankings",
+    path: "/prestige",
   },
   {
-    name: "Trophy Rooms",
-    description: "Team championships, awards and achievements",
+    name: "Coach Carousel",
+    description: "Track coaching changes across MESH",
+  },
+  {
+    name: "Draft HQ",
+    description: "Draft order, picks and preparation",
+  },
+  {
+    name: "History",
+    description: "Champions, records and past seasons",
+    path: "/history",
   },
 ];
 
@@ -47,27 +41,25 @@ function More() {
       </div>
 
       <div className="menu-grid">
-        {internalLinks.map((item) => (
-          <Link className="menu-card" to={item.path} key={item.name}>
-            <div>
-              <strong>{item.name}</strong>
-              <p>{item.description}</p>
-            </div>
-
-            <span aria-hidden="true">›</span>
-          </Link>
-        ))}
-
-        {futureSections.map((item) => (
-          <button type="button" className="menu-card" key={item.name}>
-            <div>
-              <strong>{item.name}</strong>
-              <p>{item.description}</p>
-            </div>
-
-            <span aria-hidden="true">›</span>
-          </button>
-        ))}
+        {menuItems.map((item) =>
+          item.path ? (
+            <Link className="menu-card" to={item.path} key={item.name}>
+              <div>
+                <strong>{item.name}</strong>
+                <p>{item.description}</p>
+              </div>
+              <span aria-hidden="true">›</span>
+            </Link>
+          ) : (
+            <button type="button" className="menu-card" key={item.name}>
+              <div>
+                <strong>{item.name}</strong>
+                <p>{item.description}</p>
+              </div>
+              <span aria-hidden="true">›</span>
+            </button>
+          ),
+        )}
       </div>
     </main>
   );

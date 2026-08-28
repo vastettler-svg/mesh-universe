@@ -104,23 +104,81 @@ function csvRowsToObjects(csvRows) {
   });
 }
 
+const CSV_CACHE_TTL_MS = 60_000;
+const CSV_REQUEST_TIMEOUT_MS = 15_000;
+const csvCache = new Map();
+const csvInflight = new Map();
+
 async function fetchCsvRows(url, label) {
-  const response = await fetch(url, { cache: "no-store" });
+  const now = Date.now();
+  const cached = csvCache.get(url);
 
-  if (!response.ok) {
-    throw new Error(
-      `${label} request failed: ${response.status} ${response.statusText}`,
+  // Re-visiting pages inside the app should be instant instead of issuing
+  // another identical Google Sheets request every time a route remounts.
+  if (cached && now - cached.timestamp < CSV_CACHE_TTL_MS) {
+    return cached.rows;
+  }
+
+  // If several screens ask for the same sheet at once, share one request.
+  if (csvInflight.has(url)) {
+    return csvInflight.get(url);
+  }
+
+  const request = (async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      CSV_REQUEST_TIMEOUT_MS,
     );
-  }
 
-  const csvText = await response.text();
-  const rows = csvRowsToObjects(parseCsv(csvText));
+    try {
+      const response = await fetch(url, {
+        cache: "no-store",
+        signal: controller.signal,
+      });
 
-  if (rows.length === 0) {
-    throw new Error(`${label} returned no rows.`);
-  }
+      if (!response.ok) {
+        throw new Error(
+          `${label} request failed: ${response.status} ${response.statusText}`,
+        );
+      }
 
-  return rows;
+      const csvText = await response.text();
+      const rows = csvRowsToObjects(parseCsv(csvText));
+
+      if (rows.length === 0) {
+        throw new Error(`${label} returned no rows.`);
+      }
+
+      csvCache.set(url, {
+        rows,
+        timestamp: Date.now(),
+      });
+
+      return rows;
+    } catch (error) {
+      /*
+       * If Google briefly stalls after the user has already loaded the sheet
+       * successfully, keep the app usable with the last known data rather than
+       * leaving a page on "Loading..." indefinitely.
+       */
+      if (cached?.rows?.length) {
+        console.warn(
+          `${label} refresh failed; using cached rows instead.`,
+          error,
+        );
+        return cached.rows;
+      }
+
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+      csvInflight.delete(url);
+    }
+  })();
+
+  csvInflight.set(url, request);
+  return request;
 }
 
 function toNumber(value, fallback = 0) {
@@ -1288,45 +1346,95 @@ function csvRowsToObjects_(rows) {
   });
 }
 
-export async function getLivePlayerScores() {
-  const response = await fetch(LIVE_PLAYER_SCORES_CSV_URL);
+let livePlayerScoresCache = null;
+let livePlayerScoresInflight = null;
+const LIVE_PLAYER_SCORES_CACHE_TTL_MS = 60_000;
 
-  if (!response.ok) {
-    throw new Error(
-      `LIVE_PLAYER_SCORES request failed: ${response.status} ${response.statusText}`,
-    );
+export async function getLivePlayerScores() {
+  const now = Date.now();
+
+  if (
+    livePlayerScoresCache &&
+    now - livePlayerScoresCache.timestamp < LIVE_PLAYER_SCORES_CACHE_TTL_MS
+  ) {
+    return livePlayerScoresCache.rows;
   }
 
-  const text = await response.text();
-  const rows = parseSimpleCsv_(text);
+  if (livePlayerScoresInflight) {
+    return livePlayerScoresInflight;
+  }
 
-  return csvRowsToObjects_(rows).map((row) => ({
-    season: Number(row.Season) || 0,
-    week: Number(row.Week) || 0,
-    franchiseId: String(row.Franchise_ID || "").trim(),
-    franchiseName: String(row.Franchise_Name || "").trim(),
-    sleeperLeagueId: String(row.Sleeper_League_ID || "").trim(),
-    sleeperRosterId: Number(row.Sleeper_Roster_ID) || 0,
-    sleeperMatchupId: String(row.Sleeper_Matchup_ID || "").trim(),
-    playerId: String(row.Player_ID || "").trim(),
-    playerName: String(row.Player_Name || "").trim(),
-    position: String(row.Position || "").trim(),
-    nflTeam: String(row.NFL_Team || "").trim(),
-    lineupPosition: String(row.Lineup_Position || "").trim(),
-    isStarter:
-      String(row.Is_Starter || "").trim().toUpperCase() === "TRUE",
-    playerPoints:
-      row.Player_Points === "" ? null : Number(row.Player_Points),
-    projectedPoints:
-      row.Projected_Points === "" ? null : Number(row.Projected_Points),
-    teamTotalPoints:
-      row.Team_Total_Points === "" ? null : Number(row.Team_Total_Points),
-    teamProjectedPoints:
-      row.Team_Projected_Points === ""
-        ? null
-        : Number(row.Team_Projected_Points),
-    updatedAt: String(row.Updated_At || "").trim(),
-  }));
+  livePlayerScoresInflight = (async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      CSV_REQUEST_TIMEOUT_MS,
+    );
+
+    try {
+      const response = await fetch(LIVE_PLAYER_SCORES_CSV_URL, {
+        cache: "no-store",
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `LIVE_PLAYER_SCORES request failed: ${response.status} ${response.statusText}`,
+        );
+      }
+
+      const text = await response.text();
+      const rows = csvRowsToObjects_(parseSimpleCsv_(text)).map((row) => ({
+        season: Number(row.Season) || 0,
+        week: Number(row.Week) || 0,
+        franchiseId: String(row.Franchise_ID || "").trim(),
+        franchiseName: String(row.Franchise_Name || "").trim(),
+        sleeperLeagueId: String(row.Sleeper_League_ID || "").trim(),
+        sleeperRosterId: Number(row.Sleeper_Roster_ID) || 0,
+        sleeperMatchupId: String(row.Sleeper_Matchup_ID || "").trim(),
+        playerId: String(row.Player_ID || "").trim(),
+        playerName: String(row.Player_Name || "").trim(),
+        position: String(row.Position || "").trim(),
+        nflTeam: String(row.NFL_Team || "").trim(),
+        lineupPosition: String(row.Lineup_Position || "").trim(),
+        isStarter:
+          String(row.Is_Starter || "").trim().toUpperCase() === "TRUE",
+        playerPoints:
+          row.Player_Points === "" ? null : Number(row.Player_Points),
+        projectedPoints:
+          row.Projected_Points === "" ? null : Number(row.Projected_Points),
+        teamTotalPoints:
+          row.Team_Total_Points === "" ? null : Number(row.Team_Total_Points),
+        teamProjectedPoints:
+          row.Team_Projected_Points === ""
+            ? null
+            : Number(row.Team_Projected_Points),
+        updatedAt: String(row.Updated_At || "").trim(),
+      }));
+
+      livePlayerScoresCache = {
+        rows,
+        timestamp: Date.now(),
+      };
+
+      return rows;
+    } catch (error) {
+      if (livePlayerScoresCache?.rows?.length) {
+        console.warn(
+          "LIVE_PLAYER_SCORES refresh failed; using cached rows instead.",
+          error,
+        );
+        return livePlayerScoresCache.rows;
+      }
+
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+      livePlayerScoresInflight = null;
+    }
+  })();
+
+  return livePlayerScoresInflight;
 }
 
 export async function getGameRosterPlayers(game) {

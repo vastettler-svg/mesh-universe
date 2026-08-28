@@ -1324,3 +1324,35 @@
     font-size: .49rem;
   }
 }
+
+/* =========================================================
+   PHASE 4J — SCORES FRANCHISE LINKS + RECORD SPACING
+========================================================= */
+
+.score-team-franchise-logo-link,
+.score-team-franchise-name-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.score-team-franchise-logo-link {
+  width: fit-content;
+  border-radius: 50%;
+}
+
+.score-team-franchise-name-link:hover,
+.score-team-franchise-logo-link:hover {
+  filter: brightness(1.12);
+}
+
+.score-team-records {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 3px;
+}
+
+.score-team-records > span + span {
+  margin-left: 2px;
+}

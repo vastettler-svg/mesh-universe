@@ -1401,3 +1401,82 @@
   filter: brightness(1.08);
 }
 
+
+
+/* =========================================================
+   PHASE 6A v2.0 — COACH PROFILE HERO CLEANUP
+========================================================= */
+.coach-profile-title-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.coach-profile-title-row h1 {
+  min-width: 0;
+  margin-right: auto;
+}
+
+.coach-profile-title-prestige {
+  flex: 0 0 auto;
+  min-width: 92px;
+  padding: 8px 10px;
+  border: 1px solid rgba(239,200,90,.15);
+  border-radius: 10px;
+  text-align: right;
+  background: rgba(239,200,90,.045);
+}
+
+.coach-profile-title-prestige span {
+  display: block;
+  color: #9d884d;
+  font-size: .38rem;
+  font-weight: 900;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+.coach-profile-title-prestige strong {
+  display: block;
+  margin-top: 2px;
+  color: #efc85a;
+  font-size: .78rem;
+}
+
+.coach-hero-current-franchise-wide {
+  grid-column: span 2;
+}
+
+.coach-hero-current-franchise-wide .coach-hero-franchise-link strong {
+  font-size: .68rem;
+}
+
+@media (max-width: 560px) {
+  .coach-profile-title-row {
+    gap: 8px;
+  }
+
+  .coach-profile-title-prestige {
+    min-width: 76px;
+    padding: 7px 8px;
+  }
+
+  .coach-profile-title-prestige span {
+    font-size: .31rem;
+  }
+
+  .coach-profile-title-prestige strong {
+    font-size: .68rem;
+  }
+
+  .coach-hero-current-franchise-wide {
+    grid-column: span 2;
+  }
+
+  .coach-hero-current-franchise-wide .coach-hero-franchise-link strong {
+    font-size: .58rem;
+  }
+}

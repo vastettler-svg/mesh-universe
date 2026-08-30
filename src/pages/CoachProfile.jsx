@@ -1092,10 +1092,16 @@ function CoachProfile() {
             {currentTeam.conference ? <span>{currentTeam.conference}</span> : null}
           </div>
 
-          <h1>{coachName}</h1>
+          <div className="coach-profile-title-row">
+            <h1>{coachName}</h1>
+            <div className="coach-profile-title-prestige">
+              <span>Coach Prestige</span>
+              <strong>{prestige}</strong>
+            </div>
+          </div>
 
           <div className="coach-profile-hero-data">
-            <article className="coach-hero-info coach-hero-current-franchise">
+            <article className="coach-hero-info coach-hero-current-franchise coach-hero-current-franchise-wide">
               <span>Current Franchise</span>
               <Link
                 className="coach-hero-franchise-link"
@@ -1106,11 +1112,6 @@ function CoachProfile() {
                 {currentTeam.logo ? <img src={currentTeam.logo} alt="" /> : null}
                 <strong>{currentTeam.team}</strong>
               </Link>
-            </article>
-
-            <article className="coach-hero-info coach-hero-prestige">
-              <span>Coach Prestige</span>
-              <strong>{prestige}</strong>
             </article>
 
             <article className="coach-hero-info">

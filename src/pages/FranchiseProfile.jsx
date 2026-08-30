@@ -9,15 +9,18 @@ import {
   Medal,
   Trophy,
   UserRound,
+  Users,
 } from "lucide-react";
 
 import {
   getGameResults,
+  getLivePlayerScores,
   getStandingsArchive,
   getStandingsData,
 } from "../services/googleSheets";
 
 import "../styles/franchises.css";
+import "../styles/franchiseRoster.css";
 
 function formatPoints(value) {
   const number = Number(value);
@@ -689,6 +692,11 @@ function FranchiseProfile() {
   const [archive, setArchive] = useState([]);
   const [selectedSeason, setSelectedSeason] = useState(null);
   const [status, setStatus] = useState("loading");
+  const [rosterRows, setRosterRows] = useState([]);
+  const [rosterStatus, setRosterStatus] = useState("idle");
+
+  const rosterView =
+    new URLSearchParams(location.search).get("view") === "roster";
 
   useEffect(() => {
     let cancelled = false;
@@ -725,6 +733,36 @@ function FranchiseProfile() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!rosterView) return undefined;
+
+    let cancelled = false;
+
+    async function loadRoster() {
+      try {
+        setRosterStatus("loading");
+        const rows = await getLivePlayerScores();
+
+        if (!cancelled) {
+          setRosterRows(rows);
+          setRosterStatus("ready");
+        }
+      } catch (error) {
+        console.error("Unable to load franchise roster:", error);
+
+        if (!cancelled) {
+          setRosterStatus("error");
+        }
+      }
+    }
+
+    loadRoster();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [rosterView]);
+
   const franchise = useMemo(
     () =>
       teams.find(
@@ -739,6 +777,91 @@ function FranchiseProfile() {
     () => new Map(teams.map((team) => [team.franchiseId, team])),
     [teams],
   );
+
+  const franchiseRoster = useMemo(() => {
+    if (!franchise) return [];
+
+    const matchingRows = rosterRows.filter(
+      (row) =>
+        String(row.franchiseId || "").trim().toLowerCase() ===
+        String(franchise.franchiseId || "").trim().toLowerCase(),
+    );
+
+    if (!matchingRows.length) return [];
+
+    const latestSeason = Math.max(
+      ...matchingRows.map((row) => Number(row.season) || 0),
+    );
+
+    const latestSeasonRows = matchingRows.filter(
+      (row) => Number(row.season) === latestSeason,
+    );
+
+    const latestWeek = Math.max(
+      ...latestSeasonRows.map((row) => Number(row.week) || 0),
+    );
+
+    return latestSeasonRows.filter(
+      (row) => Number(row.week) === latestWeek,
+    );
+  }, [franchise, rosterRows]);
+
+  const rosterSnapshot = useMemo(() => {
+    if (!franchiseRoster.length) {
+      return {
+        season: 0,
+        week: 0,
+        starters: [],
+        bench: [],
+      };
+    }
+
+    const lineupOrder = [
+      "QB",
+      "RB",
+      "WR",
+      "TE",
+      "FLEX",
+      "W/R/T",
+      "SUPER_FLEX",
+      "SUPER FLEX",
+      "K",
+      "DEF",
+      "DL",
+      "LB",
+      "DB",
+      "BN",
+      "BENCH",
+      "IR",
+      "TAXI",
+    ];
+
+    const sortPlayers = (rows) =>
+      [...rows].sort((a, b) => {
+        const aRole = String(a.lineupPosition || a.position || "").toUpperCase();
+        const bRole = String(b.lineupPosition || b.position || "").toUpperCase();
+        const aIndex = lineupOrder.indexOf(aRole);
+        const bIndex = lineupOrder.indexOf(bRole);
+
+        if (aIndex !== bIndex) {
+          return (aIndex === -1 ? 999 : aIndex) -
+            (bIndex === -1 ? 999 : bIndex);
+        }
+
+        return String(a.playerName || "").localeCompare(
+          String(b.playerName || ""),
+        );
+      });
+
+    const first = franchiseRoster[0];
+
+    return {
+      season: Number(first?.season) || 0,
+      week: Number(first?.week) || 0,
+      starters: sortPlayers(franchiseRoster.filter((row) => row.isStarter)),
+      bench: sortPlayers(franchiseRoster.filter((row) => !row.isStarter)),
+    };
+  }, [franchiseRoster]);
 
   const franchiseGames = useMemo(() => {
     if (!franchise) return [];
@@ -1216,6 +1339,140 @@ function FranchiseProfile() {
     };
   });
 
+  if (rosterView) {
+    const rosterTotal =
+      rosterSnapshot.starters.length + rosterSnapshot.bench.length;
+
+    const PlayerRow = ({ player }) => (
+      <article className="franchise-roster-player">
+        <div className="franchise-roster-player-role">
+          <span>{player.lineupPosition || player.position || "—"}</span>
+        </div>
+
+        <div className="franchise-roster-player-copy">
+          <strong>{player.playerName || "Player unavailable"}</strong>
+          <span>
+            {[player.position, player.nflTeam].filter(Boolean).join(" • ") || "—"}
+          </span>
+        </div>
+
+        <div className="franchise-roster-player-score">
+          <span>Proj</span>
+          <strong>
+            {player.projectedPoints === null ||
+            player.projectedPoints === undefined ||
+            !Number.isFinite(Number(player.projectedPoints))
+              ? "—"
+              : Number(player.projectedPoints).toFixed(1)}
+          </strong>
+        </div>
+      </article>
+    );
+
+    return (
+      <main
+        className={`franchise-profile-page franchise-profile-${franchise.tierClass}`}
+        style={{
+          "--franchise-primary":
+            franchise.primaryColor || "rgba(74, 137, 220, .72)",
+          "--franchise-secondary":
+            franchise.secondaryColor || "rgba(239, 64, 82, .42)",
+        }}
+      >
+        <Link
+          className="franchise-back-link"
+          to={`/league/franchises/${encodeURIComponent(franchise.franchiseId)}`}
+        >
+          <ArrowLeft size={15} />
+          Franchise Profile
+        </Link>
+
+        <section className="franchise-roster-hero">
+          <div className="franchise-roster-hero-logo">
+            {franchise.logo ? (
+              <img src={franchise.logo} alt={`${franchise.team} logo`} />
+            ) : (
+              <span>{franchise.team?.charAt(0) || "M"}</span>
+            )}
+          </div>
+
+          <div className="franchise-roster-hero-copy">
+            <span>
+              {franchise.tier} • {franchise.conference}
+            </span>
+            <h1>{franchise.team}</h1>
+            <p>Current MESH roster</p>
+          </div>
+
+          <div className="franchise-roster-hero-badge">
+            <Users size={17} />
+            <span>Roster</span>
+          </div>
+        </section>
+
+        {rosterStatus === "loading" ? (
+          <section className="franchise-roster-state">
+            <Users size={23} />
+            <strong>Loading roster…</strong>
+            <span>Retrieving the latest MESH player roster.</span>
+          </section>
+        ) : rosterStatus === "error" ? (
+          <section className="franchise-roster-state franchise-roster-state-error">
+            <Users size={23} />
+            <strong>Roster unavailable</strong>
+            <span>LIVE_PLAYER_SCORES could not be loaded right now.</span>
+          </section>
+        ) : rosterTotal === 0 ? (
+          <section className="franchise-roster-state">
+            <Users size={23} />
+            <strong>No roster snapshot available</strong>
+            <span>This franchise does not currently have player rows in LIVE_PLAYER_SCORES.</span>
+          </section>
+        ) : (
+          <>
+            <section className="franchise-roster-section">
+              <div className="franchise-roster-heading">
+                <div>
+                  <span>Active Lineup</span>
+                  <h2>Starters</h2>
+                </div>
+                <strong>{rosterSnapshot.starters.length}</strong>
+              </div>
+
+              <div className="franchise-roster-list">
+                {rosterSnapshot.starters.map((player) => (
+                  <PlayerRow
+                    player={player}
+                    key={`starter-${player.playerId || player.playerName}`}
+                  />
+                ))}
+              </div>
+            </section>
+
+            <section className="franchise-roster-section">
+              <div className="franchise-roster-heading">
+                <div>
+                  <span>Depth Chart</span>
+                  <h2>Bench & Reserve</h2>
+                </div>
+                <strong>{rosterSnapshot.bench.length}</strong>
+              </div>
+
+              <div className="franchise-roster-list">
+                {rosterSnapshot.bench.map((player) => (
+                  <PlayerRow
+                    player={player}
+                    key={`bench-${player.playerId || player.playerName}`}
+                  />
+                ))}
+              </div>
+            </section>
+          </>
+        )}
+      </main>
+    );
+  }
+
   return (
     <main
       className={`franchise-profile-page franchise-profile-${franchise.tierClass}`}
@@ -1234,12 +1491,27 @@ function FranchiseProfile() {
       <section className="franchise-profile-hero franchise-profile-hero-clean">
         <div className="franchise-profile-hero-glow" />
 
-        <div className="franchise-profile-logo">
-          {franchise.logo ? (
-            <img src={franchise.logo} alt={`${franchise.team} logo`} />
-          ) : (
-            <span>{franchise.team?.charAt(0) || "M"}</span>
-          )}
+        <div className="franchise-profile-logo-column">
+          <div className="franchise-profile-logo">
+            {franchise.logo ? (
+              <img src={franchise.logo} alt={`${franchise.team} logo`} />
+            ) : (
+              <span>{franchise.team?.charAt(0) || "M"}</span>
+            )}
+          </div>
+
+          <div className="franchise-profile-prestige franchise-profile-prestige-under-logo">
+            <Trophy size={16} />
+            <div>
+              <span>Prestige Points</span>
+              <strong>
+                {franchise.prestigePoints === null ||
+                franchise.prestigePoints === undefined
+                  ? "—"
+                  : Number(franchise.prestigePoints).toFixed(1)}
+              </strong>
+            </div>
+          </div>
         </div>
 
         <div className="franchise-profile-identity">
@@ -1275,18 +1547,14 @@ function FranchiseProfile() {
               </div>
             </div>
 
-            <div className="franchise-profile-prestige">
-              <Trophy size={16} />
-              <div>
-                <span>Prestige Points</span>
-                <strong>
-                  {franchise.prestigePoints === null ||
-                  franchise.prestigePoints === undefined
-                    ? "—"
-                    : Number(franchise.prestigePoints).toFixed(1)}
-                </strong>
-              </div>
-            </div>
+            <Link
+              className="franchise-roster-button"
+              to={`/league/franchises/${encodeURIComponent(franchise.franchiseId)}?view=roster`}
+            >
+              <Users size={16} />
+              <span>Roster</span>
+              <ChevronRight size={15} />
+            </Link>
           </div>
 
           {franchise.tier === "NFL" ? (

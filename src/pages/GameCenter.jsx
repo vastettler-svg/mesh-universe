@@ -694,6 +694,383 @@ function HistoryCard({ meeting, currentTeam1Id }) {
   );
 }
 
+function numericHistoryScore(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function normalizeHistoryMeeting(meeting, game) {
+  const currentLeftIsMeetingLeft = meeting.team1Id === game.team1Id;
+
+  return {
+    ...meeting,
+    leftName: currentLeftIsMeetingLeft ? meeting.team1Team : meeting.team2Team,
+    rightName: currentLeftIsMeetingLeft ? meeting.team2Team : meeting.team1Team,
+    leftScore: numericHistoryScore(
+      currentLeftIsMeetingLeft ? meeting.team1Score : meeting.team2Score,
+    ),
+    rightScore: numericHistoryScore(
+      currentLeftIsMeetingLeft ? meeting.team2Score : meeting.team1Score,
+    ),
+  };
+}
+
+function isPostseasonMeeting(meeting) {
+  const label = `${meeting.gameType || ""} ${meeting.gameCategory || ""} ${meeting.bowlName || ""}`
+    .trim()
+    .toLowerCase();
+
+  return [
+    "playoff", "wild card", "wildcard", "divisional", "conference championship",
+    "super bowl", "cfp", "quarterfinal", "quarter final", "semifinal",
+    "semi final", "national championship", "bowl",
+  ].some((term) => label.includes(term));
+}
+
+function buildSeriesAnalytics(history, game) {
+  const completed = (history || [])
+    .map((meeting) => normalizeHistoryMeeting(meeting, game))
+    .filter(
+      (meeting) =>
+        meeting.leftScore !== null && meeting.rightScore !== null,
+    );
+
+  let leftWins = 0;
+  let rightWins = 0;
+  let ties = 0;
+  let leftPoints = 0;
+  let rightPoints = 0;
+
+  completed.forEach((meeting) => {
+    leftPoints += meeting.leftScore;
+    rightPoints += meeting.rightScore;
+    if (meeting.leftScore > meeting.rightScore) leftWins += 1;
+    else if (meeting.rightScore > meeting.leftScore) rightWins += 1;
+    else ties += 1;
+  });
+
+  const largestWin = completed.reduce((best, meeting) => {
+    const margin = Math.abs(meeting.leftScore - meeting.rightScore);
+    if (!best || margin > best.margin) {
+      return {
+        meeting,
+        margin,
+        winner:
+          meeting.leftScore > meeting.rightScore
+            ? meeting.leftName
+            : meeting.rightScore > meeting.leftScore
+              ? meeting.rightName
+              : "Tie",
+      };
+    }
+    return best;
+  }, null);
+
+  const closestMeeting = completed.reduce((best, meeting) => {
+    const margin = Math.abs(meeting.leftScore - meeting.rightScore);
+    if (!best || margin < best.margin) {
+      return {
+        meeting,
+        margin,
+        winner:
+          meeting.leftScore > meeting.rightScore
+            ? meeting.leftName
+            : meeting.rightScore > meeting.leftScore
+              ? meeting.rightName
+              : "Tie",
+      };
+    }
+    return best;
+  }, null);
+
+  const highestScoring = completed.reduce((best, meeting) => {
+    const combined = meeting.leftScore + meeting.rightScore;
+    return !best || combined > best.combined ? { meeting, combined } : best;
+  }, null);
+
+  let streakTeam = "";
+  let streakCount = 0;
+  for (const meeting of completed) {
+    const winner =
+      meeting.leftScore > meeting.rightScore
+        ? game.team1Team
+        : meeting.rightScore > meeting.leftScore
+          ? game.team2Team
+          : "";
+    if (!winner) break;
+    if (!streakTeam) {
+      streakTeam = winner;
+      streakCount = 1;
+    } else if (winner === streakTeam) {
+      streakCount += 1;
+    } else {
+      break;
+    }
+  }
+
+  const postseason = completed.filter(isPostseasonMeeting);
+  let postseasonLeftWins = 0;
+  let postseasonRightWins = 0;
+  postseason.forEach((meeting) => {
+    if (meeting.leftScore > meeting.rightScore) postseasonLeftWins += 1;
+    else if (meeting.rightScore > meeting.leftScore) postseasonRightWins += 1;
+  });
+
+  return {
+    completed,
+    meetings: completed.length,
+    leftWins,
+    rightWins,
+    ties,
+    leftAverage: completed.length ? (leftPoints / completed.length).toFixed(1) : "—",
+    rightAverage: completed.length ? (rightPoints / completed.length).toFixed(1) : "—",
+    largestWin,
+    closestMeeting,
+    highestScoring,
+    lastMeeting: completed[0] || null,
+    streakTeam,
+    streakCount,
+    postseason,
+    postseasonLeftWins,
+    postseasonRightWins,
+  };
+}
+
+function formatHistoryMargin(value) {
+  return Number.isFinite(Number(value)) ? `+${Number(value).toFixed(1)}` : "—";
+}
+
+function meetingLabel(meeting) {
+  return `${meeting?.season || "—"} • Week ${meeting?.week || "—"}`;
+}
+
+function SeriesHistory({ game, analytics }) {
+  if (!analytics?.meetings) {
+    return (
+      <section className="game-center-history">
+        <div className="game-center-section-heading">
+          <span>Archive</span>
+          <h2>Matchup History</h2>
+        </div>
+        <div className="game-center-history-empty">
+          <History size={18} />
+          <div>
+            <strong>No previous meetings</strong>
+            <span>This is the first archived MESH meeting between these permanent franchises.</span>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const leader =
+    analytics.leftWins === analytics.rightWins
+      ? `Series tied ${analytics.leftWins}–${analytics.rightWins}`
+      : analytics.leftWins > analytics.rightWins
+        ? `${game.team1Team} leads ${analytics.leftWins}–${analytics.rightWins}`
+        : `${game.team2Team} leads ${analytics.rightWins}–${analytics.leftWins}`;
+
+  const last = analytics.lastMeeting;
+  const largest = analytics.largestWin;
+  const closest = analytics.closestMeeting;
+  const highest = analytics.highestScoring;
+
+  return (
+    <section className="game-center-history game-center-history-restored">
+      <div className={`game-center-series-hero game-center-series-hero-${String(game.tier || "").toLowerCase()}`}>
+        <div className="game-center-series-hero-title">
+          <History size={22} />
+          <div>
+            <span>All-Time Series</span>
+            <h2>{leader}</h2>
+          </div>
+        </div>
+
+        <div className="game-center-series-scoreboard">
+          <div>
+            <strong>{analytics.leftWins}</strong>
+            <span>{game.team1Team}</span>
+          </div>
+          <div className="game-center-series-meetings">
+            <strong>{analytics.meetings}</strong>
+            <span>Previous Meetings</span>
+          </div>
+          <div>
+            <strong>{analytics.rightWins}</strong>
+            <span>{game.team2Team}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="game-center-history-stat-grid">
+        <article className="game-center-history-stat-card">
+          <span>Last Meeting</span>
+          <div className="game-center-history-team-lines">
+            <div>
+              <strong>{last.leftName}</strong>
+              <b>{last.leftScore.toFixed(1)}</b>
+            </div>
+            <div>
+              <strong>{last.rightName}</strong>
+              <b>{last.rightScore.toFixed(1)}</b>
+            </div>
+          </div>
+          <small>{meetingLabel(last)}</small>
+        </article>
+
+        <article className="game-center-history-stat-card">
+          <span>Current Streak</span>
+          <div className="game-center-history-streak-copy">
+            <span>{analytics.streakTeam || "No Active Streak"}</span>
+            <strong>
+              {analytics.streakCount
+                ? `W${analytics.streakCount}`
+                : "—"}
+            </strong>
+          </div>
+        </article>
+
+        <article className="game-center-history-stat-card">
+          <span>Largest Win</span>
+          {largest ? (
+            <>
+              <div className="game-center-history-team-lines">
+                <div>
+                  <strong>{largest.meeting.leftName}</strong>
+                  <b>{largest.meeting.leftScore.toFixed(1)}</b>
+                </div>
+                <div>
+                  <strong>{largest.meeting.rightName}</strong>
+                  <b>{largest.meeting.rightScore.toFixed(1)}</b>
+                </div>
+              </div>
+              <small><strong>Margin:</strong> {formatHistoryMargin(largest.margin)}</small>
+            </>
+          ) : (
+            <small>—</small>
+          )}
+        </article>
+
+        <article className="game-center-history-stat-card">
+          <span>Closest Meeting</span>
+          {closest ? (
+            <>
+              <div className="game-center-history-team-lines">
+                <div>
+                  <strong>{closest.meeting.leftName}</strong>
+                  <b>{closest.meeting.leftScore.toFixed(1)}</b>
+                </div>
+                <div>
+                  <strong>{closest.meeting.rightName}</strong>
+                  <b>{closest.meeting.rightScore.toFixed(1)}</b>
+                </div>
+              </div>
+              <small>
+                {closest.margin === 0
+                  ? "Margin: 0.0"
+                  : `Margin: ${formatHistoryMargin(closest.margin)}`}
+              </small>
+            </>
+          ) : (
+            <small>—</small>
+          )}
+        </article>
+
+        <article className="game-center-history-stat-card">
+          <span>Highest-Scoring Meeting</span>
+          {highest ? (
+            <>
+              <div className="game-center-history-team-lines">
+                <div>
+                  <strong>{highest.meeting.leftName}</strong>
+                  <b>{highest.meeting.leftScore.toFixed(1)}</b>
+                </div>
+                <div>
+                  <strong>{highest.meeting.rightName}</strong>
+                  <b>{highest.meeting.rightScore.toFixed(1)}</b>
+                </div>
+              </div>
+              <small><strong>Combined:</strong> {highest.combined.toFixed(1)}</small>
+            </>
+          ) : (
+            <small>—</small>
+          )}
+        </article>
+
+        <article className="game-center-history-stat-card">
+          <span>Average Score</span>
+          <div className="game-center-history-team-lines">
+            <div>
+              <strong>{game.team1Team}</strong>
+              <b>{analytics.leftAverage}</b>
+            </div>
+            <div>
+              <strong>{game.team2Team}</strong>
+              <b>{analytics.rightAverage}</b>
+            </div>
+          </div>
+          <small><strong>All-Time Average</strong></small>
+        </article>
+      </div>
+
+      <div className="game-center-postseason-series">
+        <span>Postseason Series</span>
+        {analytics.postseason.length ? (
+          <>
+            <strong>
+              {analytics.postseasonLeftWins === analytics.postseasonRightWins
+                ? `Tied ${analytics.postseasonLeftWins}–${analytics.postseasonRightWins}`
+                : analytics.postseasonLeftWins > analytics.postseasonRightWins
+                  ? `${game.team1Team} leads ${analytics.postseasonLeftWins}–${analytics.postseasonRightWins}`
+                  : `${game.team2Team} leads ${analytics.postseasonRightWins}–${analytics.postseasonLeftWins}`}
+            </strong>
+            <small>{analytics.postseason.length} postseason meeting{analytics.postseason.length === 1 ? "" : "s"}</small>
+          </>
+        ) : (
+          <>
+            <strong>No Postseason Meetings</strong>
+            <small>Regular-season series only</small>
+          </>
+        )}
+      </div>
+
+      <div className="game-center-recent-meetings-heading">
+        <div>
+          <span>Archive</span>
+          <h2>Recent Meetings</h2>
+        </div>
+        <small>Showing {analytics.meetings} of {analytics.meetings}</small>
+      </div>
+
+      <div className="game-center-recent-meetings">
+        {analytics.completed.map((meeting) => {
+          const leftWon = meeting.leftScore > meeting.rightScore;
+          const rightWon = meeting.rightScore > meeting.leftScore;
+          return (
+            <div
+              className="game-center-recent-meeting"
+              key={`${meeting.gameId || ""}-${meeting.season}-${meeting.week}`}
+            >
+              <div className="game-center-recent-meta">
+                <span>{meetingLabel(meeting)}</span>
+                <strong>{meeting.gameType || meeting.gameCategory || "Regular Season"}</strong>
+              </div>
+              <div className="game-center-recent-score">
+                <span>{meeting.leftName}</span>
+                <strong className={leftWon ? "is-history-winner" : ""}>{meeting.leftScore.toFixed(1)}</strong>
+                <em>vs</em>
+                <strong className={rightWon ? "is-history-winner" : ""}>{meeting.rightScore.toFixed(1)}</strong>
+                <span>{meeting.rightName}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function GameCenter() {
   const { gameId } = useParams();
   const navigate = useNavigate();
@@ -771,6 +1148,11 @@ function GameCenter() {
       hasWinner: true,
     };
   }, [game]);
+
+  const seriesAnalytics = useMemo(
+    () => (game ? buildSeriesAnalytics(history, game) : null),
+    [history, game],
+  );
 
   const goBackToScores = () => {
     if (location.state?.scoresView) {
@@ -869,34 +1251,10 @@ function GameCenter() {
         </div>
       </section>
 
-      <section className="game-center-history">
-        <div className="game-center-section-heading">
-          <span>Series</span>
-          <h2>Head-to-Head History & Prior Meetings</h2>
-        </div>
-
-        {history.length > 0 ? (
-          <div className="game-center-history-list">
-            {history.slice(0, 8).map((meeting) => (
-              <HistoryCard
-                key={meeting.gameId}
-                meeting={meeting}
-                currentTeam1Id={game.team1Id}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="game-center-history-empty">
-            <History size={20} />
-            <div>
-              <strong>No prior meetings found</strong>
-              <span>
-                Historical meetings will populate as earlier GAME_RESULTS seasons are added.
-              </span>
-            </div>
-          </div>
-        )}
-      </section>
+      <SeriesHistory
+        game={game}
+        analytics={seriesAnalytics}
+      />
 
       <section className="game-center-details">
         <div className="game-center-section-heading">

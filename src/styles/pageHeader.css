@@ -152,9 +152,9 @@
   }
   
   .page-header-stats {
-    --header-accent: #a777ff;
-    --header-accent-soft: rgba(167, 119, 255, 0.17);
-    --header-accent-glow: rgba(167, 119, 255, 0.25);
+    --header-accent: #38c6e8;
+    --header-accent-soft: rgba(56, 198, 232, 0.17);
+    --header-accent-glow: rgba(56, 198, 232, 0.27);
   }
   
   .page-header-more {

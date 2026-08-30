@@ -58,11 +58,13 @@ const quickLinks = [
     title: "Coach Carousel",
     description: "Track coaching changes across MESH",
     icon: Users,
+    path: "/coach-carousel",
   },
   {
     title: "Draft HQ",
     description: "Draft order, picks and preparation",
     icon: ClipboardList,
+    path: "/draft-hq",
   },
   {
     title: "History",
@@ -1390,36 +1392,34 @@ function Home() {
     };
   }, []);
 
-  const currentWeek = Number(settings?.currentWeek) || 1;
-  const activeWeek = Number(selectedWeek) || currentWeek;
-
   useEffect(() => {
     let cancelled = false;
 
     async function loadHeadlineHistory() {
-      if (!games.length || !activeWeek) return;
+      const currentWeek = Number(settings?.currentWeek) || 1;
+      if (!games.length || !currentWeek) return;
 
       const targetGames = [];
 
-      if (activeWeek <= 1) {
+      if (currentWeek <= 1) {
         const openingGame = games.find(
           (game) =>
             game.tier === "NFL" &&
-            Number(game.week) === activeWeek &&
+            Number(game.week) === currentWeek &&
             Number(game.featuredRank) === 1,
         );
 
         if (openingGame) targetGames.push(openingGame);
       } else {
         ["NFL", "FBS", "FCS"].forEach((tier) => {
-          const recapGame = chooseHeadlineGame(games, tier, activeWeek - 1);
+          const recapGame = chooseHeadlineGame(games, tier, currentWeek - 1);
           if (recapGame) targetGames.push(recapGame);
         });
 
         const upcomingNflGame = getBestUpcomingGame(
           games,
           "NFL",
-          activeWeek,
+          currentWeek,
         );
 
         if (upcomingNflGame) targetGames.push(upcomingNflGame);
@@ -1467,7 +1467,7 @@ function Home() {
     return () => {
       cancelled = true;
     };
-  }, [games, activeWeek]);
+  }, [games, settings?.currentWeek]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1544,6 +1544,9 @@ function Home() {
     };
   }, []);
 
+  const currentWeek = Number(settings?.currentWeek) || 1;
+  const activeWeek = Number(selectedWeek) || currentWeek;
+
   const availableWeeks = useMemo(() => {
     const weeks = [...new Set(
       games
@@ -1579,90 +1582,38 @@ function Home() {
     return event?.phase || "Regular Season";
   }, [settings, activeWeek]);
 
-  const getWeekOneRankedLeader = (tier) => {
-    const candidates = [];
-
-    games
-      .filter(
-        (game) =>
-          game.tier === tier &&
-          Number(game.week) === 1,
-      )
-      .forEach((game) => {
-        [
-          {
-            team: game.team1Team,
-            coach: game.team1Coach,
-            rank: Number(game.team1GameRank) || 0,
-          },
-          {
-            team: game.team2Team,
-            coach: game.team2Coach,
-            rank: Number(game.team2GameRank) || 0,
-          },
-        ].forEach((entry) => {
-          if (
-            entry.team &&
-            entry.rank >= 1 &&
-            entry.rank <= 25
-          ) {
-            candidates.push(entry);
-          }
-        });
-      });
-
-    const best = candidates.sort(
-      (a, b) => a.rank - b.rank,
-    )[0];
-
-    return best
-      ? {
-          team: best.team,
-          coach: best.coach,
-          top25Rank: best.rank,
-          overallRank: best.rank,
-        }
-      : null;
-  };
-
-  /*
-   * HOME WEEK SNAPSHOT
-   * ------------------
-   * Headlines follow the Home week selector just like Games of the Week.
-   *
-   * Week 1:
-   *   Opening-week stories are built from Week 1 GAME_RESULTS snapshots.
-   *
-   * Week 2+:
-   *   - recap = selected week - 1
-   *   - preview = selected week
-   *
-   * Past weeks always show the completed recap + preview package, so returning
-   * to an older Home week feels like reopening MESH at that point in the season.
-   * The current week keeps the Tuesday/Wednesday recap-only and
-   * Thursday-through-Monday recap + preview cadence.
-   */
-  const headlineRecapWeek = activeWeek - 1;
-
   const headlines = useMemo(() => {
     const tiers = ["NFL", "FBS", "FCS"];
+    const previousWeek = currentWeek - 1;
 
-    if (activeWeek <= 1) {
+    if (previousWeek < 1) {
       const nflGame = games.find(
         (item) =>
           item.tier === "NFL" &&
-          Number(item.week) === 1 &&
+          Number(item.week) === currentWeek &&
           Number(item.featuredRank) === 1,
       );
 
-      const fbsLeader = getWeekOneRankedLeader("FBS");
-      const fcsLeader = getWeekOneRankedLeader("FCS");
+      const fbsLeader = [...standings]
+        .filter(
+          (team) =>
+            team.tier === "FBS" &&
+            Number(team.top25Rank) >= 1 &&
+            Number(team.top25Rank) <= 25,
+        )
+        .sort((a, b) => Number(a.top25Rank) - Number(b.top25Rank))[0];
+
+      const fcsLeader = [...standings]
+        .filter(
+          (team) =>
+            team.tier === "FCS" &&
+            Number(team.top25Rank) >= 1 &&
+            Number(team.top25Rank) <= 25,
+        )
+        .sort((a, b) => Number(a.top25Rank) - Number(b.top25Rank))[0];
 
       return [
-        buildWeekOneMatchupStory(
-          nflGame,
-          headlineHistory[nflGame?.gameId] ?? [],
-        ),
+        buildWeekOneMatchupStory(nflGame, headlineHistory[nflGame?.gameId] ?? []),
         buildWeekOneFbsStory(fbsLeader),
         buildWeekOneFcsStory(fcsLeader),
       ].filter(Boolean);
@@ -1670,77 +1621,40 @@ function Home() {
 
     return tiers
       .map((tier) => {
-        const game = chooseHeadlineGame(
-          games,
-          tier,
-          headlineRecapWeek,
-        );
-
-        return buildResultHeadline(
-          game,
-          headlineRecapWeek,
-          headlineHistory[game?.gameId] ?? [],
-        );
+        const game = chooseHeadlineGame(games, tier, previousWeek);
+        return buildResultHeadline(game, previousWeek, headlineHistory[game?.gameId] ?? []);
       })
       .filter(Boolean);
-  }, [
-    games,
-    activeWeek,
-    headlineRecapWeek,
-    headlineHistory,
-  ]);
+  }, [games, standings, currentWeek, headlineHistory]);
+
+  const previousWeek = currentWeek - 1;
 
   const showUpcomingHeadlines = useMemo(() => {
-    if (activeWeek <= 1) return false;
-
-    // Future weeks should not reveal a headline package before MESH reaches them.
-    if (activeWeek > currentWeek) return false;
-
-    // Once a week is historical, preserve its completed Thursday look-ahead package.
-    if (activeWeek < currentWeek) return true;
+    if (currentWeek <= 1) return false;
 
     const day = new Date().getDay();
 
-    // Current week: Thursday through Monday. Tuesday/Wednesday remain recap-only.
+    // Thursday through Monday. Tuesday/Wednesday remain recap-only.
     return day === 4 || day === 5 || day === 6 || day === 0 || day === 1;
-  }, [activeWeek, currentWeek]);
+  }, [currentWeek]);
 
   const upcomingHeadlines = useMemo(() => {
     if (!showUpcomingHeadlines) return [];
 
-    const nflGame = getBestUpcomingGame(
-      games,
-      "NFL",
-      activeWeek,
-    );
-    const fbsGame = getBestUpcomingGame(
-      games,
-      "FBS",
-      activeWeek,
-    );
-    const fcsGame = getBestUpcomingGame(
-      games,
-      "FCS",
-      activeWeek,
-    );
+    const nflGame = getBestUpcomingGame(games, "NFL", currentWeek);
+    const fbsGame = getBestUpcomingGame(games, "FBS", currentWeek);
+    const fcsGame = getBestUpcomingGame(games, "FCS", currentWeek);
 
     return [
       buildUpcomingNflStory(
         nflGame,
-        activeWeek,
+        currentWeek,
         headlineHistory[nflGame?.gameId] ?? [],
       ),
-      buildUpcomingFbsStory(fbsGame, activeWeek),
-      buildUpcomingFcsStory(fcsGame, activeWeek),
+      buildUpcomingFbsStory(fbsGame, currentWeek),
+      buildUpcomingFcsStory(fcsGame, currentWeek),
     ].filter(Boolean);
-  }, [
-    games,
-    activeWeek,
-    showUpcomingHeadlines,
-    headlineHistory,
-  ]);
-
-  const previousWeek = currentWeek - 1;
+  }, [games, currentWeek, showUpcomingHeadlines, headlineHistory]);
 
   const weeklyHighScorers = useMemo(() => {
     if (previousWeek < 1) {
@@ -1844,13 +1758,11 @@ function Home() {
       <section className="home-section">
         <SectionHeading
           eyebrow={
-            activeWeek <= 1
+            currentWeek <= 1
               ? "Opening week storylines"
               : showUpcomingHeadlines
-                ? activeWeek < currentWeek
-                  ? `Week ${activeWeek} headline archive`
-                  : `Thursday preview • Week ${activeWeek}`
-                : `Biggest stories from Week ${activeWeek - 1}`
+                ? `Thursday preview • Week ${currentWeek}`
+                : `Biggest stories from Week ${currentWeek - 1}`
           }
           title="MESH Headlines"
         />
@@ -1871,7 +1783,7 @@ function Home() {
                     color: "#9cadbd",
                   }}
                 >
-                  Looking Ahead to Week {activeWeek}
+                  Looking Ahead to Week {currentWeek}
                 </div>
 
                 <div className="headlines-grid">
@@ -1887,7 +1799,7 @@ function Home() {
 
             {headlines.length > 0 ? (
               <div className="home-headline-group">
-                {activeWeek > 1 ? (
+                {currentWeek > 1 ? (
                   <div
                     style={{
                       margin: showUpcomingHeadlines ? "20px 0 10px" : "0 0 10px",
@@ -1898,7 +1810,7 @@ function Home() {
                       color: "#9cadbd",
                     }}
                   >
-                    Week {activeWeek - 1} Recap
+                    Week {currentWeek - 1} Recap
                   </div>
                 ) : null}
 

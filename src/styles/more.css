@@ -1,0 +1,192 @@
+/* =========================================================
+   MESH FOOTBALL — MORE HUB
+========================================================= */
+
+.more-page {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  padding-bottom: 42px;
+}
+
+.more-heading {
+  margin-bottom: 20px;
+}
+
+.more-heading .eyebrow {
+  margin-bottom: 5px;
+}
+
+.more-heading h1 {
+  margin: 0;
+  color: #fff;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: clamp(1.6rem, 4vw, 2.25rem);
+  font-weight: 400;
+  letter-spacing: .02em;
+}
+
+.more-heading > p:last-child {
+  max-width: 620px;
+  margin: 8px 0 0;
+  color: #91a3b2;
+  font-size: .76rem;
+  line-height: 1.55;
+}
+
+.more-link-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.more-link-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 104px;
+  overflow: hidden;
+  padding: 15px 14px 15px 16px;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 16px;
+  color: inherit;
+  text-decoration: none;
+  background:
+    radial-gradient(circle at 0 0, rgba(72,119,158,.10), transparent 42%),
+    linear-gradient(145deg, rgba(20,40,60,.97), rgba(8,21,35,.995));
+  box-shadow: 0 12px 25px rgba(0,0,0,.13);
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    background .16s ease;
+}
+
+.more-link-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,.16);
+  background:
+    radial-gradient(circle at 0 0, rgba(72,119,158,.16), transparent 45%),
+    linear-gradient(145deg, rgba(25,47,68,.98), rgba(8,22,36,.995));
+}
+
+.more-card-accent {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: #607286;
+}
+
+.more-card-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 13px;
+  color: #b9c7d2;
+  background: rgba(255,255,255,.035);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+}
+
+.more-card-copy {
+  min-width: 0;
+}
+
+.more-card-label {
+  display: block;
+  margin-bottom: 4px;
+  color: #748a9d;
+  font-size: .42rem;
+  font-weight: 950;
+  letter-spacing: .105em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.more-card-copy strong {
+  display: block;
+  color: #f7fafc;
+  font-size: .78rem;
+  line-height: 1.25;
+}
+
+.more-card-copy p {
+  margin: 5px 0 0;
+  color: #8fa1b0;
+  font-size: .58rem;
+  line-height: 1.45;
+}
+
+.more-card-arrow {
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 999px;
+  color: #73899a;
+  background: rgba(255,255,255,.022);
+  transition: color .16s ease, transform .16s ease;
+}
+
+.more-link-card:hover .more-card-arrow {
+  color: #fff;
+  transform: translateX(2px);
+}
+
+/* Individual hub identities */
+.more-link-card-rules .more-card-accent { background: #4287ff; }
+.more-link-card-rules .more-card-icon { color: #83b0ff; background: rgba(66,135,255,.08); }
+
+.more-link-card-sleeper .more-card-accent { background: #24bd78; }
+.more-link-card-sleeper .more-card-icon { color: #69dba5; background: rgba(36,189,120,.08); }
+
+.more-link-card-prestige .more-card-accent { background: #e8c35b; }
+.more-link-card-prestige .more-card-icon { color: #f0d477; background: rgba(232,195,91,.09); }
+
+.more-link-card-carousel .more-card-accent { background: #9c67ff; }
+.more-link-card-carousel .more-card-icon { color: #b990ff; background: rgba(156,103,255,.09); }
+
+.more-link-card-draft .more-card-accent {
+  background: linear-gradient(180deg, #24bd78 0 33%, #4287ff 33% 66%, #9c67ff 66%);
+}
+.more-link-card-draft .more-card-icon { color: #a8c7f7; background: rgba(66,135,255,.07); }
+
+.more-link-card-history .more-card-accent { background: #c79557; }
+.more-link-card-history .more-card-icon { color: #d9b27d; background: rgba(199,149,87,.08); }
+
+@media (max-width: 720px) {
+  .more-link-grid {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .more-link-card {
+    grid-template-columns: 43px minmax(0, 1fr) 27px;
+    min-height: 88px;
+    gap: 10px;
+    padding: 12px 11px 12px 14px;
+    border-radius: 14px;
+  }
+
+  .more-card-icon {
+    width: 41px;
+    height: 41px;
+    border-radius: 11px;
+  }
+
+  .more-card-copy strong {
+    font-size: .72rem;
+  }
+
+  .more-card-copy p {
+    font-size: .54rem;
+  }
+
+  .more-card-arrow {
+    width: 26px;
+    height: 26px;
+  }
+}

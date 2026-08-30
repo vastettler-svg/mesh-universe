@@ -1,0 +1,578 @@
+/* =========================================================
+   MESH FOOTBALL — COACH CAROUSEL
+========================================================= */
+
+.coach-carousel-page {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  padding: 0 0 40px;
+}
+
+.carousel-controls {
+  margin-top: 17px;
+}
+
+.carousel-tier-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.carousel-tier-tab {
+  position: relative;
+  min-height: 41px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 11px;
+  color: #9fb0bf;
+  background: rgba(255,255,255,.022);
+  font: inherit;
+  font-size: .56rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.carousel-tier-tab::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  opacity: 0;
+}
+
+.carousel-tier-tab.active {
+  color: #fff;
+  border-color: rgba(255,255,255,.15);
+  background: linear-gradient(145deg, rgba(25,47,68,.96), rgba(8,22,36,.99));
+}
+
+.carousel-tier-tab.active::after { opacity: 1; }
+.carousel-tier-tab-nfl::after { background: #24bd78; }
+.carousel-tier-tab-fbs::after { background: #4287ff; }
+.carousel-tier-tab-fcs::after { background: #9c67ff; }
+.carousel-tier-tab:first-child::after {
+  background: linear-gradient(90deg, #24bd78 0 33%, #4287ff 33% 66%, #9c67ff 66%);
+}
+
+.carousel-section {
+  margin-top: 27px;
+}
+
+.carousel-section-heading,
+.carousel-history-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 2px 10px;
+}
+
+.carousel-section-heading > div > span,
+.carousel-history-heading > div > span {
+  display: block;
+  margin-bottom: 3px;
+  color: #7f94a6;
+  font-size: .46rem;
+  font-weight: 900;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+}
+
+.carousel-section-heading h2,
+.carousel-history-heading h2 {
+  margin: 0;
+  color: #fff;
+  font-family: var(--heading-font, "Graduate", serif);
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.carousel-section-heading > strong {
+  display: grid;
+  place-items: center;
+  min-width: 31px;
+  height: 27px;
+  padding: 0 8px;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 999px;
+  color: #9babb8;
+  background: rgba(255,255,255,.025);
+  font-size: .54rem;
+}
+
+.carousel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.carousel-card {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgba(20,40,60,.97), rgba(8,21,35,.995));
+  box-shadow: 0 12px 25px rgba(0,0,0,.13);
+}
+
+.carousel-card-accent {
+  height: 3px;
+  background: #607286;
+}
+
+.carousel-card-nfl .carousel-card-accent { background: #24bd78; }
+.carousel-card-fbs .carousel-card-accent { background: #4287ff; }
+.carousel-card-fcs .carousel-card-accent { background: #9c67ff; }
+
+.carousel-card-open {
+  border-color: rgba(236,194,75,.22);
+}
+
+.carousel-card-open .carousel-card-accent {
+  background: #e8c35b;
+}
+
+.carousel-card-header {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px 10px;
+}
+
+.carousel-franchise-logo {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 11px;
+  color: #8094a5;
+  background: rgba(255,255,255,.025);
+}
+
+.carousel-franchise-logo img {
+  width: 47px;
+  height: 47px;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 7px rgba(0,0,0,.25));
+}
+
+.carousel-franchise-copy {
+  min-width: 0;
+}
+
+.carousel-franchise-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  margin-bottom: 4px;
+  color: #788d9f;
+  font-size: .42rem;
+  font-weight: 900;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+
+.carousel-franchise-meta img {
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+}
+
+.carousel-franchise-copy h3 {
+  margin: 0;
+  color: #fff;
+  font-size: .70rem;
+  line-height: 1.28;
+}
+
+.carousel-inline-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.carousel-inline-link:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.carousel-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 45px;
+  min-height: 23px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: .40rem;
+  font-weight: 950;
+  letter-spacing: .055em;
+}
+
+.carousel-status-open {
+  color: #ffe688;
+  border: 1px solid rgba(232,195,91,.24);
+  background: rgba(232,195,91,.10);
+}
+
+.carousel-status-filled {
+  color: #b8c8d5;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.035);
+}
+
+.carousel-rank-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid rgba(255,255,255,.05);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  background: rgba(0,0,0,.08);
+}
+
+.carousel-rank-strip > div {
+  min-width: 0;
+  padding: 8px 7px;
+  text-align: center;
+  border-right: 1px solid rgba(255,255,255,.05);
+}
+
+.carousel-rank-strip > div:last-child {
+  border-right: 0;
+}
+
+.carousel-rank-strip span {
+  display: block;
+  overflow: hidden;
+  color: #6f8496;
+  font-size: .37rem;
+  font-weight: 900;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.carousel-rank-strip strong {
+  display: block;
+  margin-top: 4px;
+  color: #edf2f6;
+  font-size: .59rem;
+}
+
+.carousel-move-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 26px minmax(0, 1fr);
+  gap: 7px;
+  align-items: stretch;
+  padding: 12px;
+}
+
+.carousel-move-side {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 11px;
+  background: rgba(255,255,255,.018);
+}
+
+.carousel-side-label {
+  display: block;
+  color: #758a9c;
+  font-size: .40rem;
+  font-weight: 950;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+
+.carousel-coach-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-top: 6px;
+  color: #fff;
+  font-size: .61rem;
+  font-weight: 900;
+}
+
+.carousel-coach-name svg {
+  flex: 0 0 auto;
+  color: #91a4b4;
+}
+
+.carousel-reason {
+  display: block;
+  min-height: 1.4em;
+  margin-top: 4px;
+  color: #8799a8;
+  font-size: .43rem;
+  line-height: 1.35;
+}
+
+.carousel-destination {
+  min-width: 0;
+  margin-top: 11px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,.055);
+}
+
+.carousel-destination > span {
+  display: block;
+  color: #6f8496;
+  font-size: .37rem;
+  font-weight: 900;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.carousel-destination > strong {
+  display: block;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+  color: #dbe4eb;
+  font-size: .52rem;
+  line-height: 1.3;
+}
+
+.carousel-destination > small {
+  display: block;
+  margin-top: 3px;
+  color: #6f8496;
+  font-size: .38rem;
+  font-weight: 850;
+}
+
+.carousel-move-arrow {
+  display: grid;
+  place-items: center;
+  color: #63798b;
+}
+
+.carousel-open-job {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 12px;
+  padding: 15px 13px;
+  border: 1px dashed rgba(232,195,91,.22);
+  border-radius: 12px;
+  background: rgba(232,195,91,.035);
+}
+
+.carousel-open-job > svg {
+  flex: 0 0 auto;
+  color: #e8c35b;
+}
+
+.carousel-open-job span {
+  display: block;
+  color: #907d46;
+  font-size: .40rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.carousel-open-job strong {
+  display: block;
+  margin-top: 3px;
+  color: #fff;
+  font-size: .65rem;
+}
+
+.carousel-open-job small {
+  display: block;
+  margin-top: 4px;
+  color: #899baa;
+  font-size: .46rem;
+  line-height: 1.4;
+}
+
+.carousel-card-notes {
+  margin: 0 12px 12px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(255,255,255,.05);
+  color: #8295a5;
+  font-size: .45rem;
+  line-height: 1.4;
+}
+
+.carousel-history-section {
+  margin-top: 32px;
+  padding-top: 23px;
+  border-top: 1px solid rgba(255,255,255,.065);
+}
+
+.carousel-season-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.carousel-season-tab {
+  position: relative;
+  min-width: 58px;
+  height: 37px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 10px;
+  color: #8fa2b2;
+  background: rgba(255,255,255,.025);
+  font: inherit;
+  font-size: .50rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.carousel-season-tab::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    #24bd78 0 33%,
+    #4287ff 33% 66%,
+    #9c67ff 66%
+  );
+  opacity: 0;
+}
+
+.carousel-season-tab.active {
+  color: #fff;
+  border-color: rgba(255,255,255,.15);
+  background: linear-gradient(145deg, rgba(25,47,68,.96), rgba(8,22,36,.99));
+}
+
+.carousel-season-tab.active::after {
+  opacity: 1;
+}
+
+.carousel-empty,
+.carousel-state {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 82px;
+  padding: 15px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 13px;
+  color: #8296a7;
+  background: rgba(255,255,255,.018);
+}
+
+.carousel-empty > div,
+.carousel-state {
+  font-size: .54rem;
+}
+
+.carousel-empty strong,
+.carousel-state strong {
+  display: block;
+  color: #dce5ec;
+  font-size: .62rem;
+}
+
+.carousel-empty span,
+.carousel-state span {
+  display: block;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.carousel-state {
+  flex-direction: column;
+  justify-content: center;
+  min-height: 180px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.carousel-state-error {
+  color: #ef8c96;
+}
+
+@media (max-width: 720px) {
+  .carousel-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-tier-tabs {
+    gap: 5px;
+  }
+
+  .carousel-history-heading {
+    align-items: flex-end;
+  }
+
+  .carousel-season-tabs {
+    gap: 4px;
+  }
+
+  .carousel-season-tab {
+    min-width: 49px;
+    height: 34px;
+    padding: 0 5px;
+    font-size: .45rem;
+  }
+
+  .carousel-tier-tab {
+    min-height: 38px;
+    padding-inline: 3px;
+    font-size: .48rem;
+  }
+
+  .carousel-card-header {
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding-inline: 10px;
+  }
+
+  .carousel-franchise-logo {
+    width: 46px;
+    height: 46px;
+  }
+
+  .carousel-franchise-logo img {
+    width: 42px;
+    height: 42px;
+  }
+
+  .carousel-franchise-copy h3 {
+    font-size: .63rem;
+  }
+
+  .carousel-move-grid {
+    grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr);
+    gap: 5px;
+    padding: 9px;
+  }
+
+  .carousel-move-side {
+    padding: 8px;
+  }
+
+  .carousel-coach-name {
+    align-items: flex-start;
+    font-size: .54rem;
+    overflow-wrap: anywhere;
+  }
+
+  .carousel-destination > strong {
+    font-size: .47rem;
+  }
+
+  .carousel-rank-strip span {
+    font-size: .33rem;
+  }
+
+  .carousel-rank-strip strong {
+    font-size: .54rem;
+  }
+}

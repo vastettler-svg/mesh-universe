@@ -1,0 +1,294 @@
+/* =========================================================
+   MESH FOOTBALL — DRAFT HQ
+========================================================= */
+
+.draft-hq-page {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  padding-bottom: 42px;
+}
+
+.draft-view-tabs,
+.draft-tier-tabs {
+  display: grid;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.draft-view-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.draft-tier-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.draft-view-tabs button,
+.draft-tier-tab {
+  min-height: 42px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 11px;
+  color: #91a4b4;
+  background: rgba(255,255,255,.025);
+  font: inherit;
+  font-size: .58rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.draft-view-tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.draft-view-tabs button.active,
+.draft-tier-tab.active {
+  color: #fff;
+  border-color: rgba(255,255,255,.16);
+  background: linear-gradient(145deg, rgba(25,47,68,.96), rgba(8,22,36,.99));
+}
+
+.draft-tier-tab { position: relative; overflow: hidden; }
+.draft-tier-tab::after { content:""; position:absolute; inset:auto 0 0; height:3px; opacity:0; }
+.draft-tier-tab.active::after { opacity:1; }
+.draft-tier-nfl::after { background:#24bd78; }
+.draft-tier-fbs::after { background:#4287ff; }
+.draft-tier-fcs::after { background:#9c67ff; }
+
+.draft-filter-bar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 15px;
+  padding: 11px;
+  border: 1px solid rgba(255,255,255,.065);
+  border-radius: 13px;
+  background: rgba(255,255,255,.018);
+}
+
+.draft-filter-bar label { min-width:0; }
+.draft-filter-bar label > span {
+  display:block;
+  margin:0 0 5px 2px;
+  color:#708596;
+  font-size:.42rem;
+  font-weight:950;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+}
+
+.draft-filter-bar select {
+  width:100%;
+  min-height:38px;
+  padding:0 30px 0 10px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:9px;
+  color:#f4f7fa;
+  background:#10263a;
+  font:inherit;
+  font-size:.60rem;
+  font-weight:700;
+  outline:none;
+}
+
+.draft-board {
+  margin-top:16px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:17px;
+  background:linear-gradient(145deg, rgba(20,40,60,.97), rgba(8,21,35,.995));
+  box-shadow:0 16px 36px rgba(0,0,0,.16);
+}
+
+.draft-board::before { content:""; display:block; height:4px; background:#607286; }
+.draft-board-nfl::before { background:#24bd78; }
+.draft-board-fbs::before { background:#4287ff; }
+.draft-board-fcs::before { background:#9c67ff; }
+
+.draft-board-header {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:15px 16px 14px;
+  border-bottom:1px solid rgba(255,255,255,.055);
+  background:rgba(0,0,0,.08);
+}
+
+.draft-board-patch {
+  display:grid;
+  place-items:center;
+  flex:0 0 52px;
+  width:52px;
+  height:52px;
+  border-radius:12px;
+  background:rgba(255,255,255,.025);
+}
+.draft-board-patch img { width:44px; height:44px; object-fit:contain; }
+.draft-board-header span { color:#7f94a6; font-size:.43rem; font-weight:900; letter-spacing:.07em; text-transform:uppercase; }
+.draft-board-header h2 { margin:3px 0 3px; color:#fff; font-family:var(--heading-font,"Graduate",serif); font-size:1rem; font-weight:400; }
+.draft-board-header p { margin:0; color:#7c8f9e; font-size:.52rem; }
+
+.draft-rounds,
+.draft-team-history { padding:12px; }
+.draft-round + .draft-round,
+.draft-team-season + .draft-team-season { margin-top:13px; }
+
+.draft-round-title {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height:31px;
+  padding:0 10px;
+  border:1px solid rgba(255,255,255,.055);
+  border-radius:8px 8px 0 0;
+  color:#fff;
+  background:rgba(255,255,255,.045);
+}
+.draft-round-title span { font-family:var(--heading-font,"Graduate",serif); font-size:.64rem; }
+.draft-round-title small { color:#7f94a6; font-size:.42rem; font-weight:850; text-transform:uppercase; }
+
+.draft-pick-list { border:1px solid rgba(255,255,255,.05); border-top:0; border-radius:0 0 9px 9px; overflow:hidden; }
+.draft-pick-row {
+  display:grid;
+  grid-template-columns:62px minmax(180px, .95fr) minmax(180px, 1.25fr);
+  align-items:center;
+  min-height:60px;
+  border-bottom:1px solid rgba(255,255,255,.045);
+  background:rgba(255,255,255,.012);
+}
+.draft-pick-row:last-child { border-bottom:0; }
+.draft-pick-row:nth-child(even) { background:rgba(255,255,255,.026); }
+
+.draft-pick-number {
+  align-self:stretch;
+  display:grid;
+  place-items:center;
+  padding:0 8px;
+  border-right:1px solid rgba(255,255,255,.055);
+  color:#e5c55e;
+  font-family:var(--heading-font,"Graduate",serif);
+  font-size:.64rem;
+}
+
+.draft-team-cell {
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr);
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  padding:8px 11px;
+}
+.draft-team-cell img,
+.draft-logo-fallback { width:32px; height:32px; object-fit:contain; }
+.draft-logo-fallback { display:grid; place-items:center; color:#7b8e9d; }
+.draft-team-cell a,
+.draft-team-cell strong { display:block; overflow:hidden; color:#f3f6f8; font-size:.58rem; font-weight:850; text-decoration:none; text-overflow:ellipsis; white-space:nowrap; }
+.draft-team-cell a:hover { text-decoration:underline; text-underline-offset:2px; }
+.draft-traded-from { display:flex; align-items:center; gap:4px; margin-top:3px; color:#d6b64e; font-size:.42rem; }
+
+.draft-player-cell { min-width:0; padding:8px 12px; }
+.draft-player-cell strong { display:block; overflow:hidden; color:#fff; font-size:.62rem; text-overflow:ellipsis; white-space:nowrap; }
+.draft-player-cell span { display:block; margin-top:4px; color:#e4bd42; font-size:.46rem; font-weight:900; letter-spacing:.03em; }
+.draft-player-cell .draft-available { color:#9babb8; }
+
+.draft-pick-row-compact { grid-template-columns:62px minmax(170px,1fr) minmax(130px,.8fr); }
+.draft-team-origin { padding:8px 12px; color:#d6b64e; font-size:.45rem; font-weight:800; }
+
+.draft-empty,
+.draft-state { margin-top:16px; padding:28px 16px; border:1px solid rgba(255,255,255,.06); border-radius:13px; color:#8396a6; background:rgba(255,255,255,.018); text-align:center; font-size:.62rem; }
+.draft-empty { margin:12px; }
+.draft-state-error { color:#ffb8b8; }
+
+@media (max-width: 720px) {
+  .draft-filter-bar { grid-template-columns:1fr 1fr; }
+  .draft-team-select { grid-column:1 / -1; }
+  .draft-pick-row { grid-template-columns:52px minmax(120px,.9fr) minmax(120px,1.1fr); min-height:58px; }
+  .draft-team-cell { grid-template-columns:28px minmax(0,1fr); gap:6px; padding:7px; }
+  .draft-team-cell img,
+  .draft-logo-fallback { width:27px; height:27px; }
+  .draft-team-cell a,
+  .draft-team-cell strong { font-size:.50rem; white-space:normal; line-height:1.2; }
+  .draft-traded-from { font-size:.36rem; line-height:1.2; }
+  .draft-player-cell { padding:7px 8px; }
+  .draft-player-cell strong { font-size:.53rem; white-space:normal; line-height:1.2; }
+  .draft-player-cell span { font-size:.40rem; }
+  .draft-pick-number { font-size:.54rem; }
+  .draft-pick-row-compact { grid-template-columns:52px minmax(130px,1fr) minmax(100px,.72fr); }
+  .draft-team-origin { padding:7px 8px; font-size:.38rem; }
+}
+
+@media (max-width: 440px) {
+  .draft-board-header { padding:13px 11px; }
+  .draft-board-patch { flex-basis:45px; width:45px; height:45px; }
+  .draft-board-patch img { width:38px; height:38px; }
+  .draft-board-header h2 { font-size:.78rem; line-height:1.3; }
+  .draft-rounds,
+  .draft-team-history { padding:8px; }
+  .draft-filter-bar { grid-template-columns:1fr; }
+  .draft-team-select { grid-column:auto; }
+}
+
+/* Phase 6C v1.2 — shared header + conference identity polish */
+.draft-page-header-wrap { position: relative; }
+
+/* PageHeader renders the same shield/ring treatment used on Scores and other
+   MESH feature pages. This transparent link preserves Draft HQ's Home shortcut
+   without changing the shared PageHeader component. */
+.draft-header-home-link {
+  position: absolute;
+  z-index: 5;
+  top: 38px;
+  right: 26px;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+}
+.draft-header-home-link:focus-visible {
+  outline: 2px solid rgba(255,255,255,.7);
+  outline-offset: 3px;
+}
+
+.draft-year-team { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.draft-year-team > img { width: 28px; height: 28px; object-fit: contain; flex: 0 0 28px; }
+.draft-year-team > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.draft-team-year-title { min-height: 42px; }
+
+@media (max-width: 600px) {
+  .draft-header-home-link {
+    top: 33px;
+    right: 15px;
+    width: 66px;
+    height: 66px;
+  }
+}
+
+@media (max-width: 520px) {
+  .draft-year-team > img { width: 24px; height: 24px; flex-basis: 24px; }
+}
+
+@media (max-width: 380px) {
+  .draft-header-home-link {
+    top: 34px;
+    right: 13px;
+    width: 58px;
+    height: 58px;
+  }
+}
+
+/* Phase 6C v1.3 — current franchise identity link in By Team */
+.draft-team-profile-link {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  min-width:0;
+  color:inherit;
+  text-decoration:none;
+}
+
+.draft-team-profile-link > div:last-child { min-width:0; }
+.draft-team-profile-link h2 { transition:color .16s ease; }
+.draft-team-profile-link:hover h2 { color:#ffffff; text-decoration:underline; text-underline-offset:3px; }
+.draft-team-profile-link:hover .draft-board-patch { background:rgba(255,255,255,.055); }
+.draft-team-profile-link:focus-visible {
+  outline:2px solid rgba(255,255,255,.65);
+  outline-offset:4px;
+  border-radius:10px;
+}

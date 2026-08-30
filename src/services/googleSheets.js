@@ -22,6 +22,12 @@ const STANDINGS_ARCHIVE_CSV_URL =
 const APP_SETTINGS_CSV_URL =
   `${PUBLISHED_SHEET_BASE_URL}?gid=121795657&single=true&output=csv`;
 
+const COACH_CAROUSEL_CSV_URL =
+  `${PUBLISHED_SHEET_BASE_URL}?gid=325208769&single=true&output=csv`;
+
+const DRAFT_HQ_CSV_URL =
+  `${PUBLISHED_SHEET_BASE_URL}?gid=436166201&single=true&output=csv`;
+
 function parseCsv(text) {
   const rows = [];
   let row = [];
@@ -652,6 +658,7 @@ export async function getStandingsArchive() {
         logo:
           getTeamLogoOverride(franchiseName) ||
           historicalLogoLookup.get(franchiseName.toLowerCase()) ||
+          COACH_CAROUSEL_HISTORICAL_LOGOS[franchiseName.toLowerCase()] ||
           "",
 
         coachId: String(row.Final_Coach_ID ?? "").trim(),
@@ -719,6 +726,179 @@ export async function getStandingsArchive() {
       }
 
       return b.season - a.season;
+    });
+}
+
+
+const COACH_CAROUSEL_HISTORICAL_LOGOS = {
+  "appalachian state mountaineers":
+    "https://a.espncdn.com/i/teamlogos/ncaa/500/2026.png",
+};
+
+export async function getCoachCarousel() {
+  const [rows, franchiseDirectoryRows] = await Promise.all([
+    fetchCsvRows(COACH_CAROUSEL_CSV_URL, "COACH_CAROUSEL"),
+    fetchCsvRows(
+      FRANCHISE_DIRECTORY_CSV_URL,
+      "FRANCHISE_DIRECTORY",
+    ).catch(() => []),
+  ]);
+
+  const historicalLogoLookup =
+    buildHistoricalTeamLogoLookup_(franchiseDirectoryRows);
+
+  return rows
+    .filter((row) => {
+      return (
+        toNumber(row.Season) > 0 &&
+        String(row.Franchise_ID ?? "").trim()
+      );
+    })
+    .map((row, index) => {
+      const franchiseName = String(row.Franchise_Name ?? "").trim();
+      const tier = String(row.Tier ?? "").trim().toUpperCase();
+      const status = String(row.Status ?? "").trim() || "Filled";
+
+      return {
+        id: `${toNumber(row.Season)}-${String(row.Franchise_ID ?? "").trim()}-${index}`,
+        season: toNumber(row.Season),
+        franchiseId: String(row.Franchise_ID ?? "").trim(),
+        franchiseName,
+        team: franchiseName,
+        tier,
+        tierClass: tier.toLowerCase(),
+        conference: String(row.Conference ?? "").trim(),
+        conferenceRank: toOptionalNumber(row.Conference_Rank),
+        tierRank: toOptionalNumber(row.Tier_Rank),
+
+        logo:
+          getTeamLogoOverride(franchiseName) ||
+          historicalLogoLookup.get(franchiseName.toLowerCase()) ||
+          "",
+
+        outgoingCoachId: String(row.Outgoing_Coach_ID ?? "").trim(),
+        outgoingCoachName: String(row.Outgoing_Coach_Name ?? "").trim(),
+        outgoingReason: String(row.Outgoing_Reason ?? "").trim(),
+        outgoingNewFranchiseId: String(
+          row.Outgoing_New_Franchise_ID ?? "",
+        ).trim(),
+        outgoingNewTeam: String(row.Outgoing_New_Team ?? "").trim(),
+        outgoingNewTier: String(row.Outgoing_New_Tier ?? "")
+          .trim()
+          .toUpperCase(),
+
+        incomingCoachId: String(row.Incoming_Coach_ID ?? "").trim(),
+        incomingCoachName: String(row.Incoming_Coach_Name ?? "").trim(),
+        incomingReason: String(row.Incoming_Reason ?? "").trim(),
+        incomingPrevFranchiseId: String(
+          row.Incoming_Prev_Franchise_ID ?? "",
+        ).trim(),
+        incomingPrevTeam: String(row.Incoming_Prev_Team ?? "").trim(),
+        incomingPrevTier: String(row.Incoming_Prev_Tier ?? "")
+          .trim()
+          .toUpperCase(),
+
+        status,
+        isOpen: status.toLowerCase() === "open",
+        notes: String(row.Notes ?? "").trim(),
+      };
+    })
+    .sort((a, b) => {
+      if (a.season !== b.season) return b.season - a.season;
+      if (a.isOpen !== b.isOpen) return a.isOpen ? -1 : 1;
+      if (a.tier !== b.tier) return a.tier.localeCompare(b.tier);
+      return a.franchiseName.localeCompare(b.franchiseName);
+    });
+}
+
+
+export async function getDraftHQ() {
+  const [rows, franchiseDirectoryRows] = await Promise.all([
+    fetchCsvRows(DRAFT_HQ_CSV_URL, "DRAFT_HQ"),
+    fetchCsvRows(
+      FRANCHISE_DIRECTORY_CSV_URL,
+      "FRANCHISE_DIRECTORY",
+    ).catch(() => []),
+  ]);
+
+  const historicalLogoLookup =
+    buildHistoricalTeamLogoLookup_(franchiseDirectoryRows);
+
+  const franchiseLogoById = new Map();
+  franchiseDirectoryRows.forEach((row) => {
+    const id = String(row.Franchise_ID ?? "").trim();
+    const logo = String(row.Logo_URL ?? "").trim();
+    if (id && logo && !franchiseLogoById.has(id)) {
+      franchiseLogoById.set(id, logo);
+    }
+  });
+
+  return rows
+    .filter((row) => toNumber(row.Season) > 0 && toNumber(row.Pick) > 0)
+    .map((row, index) => {
+      const draftingFranchiseId = String(
+        row.Drafting_Franchise_ID ?? "",
+      ).trim();
+      const draftingFranchiseName = String(
+        row.Drafting_Franchise_Name ?? "",
+      ).trim();
+      const originalFranchiseId = String(
+        row.Original_Franchise_ID ?? "",
+      ).trim();
+      const originalFranchiseName = String(
+        row.Original_Franchise_Name ?? "",
+      ).trim();
+      const tier = String(row.Tier ?? "").trim().toUpperCase();
+      const conference = String(
+        row.Conference ?? row.League_Label ?? "",
+      ).trim();
+
+      // Draft history is season-specific: resolve the logo from the stored
+      // historical team name before falling back to the permanent franchise ID.
+      const draftingLogo =
+        getTeamLogoOverride(draftingFranchiseName) ||
+        historicalLogoLookup.get(draftingFranchiseName.toLowerCase()) ||
+        franchiseLogoById.get(draftingFranchiseId) ||
+        "";
+
+      return {
+        id: `${toNumber(row.Season)}-${String(row.Draft_ID ?? "").trim()}-${toNumber(row.Pick)}-${index}`,
+        season: toNumber(row.Season),
+        leagueLabel: String(row.League_Label ?? "").trim(),
+        sleeperLeagueId: String(row.Sleeper_League_ID ?? "").trim(),
+        draftId: String(row.Draft_ID ?? "").trim(),
+        pick: toNumber(row.Pick),
+        round: toNumber(row.Round),
+        pickInRound: toNumber(row.Pick_In_Round),
+        playerName: String(row.Player_Name ?? "").trim(),
+        position: String(row.Position ?? "").trim().toUpperCase(),
+        nflTeam: String(row.NFL_Team ?? "").trim().toUpperCase(),
+        playerId: String(row.Player_ID ?? "").trim(),
+        tier,
+        tierClass: tier.toLowerCase(),
+        conference,
+        conferenceId: normalizeId(conference),
+        draftingFranchiseId,
+        draftingFranchiseName,
+        draftingLogo,
+        originalFranchiseId,
+        originalFranchiseName,
+        isTraded:
+          Boolean(originalFranchiseId || originalFranchiseName) &&
+          (originalFranchiseId
+            ? originalFranchiseId !== draftingFranchiseId
+            : originalFranchiseName.toLowerCase() !==
+              draftingFranchiseName.toLowerCase()),
+        isSelected: Boolean(String(row.Player_Name ?? "").trim()),
+      };
+    })
+    .sort((a, b) => {
+      if (a.season !== b.season) return b.season - a.season;
+      if (a.tier !== b.tier) return a.tier.localeCompare(b.tier);
+      if (a.conference !== b.conference) {
+        return a.conference.localeCompare(b.conference);
+      }
+      return a.pick - b.pick;
     });
 }
 

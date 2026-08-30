@@ -141,7 +141,7 @@ function League() {
         imageSrc={meshShield}
         imageAlt="MESH Football shield"
         accent="league"
-        size="medium"
+        size="compact"
       />
 
       <section className="league-section">

@@ -17,6 +17,8 @@ import FranchiseProfile from "./pages/FranchiseProfile";
 import CoachDirectory from "./pages/CoachDirectory";
 import CoachProfile from "./pages/CoachProfile";
 import Prestige from "./pages/Prestige";
+import CoachCarousel from "./pages/CoachCarousel";
+import DraftHQ from "./pages/DraftHQ";
 
 function App() {
   return (
@@ -37,6 +39,8 @@ function App() {
         <Route path="/rules" element={<RulesInfo />} />
         <Route path="/league-links" element={<LeagueLinks />} />
         <Route path="/prestige" element={<Prestige />} />
+        <Route path="/coach-carousel" element={<CoachCarousel />} />
+        <Route path="/draft-hq" element={<DraftHQ />} />
       </Routes>
     </AppShell>
   );

@@ -42,7 +42,7 @@ function GameRecord({ title, icon, item, kind, conference }) {
 }
 
 export default function Stats() {
-  const [raw, setRaw] = useState({ seasons: [], games: [] });
+  const [raw, setRaw] = useState({ seasons: [], games: [], currentTeams: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [view, setView] = useState("teams");
@@ -55,7 +55,7 @@ export default function Stats() {
 
   useEffect(() => { let live = true; getStatsCenterData().then((data) => live && setRaw(data)).catch((e) => live && setError(e.message || "Stats unavailable.")).finally(() => live && setLoading(false)); return () => { live = false; }; }, []);
   useEffect(() => setConference("all"), [tier]);
-  const data = useMemo(() => calculateStats(raw.games, { season, tier, conference, scope }), [raw.games, season, tier, conference, scope]);
+  const data = useMemo(() => calculateStats(raw.games, { season, tier, conference, scope, currentTeams: raw.currentTeams }), [raw.games, raw.currentTeams, season, tier, conference, scope]);
   const teams = useMemo(() => [...data.teams].sort((a,b) => {
     const naturalAscending = LOWER_IS_BETTER.has(sortKey);
     const ascending = sortDirection === "asc" ? !naturalAscending : naturalAscending;

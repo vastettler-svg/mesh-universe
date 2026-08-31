@@ -1,4 +1,4 @@
-import { getGameResults } from "./googleSheets";
+import { getGameResults, getStandingsData } from "./googleSheets";
 
 const REGULAR_SEASON = "regular season";
 const CONFERENCE_ALIASES = {
@@ -156,14 +156,19 @@ function singleGameRecords(games, conference = "all") {
 }
 
 export async function getStatsCenterData() {
-  const all = (await getGameResults({ allSeasons: true })).filter(isCompleted);
+  const [allGames, currentTeams] = await Promise.all([
+    getGameResults({ allSeasons: true }),
+    getStandingsData(),
+  ]);
+  const all = allGames.filter(isCompleted);
   return {
     seasons: [...new Set(all.map((g) => Number(g.season)).filter(Boolean))].sort((a, b) => b - a),
     games: all,
+    currentTeams,
   };
 }
 
-export function calculateStats(games, { season = "all", tier = "NFL", conference = "all", scope = "regular" } = {}) {
+export function calculateStats(games, { season = "all", tier = "NFL", conference = "all", scope = "regular", currentTeams = [] } = {}) {
   const selectedConference = conferenceKey(conference);
   const filtered = games.filter((game) => {
     if (season !== "all" && Number(game.season) !== Number(season)) return false;
@@ -176,6 +181,29 @@ export function calculateStats(games, { season = "all", tier = "NFL", conference
   });
 
   let teamRows = aggregateTeams(filtered);
+
+  // All-Time statistics belong to the permanent Franchise_ID, but should be
+  // presented with that franchise's current active identity. Specific seasons
+  // intentionally retain their historical team name/logo from GAME_RESULTS.
+  if (season === "all" && currentTeams.length) {
+    const currentByFranchise = new Map(
+      currentTeams.map((team) => [String(team.franchiseId || team.id || "").trim(), team]),
+    );
+    teamRows = teamRows.map((row) => {
+      const current = currentByFranchise.get(String(row.franchiseId || "").trim());
+      if (!current) return row;
+      return {
+        ...row,
+        team: current.team || row.team,
+        coach: current.coach || row.coach,
+        coachId: current.coachId || row.coachId,
+        logo: current.logo || current.logoUrl || row.logo,
+        conference: current.conference || row.conference,
+        tier: current.tier || row.tier,
+      };
+    });
+  }
+
   if (conference !== "all") teamRows = teamRows.filter((row) => conferenceKey(row.conference) === selectedConference);
 
   const records = singleGameRecords(filtered, conference);

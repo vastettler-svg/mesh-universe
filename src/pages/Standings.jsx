@@ -48,7 +48,6 @@ const secondaryFilters = {
     { id: "sec", label: "SEC" },
     { id: "sun-belt", label: "Sun Belt" },
     { id: "cfp", label: "CFP" },
-    { id: "bowl-games", label: "Bowl Games" },
   ],
   fcs: [
     { id: "top-25", label: "Top 25" },
@@ -93,7 +92,6 @@ const standingsPatchMap = {
     "top-25": MESH_PATCHES.tier.FBS,
     overall: MESH_PATCHES.tier.FBS,
     cfp: MESH_PATCHES.tier.FBS,
-    "bowl-games": MESH_PATCHES.tier.FBS,
     acc: MESH_PATCHES.FBS.ACC,
     "big-ten": MESH_PATCHES.FBS["Big Ten"],
     "big-12": MESH_PATCHES.FBS["Big 12"],
@@ -829,7 +827,7 @@ function NflConferenceModernBracket({ conference, games, mirrored = false }) {
   );
 }
 
-function NflPlayoffBracket({ games, loading, error }) {
+function NflPlayoffBracket({ games, loading, error, initialSeason = 2026 }) {
   const availableSeasons = useMemo(() => {
     const gameSeasons = games
       .filter(
@@ -846,7 +844,11 @@ function NflPlayoffBracket({ games, loading, error }) {
     );
   }, [games]);
 
-  const [season, setSeason] = useState(2026);
+  const [season, setSeason] = useState(initialSeason);
+
+  useEffect(() => {
+    if (availableSeasons.includes(Number(initialSeason))) setSeason(Number(initialSeason));
+  }, [initialSeason, availableSeasons]);
 
   const seasonGames = useMemo(
     () =>
@@ -1282,86 +1284,6 @@ function FbsCfpBracket({ games, loading, error }) {
   );
 }
 
-function FbsBowlGames({ games, loading, error }) {
-  const availableSeasons = useMemo(() => {
-    const gameSeasons = games
-      .filter((game) => game.tierClass === "fbs" && game.bowlName && !isCfpGame(game))
-      .map((game) => Number(game.season))
-      .filter(Boolean);
-
-    return [...new Set([2026, 2025, 2024, ...gameSeasons])].sort((a, b) => b - a);
-  }, [games]);
-
-  const [season, setSeason] = useState(2026);
-
-  const bowlGames = useMemo(
-    () =>
-      games
-        .filter(
-          (game) =>
-            game.tierClass === "fbs" &&
-            Number(game.season) === Number(season) &&
-            [14, 15].includes(Number(game.week)) &&
-            Boolean(game.bowlName) &&
-            !isCfpGame(game),
-        )
-        .sort((a, b) => Number(a.week) - Number(b.week) || Number(a.gameNumber) - Number(b.gameNumber)),
-    [games, season],
-  );
-
-  if (loading) return <div className="standings-postseason-note">Loading Bowl Games…</div>;
-  if (error) return <div className="standings-postseason-note">{error}</div>;
-
-  const week14 = bowlGames.filter((game) => Number(game.week) === 14);
-  const week15 = bowlGames.filter((game) => Number(game.week) === 15);
-
-  const renderWeek = (week, gamesForWeek, expected) => (
-    <section className="fbs-bowl-week">
-      <div className="fbs-bowl-week-heading">
-        <div><span>Week {week}</span><strong>Bowl Games</strong></div>
-        <small>{gamesForWeek.length || 0} of {expected} scheduled</small>
-      </div>
-
-      <div className="fbs-bowl-grid">
-        {gamesForWeek.length ? (
-          gamesForWeek.map((game) => (
-            <FbsPostseasonGame key={game.gameId || `${week}-${game.gameNumber}`} game={game} label={game.bowlName || "Bowl Game"} bowl />
-          ))
-        ) : (
-          <div className="fbs-bowl-empty">
-            <Trophy size={20} />
-            <strong>{expected} Bowl Games</strong>
-            <span>Matchups will be scheduled following Week 13 Conference Championships.</span>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-
-  return (
-    <div className="fbs-bowl-games">
-      <div className="fbs-postseason-topbar">
-        <div>
-          <span>FBS Postseason</span>
-          <h3>{season} MESH Bowl Games</h3>
-          <p>Non-CFP bowls only · teams need six regular-season wins for bowl eligibility · matchups are assigned in GAME_RESULTS.</p>
-        </div>
-
-        <label className="nfl-bracket-season-picker">
-          <span>Season</span>
-          <select value={season} onChange={(event) => setSeason(Number(event.target.value))}>
-            {availableSeasons.map((year) => <option value={year} key={year}>{year}</option>)}
-          </select>
-        </label>
-      </div>
-
-      {renderWeek(14, week14, 14)}
-      {renderWeek(15, week15, 10)}
-    </div>
-  );
-}
-
-
 function FcsPlayoffBracket({ games, loading, error }) {
   const availableSeasons = useMemo(() => {
     const years = games
@@ -1697,18 +1619,15 @@ function FcsPlayoffBracket({ games, loading, error }) {
   );
 }
 
-function PostseasonShell({ tierClass, view, games = [], gamesLoading = false, gamesError = "" }) {
+function PostseasonShell({ tierClass, view, games = [], gamesLoading = false, gamesError = "", selectedSeason = 2026 }) {
   if (tierClass === "nfl" && view === "playoff-bracket") {
-    return <NflPlayoffBracket games={games} loading={gamesLoading} error={gamesError} />;
+    return <NflPlayoffBracket games={games} loading={gamesLoading} error={gamesError} initialSeason={selectedSeason} />;
   }
 
   if (tierClass === "fbs" && view === "cfp") {
     return <FbsCfpBracket games={games} loading={gamesLoading} error={gamesError} />;
   }
 
-  if (tierClass === "fbs" && view === "bowl-games") {
-    return <FbsBowlGames games={games} loading={gamesLoading} error={gamesError} />;
-  }
 
   if (tierClass === "fcs" && view === "playoff-bracket") {
     return <FcsPlayoffBracket games={games} loading={gamesLoading} error={gamesError} />;
@@ -1722,14 +1641,6 @@ function PostseasonShell({ tierClass, view, games = [], gamesLoading = false, ga
         "The MESH CFP field and complete championship bracket will live here.",
       phase: "Phase 4C",
       cards: ["CFP Field", "Playoff Bracket", "National Championship"],
-    },
-    "fbs:bowl-games": {
-      eyebrow: "FBS Postseason",
-      title: "Bowl Games",
-      description:
-        "Non-CFP bowl matchups will live here as their own postseason section, separate from the CFP.",
-      phase: "Phase 4D",
-      cards: ["Bowl Schedule", "Matchups & Scores", "Game Centers"],
     },
     "fcs:playoff-bracket": {
       eyebrow: "FCS Postseason",
@@ -2091,7 +2002,6 @@ function Standings() {
     const postseasonViews = new Set([
       "playoff-bracket",
       "cfp",
-      "bowl-games",
     ]);
 
     if (postseasonViews.has(selectedSecondaryFilter)) return [];
@@ -2253,7 +2163,7 @@ function Standings() {
 
   const isNflPlayoffPicture = selectedPrimaryFilter === "nfl" && selectedSecondaryFilter === "playoff-picture";
   const isNflConferenceView = selectedPrimaryFilter === "nfl" && ["afc", "nfc"].includes(selectedSecondaryFilter);
-  const isPostseasonView = ["playoff-bracket", "cfp", "bowl-games"].includes(selectedSecondaryFilter);
+  const isPostseasonView = ["playoff-bracket", "cfp"].includes(selectedSecondaryFilter);
   const standingsHeading = isNflConferenceView ? activeNflDivisionLabel : activeSecondaryLabel;
 
   const activeStandingsPatch =
@@ -2623,6 +2533,7 @@ function Standings() {
               games={playoffGames}
               gamesLoading={playoffGamesLoading}
               gamesError={playoffGamesError}
+              selectedSeason={selectedSeason}
             />
           ) : (
             renderStandingsContent()

@@ -323,3 +323,155 @@ export async function getChampionsHistoryData() {
 
   return { seasons, bySeason, recordBooks: buildRecordBooks(archive, games, currentTeams) };
 }
+
+
+// Phase 8C — Season Archive
+// Completed seasons only. Historical identities come from STANDINGS_ARCHIVE /
+// GAME_RESULTS; all-time conference record books intentionally use current
+// TEAM DATA identity so the permanent franchise remains the record-book entity.
+function sortArchiveStandings(rows, tier, conference = "") {
+  const conf = conferenceKey(conference);
+  return rows
+    .filter((row) => row.tier === tier && (!conference || conferenceKey(row.conference) === conf))
+    .sort((a, b) => {
+      const aRank = conference ? n(a.conferenceRank) || 999 : n(a.overallRank) || 999;
+      const bRank = conference ? n(b.conferenceRank) || 999 : n(b.overallRank) || 999;
+      return aRank - bRank || clean(a.franchiseName).localeCompare(clean(b.franchiseName));
+    });
+}
+
+function archiveTeam(row) {
+  return {
+    id: row.franchiseId,
+    name: row.franchiseName,
+    logo: row.logo,
+    coachId: row.coachId,
+    coach: row.coachName,
+    conference: row.conference,
+    division: row.division,
+    conferenceRank: n(row.conferenceRank) || null,
+    overallRank: n(row.overallRank) || null,
+    top25Rank: n(row.top25Rank) || null,
+    playoffSeed: n(row.playoffSeed) || null,
+    conferenceRecord: row.tierStandingsRecord || "",
+    overallRecord: row.overallSeasonRecord || "",
+    playoffResult: row.playoffResult || "",
+    conferenceResult: row.conferenceResult || "",
+  };
+}
+
+function qualifierRowsForGames(rows, games, tier, conference = "") {
+  const participants = new Set();
+  games.forEach((game) => {
+    if (game.team1Id) participants.add(clean(game.team1Id));
+    if (game.team2Id) participants.add(clean(game.team2Id));
+  });
+  return rows
+    .filter((row) => row.tier === tier)
+    .filter((row) => !conference || conferenceKey(row.conference) === conferenceKey(conference))
+    .filter((row) => participants.has(clean(row.franchiseId)))
+    .map(archiveTeam)
+    .sort((a, b) => (a.playoffSeed || 99) - (b.playoffSeed || 99) || a.name.localeCompare(b.name));
+}
+
+function postseasonRecord(games, franchiseId) {
+  let wins = 0;
+  let losses = 0;
+  games.forEach((game) => {
+    const result = gameResultFor(game, franchiseId);
+    if (result === "W") wins += 1;
+    if (result === "L") losses += 1;
+  });
+  return `${wins}-${losses}`;
+}
+
+export async function getSeasonArchiveData() {
+  const { getGameResults } = await import("./googleSheets");
+  const [archive, games, currentTeams] = await Promise.all([
+    getStandingsArchive(),
+    getGameResults({ allSeasons: true }),
+    getStandingsData(),
+  ]);
+
+  const seasons = [...new Set(archive.map((row) => Number(row.season)).filter(Boolean))]
+    .sort((a, b) => b - a);
+  const recordBooks = buildRecordBooks(archive, games, currentTeams);
+  const bySeason = {};
+
+  seasons.forEach((season) => {
+    const seasonRows = archive.filter((row) => Number(row.season) === season);
+    const seasonGames = games.filter((game) => Number(game.season) === season);
+
+    const nflPlayoffGames = seasonGames
+      .filter(isNflPlayoff)
+      .sort((a, b) => Number(a.week) - Number(b.week) || Number(a.gameNumber) - Number(b.gameNumber));
+    const nflQualifiers = seasonRows
+      .filter((row) => row.tier === "NFL" && n(row.playoffSeed) > 0)
+      .map(archiveTeam)
+      .map((team) => ({ ...team, postseasonRecord: postseasonRecord(nflPlayoffGames, team.id) }))
+      .sort((a, b) => (a.conference || "").localeCompare(b.conference || "") || (a.playoffSeed || 99) - (b.playoffSeed || 99));
+
+    const fbsConferences = {};
+    const fbsNames = [...new Set(currentTeams.filter((team) => team.tier === "FBS").map((team) => clean(team.conference)).filter(Boolean))];
+    fbsNames.forEach((conference) => {
+      const cfpGames = seasonGames.filter(isCfpGame);
+      const confCfpGames = cfpGames.filter((game) => gameHasConference(game, conference));
+      const qualifiers = qualifierRowsForGames(seasonRows, confCfpGames, "FBS", conference)
+        .map((team) => ({ ...team, postseasonRecord: postseasonRecord(cfpGames, team.id) }));
+      const qualifierIds = new Set(qualifiers.map((team) => clean(team.id)));
+      const playoffGames = cfpGames
+        .filter((game) => qualifierIds.has(clean(game.team1Id)) || qualifierIds.has(clean(game.team2Id)))
+        .sort((a, b) => Number(a.week) - Number(b.week) || Number(a.gameNumber) - Number(b.gameNumber));
+      const bowls = seasonGames
+        .filter((game) => game.tier === "FBS" && Boolean(game.bowlName) && !isCfpGame(game) && gameHasConference(game, conference))
+        .sort((a, b) => Number(a.week) - Number(b.week) || String(a.bowlName).localeCompare(String(b.bowlName)));
+      const { champion, game } = seasonConferenceChampion(seasonRows, seasonGames, "FBS", conference);
+      fbsConferences[conferenceKey(conference)] = {
+        conference,
+        standings: sortArchiveStandings(seasonRows, "FBS", conference).map(archiveTeam),
+        champion,
+        championshipGame: game,
+        qualifiers,
+        playoffGames,
+        bowls,
+      };
+    });
+
+    const fcsConferences = {};
+    const fcsNames = [...new Set(currentTeams.filter((team) => team.tier === "FCS").map((team) => clean(team.conference)).filter(Boolean))];
+    fcsNames.forEach((conference) => {
+      const allPlayoffGames = seasonGames.filter(isFcsPlayoff);
+      const confGames = allPlayoffGames.filter((game) => gameHasConference(game, conference));
+      const qualifiers = qualifierRowsForGames(seasonRows, confGames, "FCS", conference)
+        .map((team) => ({ ...team, postseasonRecord: postseasonRecord(allPlayoffGames, team.id) }));
+      const qualifierIds = new Set(qualifiers.map((team) => clean(team.id)));
+      const playoffGames = allPlayoffGames
+        .filter((game) => qualifierIds.has(clean(game.team1Id)) || qualifierIds.has(clean(game.team2Id)))
+        .sort((a, b) => Number(a.week) - Number(b.week) || Number(a.gameNumber) - Number(b.gameNumber));
+      const { champion } = seasonConferenceChampion(seasonRows, seasonGames, "FCS", conference);
+      fcsConferences[conferenceKey(conference)] = {
+        conference,
+        standings: sortArchiveStandings(seasonRows, "FCS", conference).map(archiveTeam),
+        champion,
+        qualifiers,
+        playoffGames,
+      };
+    });
+
+    bySeason[season] = {
+      NFL: {
+        standings: sortArchiveStandings(seasonRows, "NFL").map(archiveTeam),
+        standingsByConference: {
+          AFC: sortArchiveStandings(seasonRows, "NFL", "AFC").map(archiveTeam),
+          NFC: sortArchiveStandings(seasonRows, "NFL", "NFC").map(archiveTeam),
+        },
+        qualifiers: nflQualifiers,
+        playoffGames: nflPlayoffGames,
+      },
+      FBS: { conferences: fbsConferences },
+      FCS: { conferences: fcsConferences },
+    };
+  });
+
+  return { seasons, bySeason, recordBooks };
+}

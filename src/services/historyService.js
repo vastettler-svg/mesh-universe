@@ -282,9 +282,35 @@ function buildRecordBooks(archive, games, currentTeams) {
   return books;
 }
 
+let historyBasePromise = null;
+let championsHistoryCache = null;
+let seasonArchiveCache = null;
+
+async function getHistoryBaseData() {
+  if (!historyBasePromise) {
+    historyBasePromise = (async () => {
+      const { getGameResults } = await import("./googleSheets");
+      const [archive, games, currentTeams] = await Promise.all([
+        getStandingsArchive(),
+        getGameResults({ allSeasons: true }),
+        getStandingsData(),
+      ]);
+      return { archive, games, currentTeams };
+    })().catch((error) => {
+      historyBasePromise = null;
+      throw error;
+    });
+  }
+  return historyBasePromise;
+}
+
+export function prefetchHistoryPostseasonData() {
+  return getHistoryBaseData().catch(() => null);
+}
+
 export async function getChampionsHistoryData() {
-  const { getGameResults } = await import("./googleSheets");
-  const [archive, games, currentTeams] = await Promise.all([getStandingsArchive(), getGameResults({ allSeasons: true }), getStandingsData()]);
+  if (championsHistoryCache) return championsHistoryCache;
+  const { archive, games, currentTeams } = await getHistoryBaseData();
   const seasons = [...new Set(archive.map((row) => Number(row.season)).filter(Boolean))].sort((a,b) => b-a);
   const bySeason = {};
 
@@ -321,7 +347,8 @@ export async function getChampionsHistoryData() {
     bySeason[season] = { champions, nflConferenceChampions, nflDivisionChampions, conferenceData };
   });
 
-  return { seasons, bySeason, recordBooks: buildRecordBooks(archive, games, currentTeams) };
+  championsHistoryCache = { seasons, bySeason, recordBooks: buildRecordBooks(archive, games, currentTeams) };
+  return championsHistoryCache;
 }
 
 
@@ -386,12 +413,8 @@ function postseasonRecord(games, franchiseId) {
 }
 
 export async function getSeasonArchiveData() {
-  const { getGameResults } = await import("./googleSheets");
-  const [archive, games, currentTeams] = await Promise.all([
-    getStandingsArchive(),
-    getGameResults({ allSeasons: true }),
-    getStandingsData(),
-  ]);
+  if (seasonArchiveCache) return seasonArchiveCache;
+  const { archive, games, currentTeams } = await getHistoryBaseData();
 
   const seasons = [...new Set(archive.map((row) => Number(row.season)).filter(Boolean))]
     .sort((a, b) => b - a);
@@ -473,5 +496,6 @@ export async function getSeasonArchiveData() {
     };
   });
 
-  return { seasons, bySeason, recordBooks };
+  seasonArchiveCache = { seasons, bySeason, recordBooks };
+  return seasonArchiveCache;
 }

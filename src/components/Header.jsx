@@ -1,4 +1,3 @@
-import { Bell } from "lucide-react";
 import meshLogo from "../assets/logos/mfl-shield.png";
 
 function Header() {
@@ -20,14 +19,6 @@ function Header() {
           </div>
         </div>
 
-        <button
-          type="button"
-          className="header-icon-button"
-          aria-label="Notifications"
-        >
-          <Bell size={22} strokeWidth={2} />
-          <span className="notification-dot" />
-        </button>
       </div>
     </header>
   );

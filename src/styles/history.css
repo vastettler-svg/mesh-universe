@@ -128,3 +128,138 @@
 .archive-section-title-with-link{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}.archive-section-title-with-link .archive-section-title{flex:1}.archive-bracket-link{display:inline-flex;align-items:center;gap:4px;margin-bottom:10px;padding:6px 8px;border:1px solid rgba(36,184,109,.28);border-radius:8px;background:rgba(36,184,109,.09);color:#c9f7df;text-decoration:none;font-size:9px;font-weight:900;white-space:nowrap}.archive-bracket-link:hover{background:rgba(36,184,109,.15)}
 .archive-record-total-row td{font-weight:900;color:#fff;background:rgba(213,177,74,.08);border-top:2px solid rgba(213,177,74,.28)}.archive-record-total-row td:first-child{color:#e0bd58;letter-spacing:.08em}
 @media(max-width:700px){.archive-section-title-with-link{align-items:flex-start;flex-direction:column;gap:0}.archive-bracket-link{margin:-4px 0 9px}.archive-record-table th>button{white-space:normal;line-height:1.15}}
+
+/* Phase 8 final mobile polish — compact, sticky identity columns */
+.history-table-wrap,
+.archive-record-wrap {
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Record books: keep franchise visible while accomplishments scroll. */
+.archive-record-table th:first-child,
+.archive-record-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: #0c1522;
+  box-shadow: 1px 0 0 rgba(255,255,255,.09), 8px 0 14px rgba(3,9,16,.24);
+}
+.archive-record-table thead th:first-child {
+  z-index: 5;
+  background: #111c2c;
+}
+.archive-record-table .archive-record-total-row td:first-child {
+  background: #171a20;
+}
+
+/* Career table: freeze rank + identity and use record-book density. */
+.history-table th:first-child,
+.history-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  width: 34px;
+  min-width: 34px;
+  max-width: 34px;
+  background: #0d1523;
+}
+.history-table th:nth-child(2),
+.history-table td:nth-child(2) {
+  position: sticky;
+  left: 34px;
+  z-index: 3;
+  width: 168px;
+  min-width: 168px;
+  max-width: 168px;
+  background: #0d1523;
+  box-shadow: 1px 0 0 rgba(255,255,255,.09), 8px 0 14px rgba(3,9,16,.24);
+}
+.history-table thead th:first-child,
+.history-table thead th:nth-child(2) {
+  z-index: 6;
+  background: #111c2d;
+}
+
+@media(max-width:720px){
+  .history-table{min-width:1040px}
+  .history-table th,.history-table td{padding:8px 7px;font-size:10px}
+  .history-table th{font-size:8px}
+  .history-table th:first-child,.history-table td:first-child{width:30px;min-width:30px;max-width:30px;padding-left:7px;padding-right:5px}
+  .history-table th:nth-child(2),.history-table td:nth-child(2){left:30px;width:150px;min-width:150px;max-width:150px}
+  .history-identity{min-width:0;gap:7px}
+  .history-logo{width:28px;height:28px;flex-basis:28px}
+  .history-logo img{max-width:28px;max-height:28px}
+  .history-identity a{display:block;max-width:108px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}
+  .history-identity span{display:block;max-width:108px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px}
+  .archive-record-table td:first-child{min-width:150px;max-width:150px}
+  .archive-record-team{gap:6px}
+  .archive-record-team img{width:22px;height:22px}
+  .archive-record-team span{display:block;max-width:112px;overflow:hidden;text-overflow:ellipsis}
+}
+
+/* Phase 8 final lock — Career Standings uses sortable table headers. */
+.history-table th > button {
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 6px;
+  border: 0;
+  background: transparent;
+  color: #8998ac;
+  font: inherit;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.history-table th > button span {
+  margin-left: 4px;
+  color: #66778c;
+}
+.history-table th > button.active {
+  color: #e0bd58;
+  background: rgba(213,177,74,.08);
+}
+.history-table th:not(:nth-child(2)) > button {
+  text-align: center;
+}
+.history-table th:nth-child(n+3),
+.history-table td:nth-child(n+3) {
+  min-width: 78px;
+  text-align: center;
+}
+
+/* Give the frozen identity column enough room to preserve full names. */
+.history-table th:nth-child(2),
+.history-table td:nth-child(2) {
+  width: 220px;
+  min-width: 220px;
+  max-width: 220px;
+}
+.history-identity > div:last-child {
+  min-width: 0;
+}
+.history-identity a,
+.history-identity span {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+
+@media(max-width:720px){
+  .history-table{min-width:1120px}
+  .history-table th:nth-child(2),.history-table td:nth-child(2){
+    left:30px;
+    width:205px;
+    min-width:205px;
+    max-width:205px;
+    padding-left:8px;
+    padding-right:10px;
+  }
+  .history-table th:nth-child(n+3),.history-table td:nth-child(n+3){min-width:82px}
+  .history-table th > button{min-height:34px;padding:6px 5px;font-size:8px}
+  .history-identity a{max-width:none;white-space:normal;overflow:visible;text-overflow:clip;font-size:10px;line-height:1.22}
+  .history-identity span{max-width:none;white-space:normal;overflow:visible;text-overflow:clip;font-size:8px;line-height:1.2}
+}

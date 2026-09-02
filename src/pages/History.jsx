@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Archive, ChevronRight, Landmark, Shield, Trophy, Users } from "lucide-react";
 import PageHeader from "../components/PageHeader";
 import meshShield from "../assets/logos/mfl-shield.png";
-import { getCareerStandingsData, getChampionsHistoryData, getSeasonArchiveData } from "../services/historyService";
+import { getCareerStandingsData, getChampionsHistoryData, getSeasonArchiveData, prefetchHistoryPostseasonData } from "../services/historyService";
 import "../styles/history.css";
 
 const CONFERENCES = {
@@ -11,22 +11,6 @@ const CONFERENCES = {
   FBS: ["ACC", "Big Ten", "Big 12", "MAC", "Mountain West", "SEC", "Sun Belt"],
   FCS: ["Big Sky", "CAA", "Ivy", "MVC", "NEC", "Southland"],
 };
-
-const COACH_SORTS = [
-  ["conferenceWins", "Conference Wins"],
-  ["tierWins", "Tier Wins"],
-  ["meshWins", "MESH Wins"],
-  ["conferencePct", "Conference Win %"],
-  ["tierPct", "Tier Win %"],
-  ["meshPct", "MESH Win %"],
-];
-
-const FRANCHISE_SORTS = [
-  ["conferenceWins", "Conference Wins"],
-  ["tierWins", "Tier Wins"],
-  ["conferencePct", "Conference Win %"],
-  ["tierPct", "Tier Win %"],
-];
 
 const pct = (value) => Number(value || 0).toFixed(3).replace(/^0/, "");
 
@@ -280,9 +264,11 @@ function ArchiveRecordBook({ tier, rows }) {
       <td><Link to={`/league/franchises/${row.id}`} className="archive-record-team">{row.logo ? <img src={row.logo} alt=""/> : <Shield size={20}/>}<span>{row.name}</span></Link></td>
       {tier === "FBS" ? <><td>{row.nationalTitles}</td><td>{row.conferenceChampionshipApps}</td><td>{row.conferenceTitles}</td><td>{row.cfpApps}</td><td>{row.cfpWins}-{row.cfpLosses}</td><td>{row.bowlApps}</td><td>{row.bowlWins}-{row.bowlLosses}</td></> : tier === "FCS" ? <><td>{row.nationalTitles}</td><td>{row.conferenceTitles}</td><td>{row.playoffApps}</td><td>{row.playoffWins}-{row.playoffLosses}</td></> : <><td>{row.divisionTitles}</td><td>{row.conferenceTitles}</td><td>{row.superBowls}</td><td>{row.playoffApps}</td><td>{row.playoffWins}-{row.playoffLosses}</td></>}
     </tr>)}
-    <tr className="archive-record-total-row"><td><strong>TOTALS</strong></td>
-      {tier === "FBS" ? <><td>{totals.nationalTitles}</td><td>{totals.conferenceChampionshipApps}</td><td>{totals.conferenceTitles}</td><td>{totals.cfpApps}</td><td>{totals.cfpWins}-{totals.cfpLosses}</td><td>{totals.bowlApps}</td><td>{totals.bowlWins}-{totals.bowlLosses}</td></> : tier === "FCS" ? <><td>{totals.nationalTitles}</td><td>{totals.conferenceTitles}</td><td>{totals.playoffApps}</td><td>{totals.playoffWins}-{totals.playoffLosses}</td></> : <><td>{totals.divisionTitles}</td><td>{totals.conferenceTitles}</td><td>{totals.superBowls}</td><td>{totals.playoffApps}</td><td>{totals.playoffWins}-{totals.playoffLosses}</td></>}
-    </tr></tbody>
+    {tier !== "NFL" ? (
+      <tr className="archive-record-total-row"><td><strong>TOTALS</strong></td>
+        {tier === "FBS" ? <><td>{totals.nationalTitles}</td><td>{totals.conferenceChampionshipApps}</td><td>{totals.conferenceTitles}</td><td>{totals.cfpApps}</td><td>{totals.cfpWins}-{totals.cfpLosses}</td><td>{totals.bowlApps}</td><td>{totals.bowlWins}-{totals.bowlLosses}</td></> : <><td>{totals.nationalTitles}</td><td>{totals.conferenceTitles}</td><td>{totals.playoffApps}</td><td>{totals.playoffWins}-{totals.playoffLosses}</td></>}
+      </tr>
+    ) : null}</tbody>
   </table></div>;
 }
 
@@ -293,8 +279,8 @@ export default function History() {
   const [section, setSection] = useState(initialSection);
   const [mode, setMode] = useState(searchParams.get("mode") === "franchises" ? "franchises" : "coaches");
   const [population, setPopulation] = useState(searchParams.get("population") === "all" ? "all" : "current");
-  const [tier, setTier] = useState(["NFL","FBS","FCS"].includes(searchParams.get("tier")) ? searchParams.get("tier") : "FBS");
-  const [conference, setConference] = useState(searchParams.get("conference") || "ACC");
+  const [tier, setTier] = useState(["NFL","FBS","FCS"].includes(searchParams.get("tier")) ? searchParams.get("tier") : "NFL");
+  const [conference, setConference] = useState(searchParams.has("conference") ? searchParams.get("conference") : "all");
   const [sortKey, setSortKey] = useState("conferenceWins");
   const [sortDirection, setSortDirection] = useState("desc");
   const [data, setData] = useState({ coaches: [], franchises: [] });
@@ -338,7 +324,7 @@ export default function History() {
   }, [tier, conference]);
 
   useEffect(() => {
-    if (mode === "franchises" && (sortKey === "meshWins" || sortKey === "meshPct")) {
+    if (mode === "franchises" && ["meshRecord", "meshWins", "meshPct", "meshSeasons"].includes(sortKey)) {
       setSortKey("conferenceWins");
       setSortDirection("desc");
     }
@@ -354,6 +340,15 @@ export default function History() {
       .finally(() => live && setLoading(false));
     return () => { live = false; };
   }, [tier, conference, population]);
+
+
+  useEffect(() => {
+    if (loading || error) return;
+    const timer = window.setTimeout(() => {
+      prefetchHistoryPostseasonData();
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [loading, error]);
 
 
   useEffect(() => {
@@ -396,33 +391,68 @@ export default function History() {
 
   const rows = useMemo(() => {
     const source = mode === "coaches" ? data.coaches : data.franchises;
-    const value = (row) => {
-      if (sortKey === "tierWins") return row.tier.wins;
-      if (sortKey === "meshWins") return row.mesh.wins;
-      if (sortKey === "conferencePct") return row.conference.winPct;
-      if (sortKey === "tierPct") return row.tier.winPct;
-      if (sortKey === "meshPct") return row.mesh.winPct;
-      return row.conference.wins;
-    };
     const multiplier = sortDirection === "asc" ? 1 : -1;
-    return [...source].sort((a, b) => {
-      const primary = value(a) - value(b);
-      if (primary) return primary * multiplier;
+
+    const compareRecord = (aRecord, bRecord) => {
+      const pctDiff = Number(aRecord?.winPct || 0) - Number(bRecord?.winPct || 0);
+      if (pctDiff) return pctDiff;
+      const winsDiff = Number(aRecord?.wins || 0) - Number(bRecord?.wins || 0);
+      if (winsDiff) return winsDiff;
+      return Number(bRecord?.losses || 0) - Number(aRecord?.losses || 0);
+    };
+
+    const compareRows = (a, b) => {
+      if (sortKey === "name") return String(a.name || "").localeCompare(String(b.name || ""));
+      if (sortKey === "conferenceRecord") return compareRecord(a.conference, b.conference);
+      if (sortKey === "tierRecord") return compareRecord(a.tier, b.tier);
+      if (sortKey === "meshRecord") return compareRecord(a.mesh, b.mesh);
+
+      const value = (row) => {
+        if (sortKey === "tierWins") return row.tier.wins;
+        if (sortKey === "meshWins") return row.mesh.wins;
+        if (sortKey === "conferencePct") return row.conference.winPct;
+        if (sortKey === "tierPct") return row.tier.winPct;
+        if (sortKey === "meshPct") return row.mesh.winPct;
+        if (sortKey === "conferenceSeasons") return row.conferenceSeasons;
+        if (sortKey === "meshSeasons") return row.meshSeasons;
+        return row.conference.wins;
+      };
+
+      const primary = Number(value(a) || 0) - Number(value(b) || 0);
+      if (primary) return primary;
       const confWins = a.conference.wins - b.conference.wins;
-      if (confWins) return confWins * multiplier;
+      if (confWins) return confWins;
       const tierWins = a.tier.wins - b.tier.wins;
-      if (tierWins) return tierWins * multiplier;
-      return a.name.localeCompare(b.name);
+      if (tierWins) return tierWins;
+      return String(b.name || "").localeCompare(String(a.name || ""));
+    };
+
+    return [...source].sort((a, b) => {
+      const result = compareRows(a, b);
+      return sortKey === "name" ? (sortDirection === "asc" ? result : -result) : result * multiplier;
     });
   }, [data, mode, sortKey, sortDirection]);
 
   const chooseSort = (key) => {
-    if (key === sortKey) setSortDirection((direction) => direction === "desc" ? "asc" : "desc");
-    else {
-      setSortKey(key);
-      setSortDirection("desc");
+    if (key === sortKey) {
+      setSortDirection((direction) => direction === "desc" ? "asc" : "desc");
+      return;
     }
+    setSortKey(key);
+    setSortDirection(key === "name" ? "asc" : "desc");
   };
+
+  const careerSortHeader = (key, text, ariaLabel = text) => (
+    <button
+      type="button"
+      className={`history-table-sort ${sortKey === key ? "active" : ""}`}
+      onClick={() => chooseSort(key)}
+      aria-label={`Sort by ${ariaLabel}`}
+    >
+      <span>{text}</span>
+      <b aria-hidden="true">{sortKey === key ? (sortDirection === "desc" ? "↓" : "↑") : "↕"}</b>
+    </button>
+  );
 
   const label = conference === "all" ? "CONF" : conference;
   const historyLabel = conference === "all" ? `${tier} History` : `${conference} History`;
@@ -460,13 +490,27 @@ export default function History() {
           {mode === "coaches" && <label><span>Coaches</span><select value={population} onChange={(e) => { setPopulation(e.target.value); updateHistoryUrl({ population: e.target.value }); }}><option value="current">Current Coaches</option><option value="all">All-Time Coaches</option></select></label>}
         </div>
 
-        <div className="history-rankby"><span>Rank by</span>{(mode === "coaches" ? COACH_SORTS : FRANCHISE_SORTS).map(([key, text]) => <button key={key} className={sortKey === key ? "active" : ""} onClick={() => chooseSort(key)}>{text}{sortKey === key && <span className="history-sort-arrow">{sortDirection === "desc" ? "↓" : "↑"}</span>}</button>)}</div>
-
         {loading && <div className="history-state">Loading MESH history…</div>}
         {error && <div className="history-state error">{error}</div>}
         {!loading && !error && <section className="history-table-wrap">
           <table className="history-table">
-            <thead><tr><th>#</th><th>{mode === "coaches" ? "Coach" : "Franchise"}</th><th>{label} REC</th><th>{label} W</th><th>{label} WIN%</th><th>{tier} REC</th><th>{tier} W</th><th>{tier} WIN%</th>{mode === "coaches" && <><th>MESH REC</th><th>MESH W</th><th>MESH WIN%</th><th>SEASONS IN CONF</th><th>SEASONS IN MESH</th></>}</tr></thead>
+            <thead><tr>
+              <th><button type="button" className="history-rank-reset" onClick={() => { setSortKey("conferenceWins"); setSortDirection("desc"); }} aria-label="Reset career ranking">#</button></th>
+              <th>{careerSortHeader("name", mode === "coaches" ? "Coach" : "Franchise")}</th>
+              <th>{careerSortHeader("conferenceRecord", `${label} REC`, `${label} record`)}</th>
+              <th>{careerSortHeader("conferenceWins", `${label} W`, `${label} wins`)}</th>
+              <th>{careerSortHeader("conferencePct", `${label} WIN%`, `${label} win percentage`)}</th>
+              <th>{careerSortHeader("tierRecord", `${tier} REC`, `${tier} record`)}</th>
+              <th>{careerSortHeader("tierWins", `${tier} W`, `${tier} wins`)}</th>
+              <th>{careerSortHeader("tierPct", `${tier} WIN%`, `${tier} win percentage`)}</th>
+              {mode === "coaches" && <>
+                <th>{careerSortHeader("meshRecord", "MESH REC", "MESH record")}</th>
+                <th>{careerSortHeader("meshWins", "MESH W", "MESH wins")}</th>
+                <th>{careerSortHeader("meshPct", "MESH WIN%", "MESH win percentage")}</th>
+                <th>{careerSortHeader("conferenceSeasons", "SEASONS IN CONF", "seasons in conference")}</th>
+                <th>{careerSortHeader("meshSeasons", "SEASONS IN MESH", "seasons in MESH")}</th>
+              </>}
+            </tr></thead>
             <tbody>{rows.map((row, index) => <tr key={row.id}>
               <td className="history-rank">{index + 1}</td>
               <td><Identity row={row} mode={mode}/></td>

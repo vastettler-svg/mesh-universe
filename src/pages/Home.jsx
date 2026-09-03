@@ -70,6 +70,7 @@ const quickLinks = [
     title: "History",
     description: "Champions, records and past seasons",
     icon: History,
+    path: "/history",
   }
 ];
 

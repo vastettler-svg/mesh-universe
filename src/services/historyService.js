@@ -1,4 +1,4 @@
-import { getStandingsArchive, getStandingsData } from "./googleSheets";
+import { getChampionsStandingsArchive, getHistoryGameResults, getStandingsArchive, getStandingsData } from "./googleSheets";
 import { getCoachSeasonTenureRows } from "./coachData";
 
 const CONFERENCE_ALIASES = {
@@ -282,75 +282,210 @@ function buildRecordBooks(archive, games, currentTeams) {
   return books;
 }
 
-let historyBasePromise = null;
+let historyCorePromise = null;
+let historyCurrentTeamsPromise = null;
 let championsHistoryCache = null;
-let seasonArchiveCache = null;
+const seasonArchiveCache = new Map();
+const recordBookCache = new Map();
 
-async function getHistoryBaseData() {
-  if (!historyBasePromise) {
-    historyBasePromise = (async () => {
-      const { getGameResults } = await import("./googleSheets");
-      const [archive, games, currentTeams] = await Promise.all([
-        getStandingsArchive(),
-        getGameResults({ allSeasons: true }),
-        getStandingsData(),
-      ]);
-      return { archive, games, currentTeams };
-    })().catch((error) => {
-      historyBasePromise = null;
+async function getHistoryCoreData() {
+  if (!historyCorePromise) {
+    historyCorePromise = Promise.all([
+      getStandingsArchive(),
+      getHistoryGameResults(),
+    ])
+      .then(([archive, games]) => ({ archive, games }))
+      .catch((error) => {
+        historyCorePromise = null;
+        throw error;
+      });
+  }
+
+  return historyCorePromise;
+}
+
+async function getHistoryCurrentTeams() {
+  if (!historyCurrentTeamsPromise) {
+    historyCurrentTeamsPromise = getStandingsData().catch((error) => {
+      historyCurrentTeamsPromise = null;
       throw error;
     });
   }
-  return historyBasePromise;
+
+  return historyCurrentTeamsPromise;
+}
+
+function latestConferenceNames(archive, tier) {
+  const latestSeason = Math.max(
+    0,
+    ...archive
+      .filter((row) => row.tier === tier)
+      .map((row) => Number(row.season) || 0),
+  );
+
+  return [
+    ...new Set(
+      archive
+        .filter((row) => row.tier === tier && Number(row.season) === latestSeason)
+        .map((row) => clean(row.conference))
+        .filter(Boolean),
+    ),
+  ];
 }
 
 export function prefetchHistoryPostseasonData() {
-  return getHistoryBaseData().catch(() => null);
+  // Warm only the lightweight archive + historical games path. Current TEAM DATA
+  // is intentionally not part of this prefetch so opening History never blocks on it.
+  return getHistoryCoreData().catch(() => null);
 }
 
 export async function getChampionsHistoryData() {
   if (championsHistoryCache) return championsHistoryCache;
-  const { archive, games, currentTeams } = await getHistoryBaseData();
-  const seasons = [...new Set(archive.map((row) => Number(row.season)).filter(Boolean))].sort((a,b) => b-a);
+
+  /*
+   * Champions-only lightweight path.
+   *
+   * - STANDINGS_ARCHIVE supplies season identity / fallback champion fields.
+   * - GAME_RESULTS supplies actual title-game winners and scores.
+   * - No LIVE_PLAYER_SCORES.
+   * - No full Game Center getGameResults() pipeline.
+   * - No TEAM DATA or coach-tenure dependency is required to paint Champions.
+   */
+  const [archive, games] = await Promise.all([
+    getChampionsStandingsArchive(),
+    getHistoryGameResults(),
+  ]);
+
+  const seasons = [
+    ...new Set(
+      archive
+        .map((row) => Number(row.season))
+        .filter(Boolean),
+    ),
+  ].sort((a, b) => b - a);
+
   const bySeason = {};
 
   seasons.forEach((season) => {
-    const seasonRows = archive.filter((row) => Number(row.season) === season);
-    const seasonGames = games.filter((game) => Number(game.season) === season);
-    const champions = ["NFL","FBS","FCS"].map((tier) => {
-      const titleGame = seasonGames.find((game) => game.tier === tier && isTitleGame(game, tier));
+    const seasonRows = archive.filter(
+      (row) => Number(row.season) === season,
+    );
+    const seasonGames = games.filter(
+      (game) => Number(game.season) === season,
+    );
+
+    const champions = ["NFL", "FBS", "FCS"].map((tier) => {
+      const titleGame = seasonGames.find(
+        (game) => game.tier === tier && isTitleGame(game, tier),
+      );
       const winner = winnerFromGame(titleGame);
+
       if (winner) return { tier, ...winner, game: titleGame };
-      const row = seasonRows.find((item) => item.tier === tier && /champion/i.test(item.playoffResult || "") && !/runner/i.test(item.playoffResult || ""));
-      return row ? { tier, ...historicalIdentity(row), game: null } : { tier };
+
+      const row =
+        seasonRows.find(
+          (item) =>
+            item.tier === tier &&
+            /champion/i.test(item.playoffResult || "") &&
+            !/runner/i.test(item.playoffResult || ""),
+        ) ||
+        seasonRows.find(
+          (item) =>
+            item.tier === tier &&
+            /national champion|super bowl champion/i.test(
+              `${item.playoffResult || ""} ${item.conferenceResult || ""}`,
+            ),
+        );
+
+      return row
+        ? { tier, ...historicalIdentity(row), game: null }
+        : { tier };
     });
 
-    const nflConferenceChampions = seasonGames.filter((g) => g.tier === "NFL" && Number(g.week) === 16).map((g) => ({ ...winnerFromGame(g), tier: "NFL", conference: winnerFromGame(g)?.conference || "" })).filter((x) => x.id);
-    const nflDivisionChampions = seasonRows.filter((r) => r.tier === "NFL" && Number(r.divisionRank) === 1).map((r) => ({ ...historicalIdentity(r), tier: "NFL", division: r.division }));
+    const nflConferenceChampions = seasonGames
+      .filter((game) => game.tier === "NFL" && Number(game.week) === 16)
+      .map((game) => {
+        const winner = winnerFromGame(game);
+        return winner
+          ? {
+              ...winner,
+              tier: "NFL",
+              conference: winner.conference || "",
+            }
+          : null;
+      })
+      .filter(Boolean);
 
-    const conferenceData = {};
-    ["FBS","FCS"].forEach((tier) => {
-      conferenceData[tier] = {};
-      const conferences = [...new Set(currentTeams.filter((t) => t.tier === tier).map((t) => clean(t.conference)).filter(Boolean))];
-      conferences.forEach((conference) => {
-        const { champion, game } = seasonConferenceChampion(seasonRows, seasonGames, tier, conference);
-        const postseasonGames = tier === "FBS" ? seasonGames.filter(isCfpGame) : seasonGames.filter(isFcsPlayoff);
-        const confPostseasonGames = postseasonGames.filter((g) => gameHasConference(g, conference));
-        const qualifiers = uniqueParticipants(confPostseasonGames).filter((t) => conferenceKey(t.conference) === conferenceKey(conference));
-        const qualifierIds = new Set(qualifiers.map((t) => clean(t.id)));
-        const playoffGames = postseasonGames.filter((g) => qualifierIds.has(clean(g.team1Id)) || qualifierIds.has(clean(g.team2Id))).sort((a,b) => Number(a.week)-Number(b.week) || Number(a.gameNumber)-Number(b.gameNumber));
-        const bowls = tier === "FBS" ? seasonGames.filter((g) => g.tier === "FBS" && g.bowlName && !isCfpGame(g) && gameHasConference(g, conference)).sort((a,b) => Number(a.week)-Number(b.week) || String(a.bowlName).localeCompare(String(b.bowlName))) : [];
-        conferenceData[tier][conferenceKey(conference)] = { conference, champion, championshipGame: game, qualifiers, playoffGames, bowls };
+    const nflDivisionChampions = seasonRows
+      .filter(
+        (row) =>
+          row.tier === "NFL" &&
+          Number(row.divisionRank) === 1,
+      )
+      .map((row) => ({
+        ...historicalIdentity(row),
+        tier: "NFL",
+        conference: row.conference,
+        division: row.division,
+      }));
+
+    const conferenceData = {
+      FBS: {},
+      FCS: {},
+    };
+
+    ["FBS", "FCS"].forEach((tier) => {
+      const conferenceNames = [
+        ...new Set(
+          seasonRows
+            .filter((row) => row.tier === tier)
+            .map((row) => clean(row.conference))
+            .filter(Boolean),
+        ),
+      ];
+
+      conferenceNames.forEach((conference) => {
+        const conferenceRows = seasonRows.filter(
+          (row) =>
+            row.tier === tier &&
+            conferenceKey(row.conference) === conferenceKey(conference),
+        );
+
+        const { champion, game } = seasonConferenceChampion(
+          seasonRows,
+          seasonGames,
+          tier,
+          conference,
+        );
+
+        conferenceData[tier][conferenceKey(conference)] = {
+          conference,
+          champion:
+            champion ||
+            historicalIdentity(
+              conferenceRows.find((row) =>
+                /conference champion/i.test(row.conferenceResult || ""),
+              ) ||
+              conferenceRows.find(
+                (row) => Number(row.conferenceRank) === 1,
+              ),
+            ),
+          championshipGame: game || null,
+        };
       });
     });
 
-    bySeason[season] = { champions, nflConferenceChampions, nflDivisionChampions, conferenceData };
+    bySeason[season] = {
+      champions,
+      nflConferenceChampions,
+      nflDivisionChampions,
+      conferenceData,
+    };
   });
 
-  championsHistoryCache = { seasons, bySeason, recordBooks: buildRecordBooks(archive, games, currentTeams) };
+  championsHistoryCache = { seasons, bySeason };
   return championsHistoryCache;
 }
-
 
 // Phase 8C — Season Archive
 // Completed seasons only. Historical identities come from STANDINGS_ARCHIVE /
@@ -412,90 +547,247 @@ function postseasonRecord(games, franchiseId) {
   return `${wins}-${losses}`;
 }
 
-export async function getSeasonArchiveData() {
-  if (seasonArchiveCache) return seasonArchiveCache;
-  const { archive, games, currentTeams } = await getHistoryBaseData();
+export async function getSeasonArchiveData(options = {}) {
+  const { archive, games } = await getHistoryCoreData();
 
   const seasons = [...new Set(archive.map((row) => Number(row.season)).filter(Boolean))]
     .sort((a, b) => b - a);
-  const recordBooks = buildRecordBooks(archive, games, currentTeams);
-  const bySeason = {};
 
-  seasons.forEach((season) => {
-    const seasonRows = archive.filter((row) => Number(row.season) === season);
-    const seasonGames = games.filter((game) => Number(game.season) === season);
+  const requestedSeason = Number(options.season);
+  const selectedSeason =
+    seasons.includes(requestedSeason) ? requestedSeason : seasons[0] || null;
+  const tier = ["NFL", "FBS", "FCS"].includes(options.tier)
+    ? options.tier
+    : "NFL";
+  const conference = clean(options.conference || "");
 
+  if (!selectedSeason) {
+    return {
+      seasons,
+      selectedSeason: null,
+      tier,
+      conference,
+      seasonData: null,
+    };
+  }
+
+  const cacheKey = `${selectedSeason}|${tier}|${conferenceKey(conference)}`;
+  if (seasonArchiveCache.has(cacheKey)) {
+    return seasonArchiveCache.get(cacheKey);
+  }
+
+  const seasonRows = archive.filter(
+    (row) => Number(row.season) === selectedSeason,
+  );
+  const seasonGames = games.filter(
+    (game) => Number(game.season) === selectedSeason,
+  );
+
+  let tierData;
+
+  if (tier === "NFL") {
     const nflPlayoffGames = seasonGames
       .filter(isNflPlayoff)
-      .sort((a, b) => Number(a.week) - Number(b.week) || Number(a.gameNumber) - Number(b.gameNumber));
+      .sort(
+        (a, b) =>
+          Number(a.week) - Number(b.week) ||
+          Number(a.gameNumber) - Number(b.gameNumber),
+      );
+
     const nflQualifiers = seasonRows
       .filter((row) => row.tier === "NFL" && n(row.playoffSeed) > 0)
       .map(archiveTeam)
-      .map((team) => ({ ...team, postseasonRecord: postseasonRecord(nflPlayoffGames, team.id) }))
-      .sort((a, b) => (a.conference || "").localeCompare(b.conference || "") || (a.playoffSeed || 99) - (b.playoffSeed || 99));
+      .map((team) => ({
+        ...team,
+        postseasonRecord: postseasonRecord(nflPlayoffGames, team.id),
+      }))
+      .sort(
+        (a, b) =>
+          (a.conference || "").localeCompare(b.conference || "") ||
+          (a.playoffSeed || 99) - (b.playoffSeed || 99),
+      );
 
-    const fbsConferences = {};
-    const fbsNames = [...new Set(currentTeams.filter((team) => team.tier === "FBS").map((team) => clean(team.conference)).filter(Boolean))];
-    fbsNames.forEach((conference) => {
-      const cfpGames = seasonGames.filter(isCfpGame);
-      const confCfpGames = cfpGames.filter((game) => gameHasConference(game, conference));
-      const qualifiers = qualifierRowsForGames(seasonRows, confCfpGames, "FBS", conference)
-        .map((team) => ({ ...team, postseasonRecord: postseasonRecord(cfpGames, team.id) }));
-      const qualifierIds = new Set(qualifiers.map((team) => clean(team.id)));
-      const playoffGames = cfpGames
-        .filter((game) => qualifierIds.has(clean(game.team1Id)) || qualifierIds.has(clean(game.team2Id)))
-        .sort((a, b) => Number(a.week) - Number(b.week) || Number(a.gameNumber) - Number(b.gameNumber));
-      const bowls = seasonGames
-        .filter((game) => game.tier === "FBS" && Boolean(game.bowlName) && !isCfpGame(game) && gameHasConference(game, conference))
-        .sort((a, b) => Number(a.week) - Number(b.week) || String(a.bowlName).localeCompare(String(b.bowlName)));
-      const { champion, game } = seasonConferenceChampion(seasonRows, seasonGames, "FBS", conference);
-      fbsConferences[conferenceKey(conference)] = {
-        conference,
-        standings: sortArchiveStandings(seasonRows, "FBS", conference).map(archiveTeam),
-        champion,
-        championshipGame: game,
-        qualifiers,
-        playoffGames,
-        bowls,
-      };
-    });
-
-    const fcsConferences = {};
-    const fcsNames = [...new Set(currentTeams.filter((team) => team.tier === "FCS").map((team) => clean(team.conference)).filter(Boolean))];
-    fcsNames.forEach((conference) => {
-      const allPlayoffGames = seasonGames.filter(isFcsPlayoff);
-      const confGames = allPlayoffGames.filter((game) => gameHasConference(game, conference));
-      const qualifiers = qualifierRowsForGames(seasonRows, confGames, "FCS", conference)
-        .map((team) => ({ ...team, postseasonRecord: postseasonRecord(allPlayoffGames, team.id) }));
-      const qualifierIds = new Set(qualifiers.map((team) => clean(team.id)));
-      const playoffGames = allPlayoffGames
-        .filter((game) => qualifierIds.has(clean(game.team1Id)) || qualifierIds.has(clean(game.team2Id)))
-        .sort((a, b) => Number(a.week) - Number(b.week) || Number(a.gameNumber) - Number(b.gameNumber));
-      const { champion } = seasonConferenceChampion(seasonRows, seasonGames, "FCS", conference);
-      fcsConferences[conferenceKey(conference)] = {
-        conference,
-        standings: sortArchiveStandings(seasonRows, "FCS", conference).map(archiveTeam),
-        champion,
-        qualifiers,
-        playoffGames,
-      };
-    });
-
-    bySeason[season] = {
-      NFL: {
-        standings: sortArchiveStandings(seasonRows, "NFL").map(archiveTeam),
-        standingsByConference: {
-          AFC: sortArchiveStandings(seasonRows, "NFL", "AFC").map(archiveTeam),
-          NFC: sortArchiveStandings(seasonRows, "NFL", "NFC").map(archiveTeam),
-        },
-        qualifiers: nflQualifiers,
-        playoffGames: nflPlayoffGames,
+    tierData = {
+      standings: sortArchiveStandings(seasonRows, "NFL").map(archiveTeam),
+      standingsByConference: {
+        AFC: sortArchiveStandings(seasonRows, "NFL", "AFC").map(archiveTeam),
+        NFC: sortArchiveStandings(seasonRows, "NFL", "NFC").map(archiveTeam),
       },
-      FBS: { conferences: fbsConferences },
-      FCS: { conferences: fcsConferences },
+      qualifiers: nflQualifiers,
+      playoffGames: nflPlayoffGames,
     };
-  });
+  } else {
+    const conferenceNames = latestConferenceNames(archive, tier);
+    const selectedConference =
+      conferenceNames.find(
+        (name) => conferenceKey(name) === conferenceKey(conference),
+      ) ||
+      conferenceNames[0] ||
+      "";
 
-  seasonArchiveCache = { seasons, bySeason, recordBooks };
-  return seasonArchiveCache;
+    const key = conferenceKey(selectedConference);
+
+    if (tier === "FBS") {
+      const cfpGames = seasonGames.filter(isCfpGame);
+      const confCfpGames = cfpGames.filter((game) =>
+        gameHasConference(game, selectedConference),
+      );
+      const qualifiers = qualifierRowsForGames(
+        seasonRows,
+        confCfpGames,
+        "FBS",
+        selectedConference,
+      ).map((team) => ({
+        ...team,
+        postseasonRecord: postseasonRecord(cfpGames, team.id),
+      }));
+      const qualifierIds = new Set(
+        qualifiers.map((team) => clean(team.id)),
+      );
+      const playoffGames = cfpGames
+        .filter(
+          (game) =>
+            qualifierIds.has(clean(game.team1Id)) ||
+            qualifierIds.has(clean(game.team2Id)),
+        )
+        .sort(
+          (a, b) =>
+            Number(a.week) - Number(b.week) ||
+            Number(a.gameNumber) - Number(b.gameNumber),
+        );
+      const bowls = seasonGames
+        .filter(
+          (game) =>
+            game.tier === "FBS" &&
+            Boolean(game.bowlName) &&
+            !isCfpGame(game) &&
+            gameHasConference(game, selectedConference),
+        )
+        .sort(
+          (a, b) =>
+            Number(a.week) - Number(b.week) ||
+            String(a.bowlName).localeCompare(String(b.bowlName)),
+        );
+      const { champion, game } = seasonConferenceChampion(
+        seasonRows,
+        seasonGames,
+        "FBS",
+        selectedConference,
+      );
+
+      tierData = {
+        conferences: {
+          [key]: {
+            conference: selectedConference,
+            standings: sortArchiveStandings(
+              seasonRows,
+              "FBS",
+              selectedConference,
+            ).map(archiveTeam),
+            champion,
+            championshipGame: game,
+            qualifiers,
+            playoffGames,
+            bowls,
+          },
+        },
+      };
+    } else {
+      const allPlayoffGames = seasonGames.filter(isFcsPlayoff);
+      const confGames = allPlayoffGames.filter((game) =>
+        gameHasConference(game, selectedConference),
+      );
+      const qualifiers = qualifierRowsForGames(
+        seasonRows,
+        confGames,
+        "FCS",
+        selectedConference,
+      ).map((team) => ({
+        ...team,
+        postseasonRecord: postseasonRecord(allPlayoffGames, team.id),
+      }));
+      const qualifierIds = new Set(
+        qualifiers.map((team) => clean(team.id)),
+      );
+      const playoffGames = allPlayoffGames
+        .filter(
+          (game) =>
+            qualifierIds.has(clean(game.team1Id)) ||
+            qualifierIds.has(clean(game.team2Id)),
+        )
+        .sort(
+          (a, b) =>
+            Number(a.week) - Number(b.week) ||
+            Number(a.gameNumber) - Number(b.gameNumber),
+        );
+      const { champion } = seasonConferenceChampion(
+        seasonRows,
+        seasonGames,
+        "FCS",
+        selectedConference,
+      );
+
+      tierData = {
+        conferences: {
+          [key]: {
+            conference: selectedConference,
+            standings: sortArchiveStandings(
+              seasonRows,
+              "FCS",
+              selectedConference,
+            ).map(archiveTeam),
+            champion,
+            qualifiers,
+            playoffGames,
+          },
+        },
+      };
+    }
+  }
+
+  const result = {
+    seasons,
+    selectedSeason,
+    tier,
+    conference,
+    seasonData: {
+      [tier]: tierData,
+    },
+  };
+
+  seasonArchiveCache.set(cacheKey, result);
+  return result;
+}
+
+export async function getSeasonArchiveRecordBookData(options = {}) {
+  const tier = ["NFL", "FBS", "FCS"].includes(options.tier)
+    ? options.tier
+    : "NFL";
+  const conference = clean(options.conference || "");
+  const cacheKey = `${tier}|${conferenceKey(conference)}`;
+
+  if (recordBookCache.has(cacheKey)) {
+    return recordBookCache.get(cacheKey);
+  }
+
+  const [{ archive, games }, currentTeams] = await Promise.all([
+    getHistoryCoreData(),
+    getHistoryCurrentTeams(),
+  ]);
+
+  const books = buildRecordBooks(archive, games, currentTeams);
+
+  let result;
+
+  if (tier === "NFL") {
+    result = books.NFL || {};
+  } else {
+    const key = conferenceKey(conference);
+    result = {
+      [key]: books[tier]?.[key] || [],
+    };
+  }
+
+  recordBookCache.set(cacheKey, result);
+  return result;
 }

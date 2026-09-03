@@ -624,18 +624,7 @@ function buildHistoricalTeamLogoLookup_(rows) {
   return lookup;
 }
 
-export async function getStandingsArchive() {
-  const [rows, directoryRows] = await Promise.all([
-    fetchCsvRows(
-      STANDINGS_ARCHIVE_CSV_URL,
-      "STANDINGS_ARCHIVE",
-    ),
-    fetchCsvRows(
-      FRANCHISE_DIRECTORY_CSV_URL,
-      "FRANCHISE_DIRECTORY",
-    ).catch(() => []),
-  ]);
-
+function mapStandingsArchiveRows_(rows, directoryRows = []) {
   const historicalLogoLookup =
     buildHistoricalTeamLogoLookup_(directoryRows);
 
@@ -728,6 +717,40 @@ export async function getStandingsArchive() {
       return b.season - a.season;
     });
 }
+
+export async function getStandingsArchive() {
+  const [rows, directoryRows] = await Promise.all([
+    fetchCsvRows(
+      STANDINGS_ARCHIVE_CSV_URL,
+      "STANDINGS_ARCHIVE",
+    ),
+    fetchCsvRows(
+      FRANCHISE_DIRECTORY_CSV_URL,
+      "FRANCHISE_DIRECTORY",
+    ).catch(() => []),
+  ]);
+
+  return mapStandingsArchiveRows_(rows, directoryRows);
+}
+
+/*
+ * Champions-only archive path.
+ * Championship lineage does not need FRANCHISE_DIRECTORY to determine winners,
+ * so do not let that optional branding request hold the Champions screen open.
+ */
+export async function getChampionsStandingsArchive() {
+  /*
+   * Champions originally skipped FRANCHISE_DIRECTORY while we were isolating
+   * the loading problem. The loader issue was later traced to a React state
+   * cleanup race, not this branding request.
+   *
+   * Reuse the normal archive loader now so historical champions receive the
+   * same logo lookup as Career Standings / Season Archive while preserving the
+   * fixed Champions loading behavior in History.jsx.
+   */
+  return getStandingsArchive();
+}
+
 
 
 const COACH_CAROUSEL_HISTORICAL_LOGOS = {
@@ -902,8 +925,153 @@ export async function getDraftHQ() {
     });
 }
 
+
+/*
+ * Lightweight historical game feed used by History -> Champions / Season Archive.
+ *
+ * The full getGameResults() path is intentionally rich because Scores/Game Center
+ * need current TEAM DATA, LIVE_PLAYER_SCORES, projections, and coach-tenure lookup.
+ * History does not need any of that live scoring work. It only needs the stored
+ * GAME_RESULTS result plus the season-specific identity already available in
+ * STANDINGS_ARCHIVE.
+ *
+ * Keeping this separate prevents Champions / Season Archive from waiting on the
+ * much larger live scoring feed or doing thousands of coach-tenure lookups.
+ */
+export async function getHistoryGameResults() {
+  const [gameRows, archive] = await Promise.all([
+    fetchCsvRows(GAME_RESULTS_CSV_URL, "GAME_RESULTS"),
+    getStandingsArchive(),
+  ]);
+
+  const identityBySeasonFranchise = new Map();
+
+  archive.forEach((row) => {
+    const season = Number(row.season);
+    const franchiseId = String(row.franchiseId || "").trim();
+    if (!season || !franchiseId) return;
+
+    identityBySeasonFranchise.set(`${season}|${franchiseId}`, {
+      name: String(row.franchiseName || "").trim(),
+      logo: String(row.logo || "").trim(),
+      coachId: String(row.coachId || "").trim(),
+      coach: String(row.coachName || "").trim(),
+      conference: String(row.conference || "").trim(),
+    });
+  });
+
+  return gameRows
+    .filter((row) => {
+      const gameId = String(row.Game_ID ?? "").trim();
+      const team1Id = String(
+        firstValue(row, ["Team1_Franchise_ID", "Franchise1_ID"]),
+      ).trim();
+      const team2Id = String(
+        firstValue(row, ["Team2_Franchise_ID", "Franchise2_ID"]),
+      ).trim();
+
+      return gameId && team1Id && team2Id;
+    })
+    .map((row) => {
+      const season = toNumber(
+        firstValue(row, ["Season", "season", "Year", "YEAR"]),
+      );
+      const week = toNumber(
+        firstValue(row, ["Week", "Schedule_Week"]),
+      );
+      const team1Id = String(
+        firstValue(row, ["Team1_Franchise_ID", "Franchise1_ID"]),
+      ).trim();
+      const team2Id = String(
+        firstValue(row, ["Team2_Franchise_ID", "Franchise2_ID"]),
+      ).trim();
+
+      const team1Identity =
+        identityBySeasonFranchise.get(`${season}|${team1Id}`) || {};
+      const team2Identity =
+        identityBySeasonFranchise.get(`${season}|${team2Id}`) || {};
+
+      const team1StoredName = String(
+        firstValue(row, ["Team1_Franchise_Name", "Franchise1_Name"]),
+      ).trim();
+      const team2StoredName = String(
+        firstValue(row, ["Team2_Franchise_Name", "Franchise2_Name"]),
+      ).trim();
+
+      let winnerId = String(row.Winner_Franchise_ID ?? "").trim();
+      const team1Score = toOptionalNumber(
+        firstValue(row, ["Team1_Score", "Franchise1_Score"]),
+      );
+      const team2Score = toOptionalNumber(
+        firstValue(row, ["Team2_Score", "Franchise2_Score"]),
+      );
+
+      if (
+        !winnerId &&
+        team1Score !== null &&
+        team2Score !== null
+      ) {
+        if (Number(team1Score) > Number(team2Score)) winnerId = team1Id;
+        if (Number(team2Score) > Number(team1Score)) winnerId = team2Id;
+      }
+
+      const tier = String(row.Tier ?? "").trim().toUpperCase();
+
+      return {
+        id: String(row.Game_ID ?? "").trim(),
+        gameId: String(row.Game_ID ?? "").trim(),
+        season,
+        week,
+        gameNumber: toNumber(
+          firstValue(row, [
+            "Game_Numer",
+            "Game_Number",
+            "Week_Game_Number",
+          ]),
+          1,
+        ),
+        tier,
+        tierClass: tier.toLowerCase(),
+        gameCategory: String(row.Game_Category ?? "").trim(),
+        gameType: String(row.Game_Type ?? "").trim(),
+        label: buildGameLabel(row),
+        bowlName: String(row.Bowl_Name ?? "").trim(),
+        notes: String(row.Notes ?? "").trim(),
+        winnerId,
+
+        team1Id,
+        team1Team:
+          team1StoredName ||
+          team1Identity.name ||
+          team1Id,
+        team1Logo: team1Identity.logo || "",
+        team1CoachId: team1Identity.coachId || "",
+        team1Coach: team1Identity.coach || "",
+        team1Conference: team1Identity.conference || "",
+        team1GameRank: toNumber(row.Team1_Game_Rank),
+        team1Score,
+
+        team2Id,
+        team2Team:
+          team2StoredName ||
+          team2Identity.name ||
+          team2Id,
+        team2Logo: team2Identity.logo || "",
+        team2CoachId: team2Identity.coachId || "",
+        team2Coach: team2Identity.coach || "",
+        team2Conference: team2Identity.conference || "",
+        team2GameRank: toNumber(row.Team2_Game_Rank),
+        team2Score,
+
+        status: "final",
+        statusLabel: "Final",
+      };
+    });
+}
+
 export async function getGameResults(options = {}) {
   const includeAllSeasons = Boolean(options.allSeasons);
+  const includeLiveScores = options.includeLiveScores !== false;
   const [
     gameRows,
     teamRows,
@@ -917,13 +1085,15 @@ export async function getGameResults(options = {}) {
       FRANCHISE_DIRECTORY_CSV_URL,
       "FRANCHISE_DIRECTORY",
     ),
-    getLivePlayerScores().catch((error) => {
-      console.warn(
-        "LIVE_PLAYER_SCORES unavailable; score cards will fall back to GAME_RESULTS projections.",
-        error,
-      );
-      return [];
-    }),
+    includeLiveScores
+      ? getLivePlayerScores().catch((error) => {
+          console.warn(
+            "LIVE_PLAYER_SCORES unavailable; score cards will fall back to GAME_RESULTS projections.",
+            error,
+          );
+          return [];
+        })
+      : Promise.resolve([]),
     getCoachSeasonTenureRows().catch((error) => {
       console.warn(
         "COACH_SEASON_TENURE unavailable; games will fall back to current coach names.",

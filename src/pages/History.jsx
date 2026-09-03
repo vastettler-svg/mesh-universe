@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Archive, ChevronRight, Landmark, Shield, Trophy, Users } from "lucide-react";
 import PageHeader from "../components/PageHeader";
 import meshShield from "../assets/logos/mfl-shield.png";
-import { getCareerStandingsData, getChampionsHistoryData, getSeasonArchiveData, prefetchHistoryPostseasonData } from "../services/historyService";
+import { getCareerStandingsData, getChampionsHistoryData, getSeasonArchiveData, getSeasonArchiveRecordBookData, prefetchHistoryPostseasonData } from "../services/historyService";
 import "../styles/history.css";
 
 const CONFERENCES = {
@@ -291,6 +291,7 @@ export default function History() {
   const [championsError, setChampionsError] = useState("");
   const [championTier, setChampionTier] = useState(["ALL","NFL","FBS","FCS"].includes(searchParams.get("championTier")) ? searchParams.get("championTier") : "ALL");
   const [archiveData, setArchiveData] = useState({ seasons: [], bySeason: {}, recordBooks: {} });
+  const [archiveRecordLoading, setArchiveRecordLoading] = useState(false);
   const [archiveLoading, setArchiveLoading] = useState(false);
   const [archiveError, setArchiveError] = useState("");
   const [archiveSeason, setArchiveSeason] = useState(Number(searchParams.get("season")) || null);
@@ -353,31 +354,120 @@ export default function History() {
 
   useEffect(() => {
     if (section !== "champions" || championsData.seasons.length) return;
+
     let live = true;
+
     setChampionsLoading(true);
+    setChampionsError("");
+
     getChampionsHistoryData()
-      .then((result) => { if (!live) return; setChampionsData(result); })
-      .catch((err) => live && setChampionsError(err.message || "Champions history unavailable."))
-      .finally(() => live && setChampionsLoading(false));
-    return () => { live = false; };
+      .then((result) => {
+        if (!live) return;
+
+        /*
+         * IMPORTANT:
+         * Clear loading in the same successful callback that stores the data.
+         *
+         * championsData.seasons.length is an effect dependency. Updating the
+         * data can therefore trigger this effect's cleanup before a chained
+         * .finally() runs, which leaves championsLoading stuck at true forever.
+         */
+        setChampionsData(result);
+        setChampionsLoading(false);
+      })
+      .catch((err) => {
+        if (!live) return;
+        setChampionsError(err.message || "Champions history unavailable.");
+        setChampionsLoading(false);
+      });
+
+    return () => {
+      live = false;
+    };
   }, [section, championsData.seasons.length]);
 
 
   useEffect(() => {
-    if (section !== "archive" || archiveData.seasons.length) return;
+    if (section !== "archive") return;
+
     let live = true;
     setArchiveLoading(true);
     setArchiveError("");
-    getSeasonArchiveData()
+
+    getSeasonArchiveData({
+      season: archiveSeason,
+      tier: archiveTier,
+      conference: archiveConference,
+    })
       .then((result) => {
         if (!live) return;
-        setArchiveData(result);
-        setArchiveSeason((current) => current || result.seasons[0] || null);
+
+        const selectedSeason = result.selectedSeason || archiveSeason;
+
+        setArchiveData((current) => ({
+          seasons: result.seasons,
+          bySeason: selectedSeason
+            ? {
+                ...current.bySeason,
+                [selectedSeason]: {
+                  ...(current.bySeason?.[selectedSeason] || {}),
+                  ...(result.seasonData || {}),
+                },
+              }
+            : current.bySeason,
+          recordBooks: current.recordBooks || {},
+        }));
+
+        if (!archiveSeason && result.selectedSeason) {
+          setArchiveSeason(result.selectedSeason);
+        }
       })
-      .catch((err) => live && setArchiveError(err.message || "Season archive unavailable."))
-      .finally(() => live && setArchiveLoading(false));
+      .catch((err) => {
+        if (live) {
+          setArchiveError(err.message || "Season archive unavailable.");
+        }
+      })
+      .finally(() => {
+        if (live) setArchiveLoading(false);
+      });
+
     return () => { live = false; };
-  }, [section, archiveData.seasons.length]);
+  }, [section, archiveSeason, archiveTier, archiveConference]);
+
+  useEffect(() => {
+    if (section !== "archive") return;
+
+    let live = true;
+    setArchiveRecordLoading(true);
+
+    getSeasonArchiveRecordBookData({
+      tier: archiveTier,
+      conference: archiveConference,
+    })
+      .then((books) => {
+        if (!live) return;
+
+        setArchiveData((current) => ({
+          ...current,
+          recordBooks: {
+            ...(current.recordBooks || {}),
+            [archiveTier]: {
+              ...(current.recordBooks?.[archiveTier] || {}),
+              ...books,
+            },
+          },
+        }));
+      })
+      .catch(() => {
+        // The season itself should remain usable even if the all-time record
+        // book is temporarily unavailable.
+      })
+      .finally(() => {
+        if (live) setArchiveRecordLoading(false);
+      });
+
+    return () => { live = false; };
+  }, [section, archiveTier, archiveConference]);
 
   useEffect(() => {
     const options = CONFERENCES[archiveTier] || [];
@@ -630,7 +720,7 @@ export default function History() {
             </section>
 
             <section className="archive-panel"><ArchiveSectionTitle eyebrow="NFL HISTORY" title="Franchise Postseason Record Book" description="Click any column heading to rank NFL franchises by that postseason accomplishment."/>
-              <ArchiveRecordBook tier="NFL" rows={[...Object.values(archiveData.recordBooks?.NFL || {}).flat()].filter((row, index, all) => all.findIndex((item) => item.id === row.id) === index)}/>
+              {archiveRecordLoading ? <div className="archive-empty">Loading franchise record book…</div> : <ArchiveRecordBook tier="NFL" rows={[...Object.values(archiveData.recordBooks?.NFL || {}).flat()].filter((row, index, all) => all.findIndex((item) => item.id === row.id) === index)}/>}
             </section>
           </div>}
 
@@ -652,7 +742,7 @@ export default function History() {
 
               {archiveTier === "FBS" && <section className="archive-panel archive-bowls"><ArchiveSectionTitle eyebrow="BOWL HISTORY" title={`${archiveConference} Bowl Games`} description="Every non-CFP bowl game involving this conference in the selected season."/><ArchiveGameGrid games={archiveConferenceData.bowls} emptyText={`No ${archiveConference} bowl games recorded for this season.`} bowl/></section>}
 
-              <section className="archive-panel archive-history-book"><ArchiveSectionTitle eyebrow="CONFERENCE HISTORY" title={`${archiveConference} Franchise Record Book`} description="All-time postseason accomplishments for the permanent franchises in this conference. Click any column heading to sort."/><ArchiveRecordBook tier={archiveTier} rows={archiveRecordRows}/></section>
+              <section className="archive-panel archive-history-book"><ArchiveSectionTitle eyebrow="CONFERENCE HISTORY" title={`${archiveConference} Franchise Record Book`} description="All-time postseason accomplishments for the permanent franchises in this conference. Click any column heading to sort."/>{archiveRecordLoading ? <div className="archive-empty">Loading franchise record book…</div> : <ArchiveRecordBook tier={archiveTier} rows={archiveRecordRows}/>}</section>
             </> : <div className="archive-empty">Conference archive unavailable.</div>}
           </div>}
         </>}

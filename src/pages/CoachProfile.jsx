@@ -20,6 +20,10 @@ import {
 } from "../services/coachData";
 
 import "../styles/coaches.css";
+import "../styles/franchiseTrophyRoom.css";
+
+import CoachTrophyRoom from "../components/CoachTrophyRoom";
+import { buildTrophyVaultData } from "../services/trophyService";
 
 function normalizeCoachId(team) {
   return String(team?.coachId || team?.ownerId || team?.coach || "").trim();
@@ -615,6 +619,7 @@ function CoachProfile() {
   const [games, setGames] = useState([]);
   const [standingsArchive, setStandingsArchive] = useState([]);
   const [status, setStatus] = useState("loading");
+  const [trophyRoomOpen, setTrophyRoomOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -701,6 +706,28 @@ function CoachProfile() {
         return number(a.startWeek, 1) - number(b.startWeek, 1);
       });
   }, [tenureRows, currentTeam]);
+
+  const coachTrophyVault = useMemo(() => {
+    if (!currentTeam) {
+      return { trophies: [], weeklyHighScores: [] };
+    }
+
+    const activeCoachId = normalizeCoachId(currentTeam);
+    const vaultData = buildTrophyVaultData({
+      standingsArchive,
+      currentStandings: teams,
+      games,
+    });
+
+    return {
+      trophies: vaultData.trophyEvents.filter(
+        (event) => event.coachId === activeCoachId,
+      ),
+      weeklyHighScores: vaultData.weeklyHighScoreEvents.filter(
+        (event) => event.coachId === activeCoachId,
+      ),
+    };
+  }, [standingsArchive, teams, games, currentTeam]);
 
   const metrics = useMemo(() => {
     if (!currentTeam) return null;
@@ -887,20 +914,20 @@ function CoachProfile() {
       ? coachPrestigeValue.toFixed(1)
       : "—";
 
+  // Overall MESH career totals should always equal the sum of the
+  // tier-by-tier career totals shown below. Do not prefer the legacy
+  // COACH DATA / TEAM DATA aggregate fields here because those tabs are
+  // being retired in favor of season/tenure history + future ACTIVE_STANDINGS.
   const meshWins =
-    coachData?.meshWins ??
     Object.values(metrics.tierTotals).reduce((sum, row) => sum + row.wins, 0);
 
   const meshLosses =
-    coachData?.meshLosses ??
     Object.values(metrics.tierTotals).reduce((sum, row) => sum + row.losses, 0);
 
   const meshTies =
-    coachData?.meshTies ??
     Object.values(metrics.tierTotals).reduce((sum, row) => sum + row.ties, 0);
 
   const meshPF =
-    coachData?.meshPF ??
     Object.values(metrics.tierTotals).reduce((sum, row) => sum + row.pf, 0);
 
   const overallCareerStats = [
@@ -1150,22 +1177,36 @@ function CoachProfile() {
           <small>Career honors across every tier</small>
         </div>
 
-        <div className="coach-trophy-entry">
+        <button
+          type="button"
+          className="coach-trophy-entry coach-trophy-entry-button"
+          onClick={() => setTrophyRoomOpen(true)}
+          aria-label={`Open ${coachName || "coach"} Trophy Room`}
+        >
           <div className="coach-trophy-icon">
             <Trophy size={27} />
           </div>
 
           <div>
             <span>Coach Trophy Room</span>
-            <strong>{coachName}'s Career Vault</strong>
+            <strong>Trophies, Banners & Championships</strong>
             <p>
-              The Trophy Vault foundation is ready. Individual trophies and
-              banners will be connected in the dedicated Trophy Vault phase.
+              View every championship trophy and Weekly High Score honor earned
+              across this coach's complete MESH career.
             </p>
           </div>
 
           <ChevronRight size={19} />
-        </div>
+        </button>
+
+        {trophyRoomOpen ? (
+          <CoachTrophyRoom
+            coachName={coachName}
+            currentTeam={currentTeam}
+            vault={coachTrophyVault}
+            onClose={() => setTrophyRoomOpen(false)}
+          />
+        ) : null}
       </section>
 
       <section className="coach-profile-section">

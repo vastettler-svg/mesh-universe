@@ -21,6 +21,10 @@ import {
 
 import "../styles/franchises.css";
 import "../styles/franchiseRoster.css";
+import "../styles/franchiseTrophyRoom.css";
+
+import FranchiseTrophyRoom from "../components/FranchiseTrophyRoom";
+import { buildTrophyVaultData } from "../services/trophyService";
 
 function formatPoints(value) {
   const number = Number(value);
@@ -694,6 +698,7 @@ function FranchiseProfile() {
   const [status, setStatus] = useState("loading");
   const [rosterRows, setRosterRows] = useState([]);
   const [rosterStatus, setRosterStatus] = useState("idle");
+  const [trophyRoomOpen, setTrophyRoomOpen] = useState(false);
 
   const rosterView =
     new URLSearchParams(location.search).get("view") === "roster";
@@ -888,6 +893,29 @@ function FranchiseProfile() {
       .filter((row) => row.franchiseId === franchise.franchiseId)
       .sort((a, b) => b.season - a.season);
   }, [archive, franchise]);
+
+  const franchiseTrophyVault = useMemo(() => {
+    if (!franchise) {
+      return { trophies: [], weeklyHighScores: [], banner: null };
+    }
+
+    const vaultData = buildTrophyVaultData({
+      standingsArchive: archive,
+      currentStandings: teams,
+      games,
+    });
+
+    return {
+      trophies: vaultData.trophyEvents.filter(
+        (event) => event.franchiseId === franchise.franchiseId,
+      ),
+      weeklyHighScores: vaultData.weeklyHighScoreEvents.filter(
+        (event) => event.franchiseId === franchise.franchiseId,
+      ),
+      banner:
+        vaultData.bannerAchievements.get(franchise.franchiseId) || null,
+    };
+  }, [archive, teams, games, franchise]);
 
   const availableSeasons = useMemo(() => {
     const seasons = new Set();
@@ -1642,23 +1670,35 @@ function FranchiseProfile() {
           action="Open the franchise trophy room"
         />
 
-        <div className="franchise-trophy-entry">
+        <button
+          type="button"
+          className="franchise-trophy-entry franchise-trophy-entry-button"
+          onClick={() => setTrophyRoomOpen(true)}
+          aria-label={`Open ${franchise.team || "franchise"} Trophy Room`}
+        >
           <div className="franchise-trophy-entry-icon">
             <Crown size={28} />
           </div>
 
           <div className="franchise-trophy-entry-copy">
             <span>Franchise Trophy Room</span>
-            <strong>Trophies, banners & championships</strong>
+            <strong>Trophies, Banners & Championships</strong>
             <p>
-              This will become the visual collection of every trophy and banner
-              earned by this franchise. Teams without an honor will simply have
-              an empty trophy room.
+              View every championship trophy, franchise banner achievement, and
+              Weekly High Score honor earned by this permanent MESH franchise.
             </p>
           </div>
 
           <ChevronRight size={18} />
-        </div>
+        </button>
+
+        {trophyRoomOpen ? (
+          <FranchiseTrophyRoom
+            franchise={franchise}
+            vault={franchiseTrophyVault}
+            onClose={() => setTrophyRoomOpen(false)}
+          />
+        ) : null}
       </section>
 
       <section className="franchise-profile-section franchise-career-section">

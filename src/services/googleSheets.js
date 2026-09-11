@@ -1257,6 +1257,17 @@ export async function getGameResults(options = {}) {
         hasLiveActualScoring || hasStoredHistoricalScoring;
 
       /*
+       * Current-season score cards must display the actual team totals from
+       * LIVE_PLAYER_SCORES once real scoring has begun. GAME_RESULTS may still
+       * contain 0.00 placeholders while a matchup is in progress, so do not
+       * use those placeholder values for the live score display.
+       */
+      if (!isHistoricalSeason && hasLiveActualScoring) {
+        if (team1LiveActual !== null) team1Score = team1LiveActual;
+        if (team2LiveActual !== null) team2Score = team2LiveActual;
+      }
+
+      /*
        * During preseason/build testing, GAME_RESULTS can still contain
        * old copied test scores/statuses. LIVE_PLAYER_SCORES is our
        * authoritative signal that real scoring has actually begun.

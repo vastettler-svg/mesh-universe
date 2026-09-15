@@ -2,6 +2,7 @@ import { getTeamLogoOverride } from "../assets/logos/overrides/teamLogoOverrides
 import { getCoachSeasonTenureRows } from "./coachData";
 
 const LIVE_PLAYER_SCORES_GID = "1339342815";
+const PLAYER_SCORE_ARCHIVE_GID = "841634242";
 const PUBLISHED_SHEET_BASE_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRwZdqNhyvQxRhmmZu9jzUdFnzB6ZFnh7gYe2bgN6qwPl9SGwPf9dYyrhLk8_dFONmrL9Ibi3iXYEnc/pub";
 
@@ -1248,13 +1249,20 @@ export async function getGameResults(options = {}) {
         (team1LiveActual !== null && team1LiveActual > 0) ||
         (team2LiveActual !== null && team2LiveActual > 0);
 
+      const hasStoredFinalScoring =
+        statusData.status === "final" &&
+        team1Score !== null &&
+        team2Score !== null;
+
       const hasStoredHistoricalScoring =
         isHistoricalSeason &&
         team1Score !== null &&
         team2Score !== null;
 
+      // Final current-season games are authoritative in GAME_RESULTS after the
+      // weekly rollover. Live games still use LIVE_PLAYER_SCORES below.
       const hasActualScoring =
-        hasLiveActualScoring || hasStoredHistoricalScoring;
+        hasLiveActualScoring || hasStoredHistoricalScoring || hasStoredFinalScoring;
 
       /*
        * Current-season score cards must display the actual team totals from
@@ -1262,7 +1270,11 @@ export async function getGameResults(options = {}) {
        * contain 0.00 placeholders while a matchup is in progress, so do not
        * use those placeholder values for the live score display.
        */
-      if (!isHistoricalSeason && hasLiveActualScoring) {
+      if (
+        !isHistoricalSeason &&
+        statusData.status !== "final" &&
+        hasLiveActualScoring
+      ) {
         if (team1LiveActual !== null) team1Score = team1LiveActual;
         if (team2LiveActual !== null) team2Score = team2LiveActual;
       }
@@ -1637,6 +1649,12 @@ const LIVE_PLAYER_SCORES_CSV_URL =
   LIVE_PLAYER_SCORES_GID +
   "&single=true&output=csv";
 
+const PLAYER_SCORE_ARCHIVE_CSV_URL =
+  PUBLISHED_SHEET_BASE_URL +
+  "?gid=" +
+  PLAYER_SCORE_ARCHIVE_GID +
+  "&single=true&output=csv";
+
 function parseSimpleCsv_(text) {
   const rows = [];
   let row = [];
@@ -1796,6 +1814,39 @@ export async function getLivePlayerScores() {
   })();
 
   return livePlayerScoresInflight;
+}
+
+export async function getPlayerScoreArchive() {
+  const rows = await fetchCsvRows(
+    PLAYER_SCORE_ARCHIVE_CSV_URL,
+    "PLAYER_SCORE_ARCHIVE",
+  );
+
+  return rows
+    .filter(
+      (row) =>
+        Number(row.Season) > 0 &&
+        Number(row.Week) > 0 &&
+        String(row.Player_ID || "").trim(),
+    )
+    .map((row) => ({
+      season: Number(row.Season) || 0,
+      week: Number(row.Week) || 0,
+      franchiseId: String(row.Franchise_ID || "").trim(),
+      franchiseName: String(row.Franchise_Name || "").trim(),
+      sleeperLeagueId: String(row.Sleeper_League_ID || "").trim(),
+      sleeperRosterId: Number(row.Sleeper_Roster_ID) || 0,
+      sleeperMatchupId: String(row.Sleeper_Matchup_ID || "").trim(),
+      playerId: String(row.Player_ID || "").trim(),
+      playerName: String(row.Player_Name || "").trim(),
+      position: String(row.Position || "").trim(),
+      nflTeam: String(row.NFL_Team || "").trim(),
+      lineupPosition: String(row.Lineup_Position || "").trim(),
+      isStarter:
+        String(row.Is_Starter || "").trim().toUpperCase() === "TRUE",
+      playerPoints:
+        row.Player_Points === "" ? null : Number(row.Player_Points),
+    }));
 }
 
 export async function getGameRosterPlayers(game) {

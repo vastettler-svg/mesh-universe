@@ -17,7 +17,7 @@ import {
   Users,
 } from "lucide-react";
 
-import { getAppSettings, getGameResults, getStandingsData, getLivePlayerScores, getHeadToHeadHistory } from "../services/googleSheets";
+import { getAppSettings, getGameResults, getStandingsData, getPlayerScoreArchive, getHeadToHeadHistory } from "../services/googleSheets";
 import { MESH_PATCHES } from "../assets/logos/patches";
 import { getFranchisePrestigeLeaders, getCoachPrestigeLeaders } from "../services/prestige";
 
@@ -591,6 +591,10 @@ function PrestigeTierCard({
 
 
 function numericScore(value) {
+  // Null/blank scores mean no finalized score is available. Number(null) is 0,
+  // which previously caused scheduled/cleared games to look like 0.00 results.
+  if (value === null || value === undefined || value === "") return null;
+
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
 }
@@ -1257,11 +1261,13 @@ function buildWeeklyHighScorers(games, week) {
 
 const TOP_PERFORMER_POSITIONS = ["QB", "DL", "RB", "LB", "WR", "DB", "TE", "K"];
 
-function buildTopPerformers(playerRows, week) {
+function buildTopPerformers(playerRows, season, week) {
   return TOP_PERFORMER_POSITIONS.map((position) => {
     const candidates = playerRows.filter(
       (row) =>
+        Number(row.season) === Number(season) &&
         Number(row.week) === Number(week) &&
+        row.isStarter === true &&
         String(row.position || "").trim().toUpperCase() === position &&
         Number.isFinite(Number(row.playerPoints)),
     );
@@ -1352,7 +1358,7 @@ function Home() {
     FBS: [],
     FCS: [],
   });
-  const [livePlayerScores, setLivePlayerScores] = useState([]);
+  const [playerScoreArchive, setPlayerScoreArchive] = useState([]);
   const [headlineHistory, setHeadlineHistory] = useState({});
   const [homeLoading, setHomeLoading] = useState(true);
   const [selectedWeek, setSelectedWeek] = useState(null);
@@ -1397,7 +1403,8 @@ function Home() {
     let cancelled = false;
 
     async function loadHeadlineHistory() {
-      const currentWeek = Number(settings?.currentWeek) || 1;
+      const currentSeason = Number(settings?.currentSeason) || 2026;
+  const currentWeek = Number(settings?.currentWeek) || 1;
       if (!games.length || !currentWeek) return;
 
       const targetGames = [];
@@ -1525,10 +1532,10 @@ function Home() {
 
     async function loadTopPerformers() {
       try {
-        const rows = await getLivePlayerScores();
+        const rows = await getPlayerScoreArchive();
 
         if (!cancelled) {
-          setLivePlayerScores(rows);
+          setPlayerScoreArchive(rows);
         }
       } catch (error) {
         console.warn(
@@ -1545,6 +1552,7 @@ function Home() {
     };
   }, []);
 
+  const currentSeason = Number(settings?.currentSeason) || 2026;
   const currentWeek = Number(settings?.currentWeek) || 1;
   const activeWeek = Number(selectedWeek) || currentWeek;
 
@@ -1679,8 +1687,8 @@ function Home() {
       }));
     }
 
-    return buildTopPerformers(livePlayerScores, topPerformersWeek);
-  }, [livePlayerScores, topPerformersWeek]);
+    return buildTopPerformers(playerScoreArchive, currentSeason, topPerformersWeek);
+  }, [playerScoreArchive, currentSeason, topPerformersWeek]);
 
   return (
     <div className="home-page">

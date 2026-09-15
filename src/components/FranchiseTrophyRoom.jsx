@@ -8,7 +8,7 @@ function formatScore(value) {
 }
 
 function years(values = []) {
-  return values.length ? values.join(" • ") : "—";
+  return values.length ? values.join("\n") : "—";
 }
 
 function bannerRows(tier, banner) {
@@ -260,7 +260,9 @@ function FranchiseTrophyRoom({ franchise, vault, onClose }) {
             <p>Franchise Trophy Room</p>
           </div>
 
-          <div className="mesh-room-scene">
+          <div
+              className={`mesh-room-scene ${String(franchise?.team || "").toLowerCase().includes("hawai") ? "mesh-room-scene-hawaii" : ""}`}
+            >
             <div className="mesh-room-backwall" />
 
             <div className="mesh-room-main-case">
@@ -318,19 +320,6 @@ function FranchiseTrophyRoom({ franchise, vault, onClose }) {
                 onOpen={setSelectedTrophy}
                 variant="conference"
               />
-            </div>
-
-            <div className="mesh-room-foreground">
-              <div className="mesh-room-rug">
-                {franchise?.logo ? <img src={franchise.logo} alt="" /> : <Shield size={52} />}
-              </div>
-
-              <div className="mesh-room-table">
-                <div className="mesh-room-team-display">
-                  {franchise?.logo ? <img src={franchise.logo} alt="" /> : <Shield size={44} />}
-                  <span>{franchise?.team || "MESH Franchise"}</span>
-                </div>
-              </div>
             </div>
 
             <div className="mesh-room-hint">Tap any trophy, banner or plaque to view details</div>

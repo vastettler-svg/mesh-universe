@@ -145,7 +145,7 @@ function divisionMatches(team, divisionFilter) {
 
 function formatPoints(value) {
   const number = Number(value);
-  return Number.isFinite(number) ? number.toFixed(1) : "0.0";
+  return Number.isFinite(number) ? number.toFixed(2) : "0.00";
 }
 
 function formatConferenceTag(value) {
@@ -1030,7 +1030,7 @@ function FbsPostseasonTeam({
         </span>
       )}
 
-      <strong>{score === null || score === undefined ? "—" : Number(score).toFixed(1)}</strong>
+      <strong>{score === null || score === undefined ? "—" : Number(score).toFixed(2)}</strong>
     </div>
   );
 }
@@ -1996,6 +1996,44 @@ function Standings() {
       }));
   }, [selectedSeason, standingsData, standingsArchive]);
 
+  // Current-season NFL seeds: four division leaders, then three wild cards.
+  // Conference_Rank supplies the existing spreadsheet tiebreak order.
+  // Do not rely on legacy Playoff_Seed / Playoff_Status placeholders.
+  const nflLiveSeeds = useMemo(() => {
+    const seeds = new Map();
+    if (selectedSeason !== 2026) return seeds;
+    for (const conferenceId of ["afc", "nfc"]) {
+      const conferenceTeams = activeStandingsData.filter(
+        (team) => team.tierClass === "nfl" && conferenceMatches(team, conferenceId),
+      );
+      const ordered = [...conferenceTeams].sort(
+        (a, b) => (Number(a.conferenceRank) || 999) - (Number(b.conferenceRank) || 999),
+      );
+      const divisions = new Map();
+      for (const team of ordered) {
+        const division = normalizeSlug(team.divisionId || team.division);
+        if (!division) continue;
+        const existing = divisions.get(division);
+        if (!existing || Number(team.divisionRank) < Number(existing.divisionRank)) {
+          divisions.set(division, team);
+        }
+      }
+      // Incomplete data should not manufacture a playoff picture.
+      if (divisions.size !== 4) continue;
+      const leaders = [...divisions.values()].sort(
+        (a, b) => (Number(a.conferenceRank) || 999) - (Number(b.conferenceRank) || 999),
+      );
+      const leaderIds = new Set(leaders.map((team) => team.franchiseId || team.id));
+      const wildcards = ordered.filter(
+        (team) => !leaderIds.has(team.franchiseId || team.id),
+      ).slice(0, 3);
+      [...leaders, ...wildcards].forEach((team, index) => {
+        seeds.set(team.franchiseId || team.id, index + 1);
+      });
+    }
+    return seeds;
+  }, [activeStandingsData, selectedSeason]);
+
   const visibleStandings = useMemo(() => {
     if (selectedPrimaryFilter === "overview") return [];
 
@@ -2012,7 +2050,9 @@ function Standings() {
 
         if (selectedPrimaryFilter === "nfl") {
           if (selectedSecondaryFilter === "all") return true;
-          if (selectedSecondaryFilter === "playoff-picture") return Number(team.playoffSeed) > 0;
+          if (selectedSecondaryFilter === "playoff-picture") return selectedSeason === 2026
+            ? nflLiveSeeds.has(team.franchiseId || team.id)
+            : Number(team.playoffSeed) > 0;
 
           if (selectedSecondaryFilter === "afc" || selectedSecondaryFilter === "nfc") {
             if (!conferenceMatches(team, selectedSecondaryFilter)) return false;
@@ -2032,7 +2072,10 @@ function Standings() {
       })
       .sort((firstTeam, secondTeam) => {
         if (selectedPrimaryFilter === "nfl" && selectedSecondaryFilter === "playoff-picture") {
-          return (firstTeam.playoffSeed || 999) - (secondTeam.playoffSeed || 999);
+          return selectedSeason === 2026
+            ? (nflLiveSeeds.get(firstTeam.franchiseId || firstTeam.id) || 999) -
+              (nflLiveSeeds.get(secondTeam.franchiseId || secondTeam.id) || 999)
+            : (firstTeam.playoffSeed || 999) - (secondTeam.playoffSeed || 999);
         }
 
         if (
@@ -2058,7 +2101,7 @@ function Standings() {
 
         return firstTeam.overallRank - secondTeam.overallRank;
       });
-  }, [activeStandingsData, selectedPrimaryFilter, selectedSecondaryFilter, selectedNflDivisionFilter]);
+  }, [activeStandingsData, selectedPrimaryFilter, selectedSecondaryFilter, selectedNflDivisionFilter, selectedSeason, nflLiveSeeds]);
 
   const displayStandings = useMemo(() => {
     return visibleStandings.map((team, index) => {
@@ -2087,7 +2130,9 @@ function Standings() {
       if (isNflConferenceView) {
         rank = selectedNflDivisionFilter !== "all" ? team.divisionRank : team.conferenceRank;
       } else if (isPlayoffPicture) {
-        rank = team.playoffSeed || team.overallRank;
+        rank = selectedSeason === 2026
+          ? (nflLiveSeeds.get(team.franchiseId || team.id) || team.overallRank)
+          : (team.playoffSeed || team.overallRank);
       } else if (isCollegeConferenceView) {
         /*
          * Conference tabs are always ranked locally 1-14 (or the
@@ -2111,6 +2156,11 @@ function Standings() {
 
       let status = team.status;
       let statusLabel = team.statusLabel;
+
+      if (team.tierClass === "nfl" && isPlayoffPicture && selectedSeason === 2026) {
+        status = rank <= 4 ? "playoff" : "wildcard";
+        statusLabel = rank <= 4 ? "Division Leader" : "Wild Card";
+      }
 
       if (team.tierClass === "fbs" && selectedSeason === 2026) {
         if (Number(team.overallRank) >= 91 && Number(team.overallRank) <= 98) {
@@ -2149,6 +2199,7 @@ function Standings() {
     selectedNflDivisionFilter,
     selectedSeason,
     cfpFranchiseIds,
+    nflLiveSeeds,
   ]);
 
   const showTierLines = ["all", "overall"].includes(selectedSecondaryFilter);
@@ -2220,7 +2271,7 @@ function Standings() {
           {["afc", "nfc"].map((conferenceId) => {
             const conferenceTeams = displayStandings
               .filter((team) => conferenceMatches(team, conferenceId))
-              .sort((a, b) => (a.playoffSeed || 999) - (b.playoffSeed || 999));
+              .sort((a, b) => a.rank - b.rank);
 
             return (
               <section className="standings-playoff-conference" key={conferenceId}>
@@ -2236,7 +2287,7 @@ function Standings() {
                     isTop25View={false}
                   />
                 ) : (
-                  <div className="standings-empty-state"><Medal size={30} /><h3>No playoff data found</h3><p>Playoff teams will appear once seeds are available in TEAM DATA.</p></div>
+                  <div className="standings-empty-state"><Medal size={30} /><h3>No playoff data found</h3><p>Playoff teams will appear when current division standings are available.</p></div>
                 )}
               </section>
             );

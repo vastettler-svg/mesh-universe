@@ -17,7 +17,7 @@ import {
   Users,
 } from "lucide-react";
 
-import { getAppSettings, getGameResults, getStandingsData, getPlayerScoreArchive, getHeadToHeadHistory } from "../services/googleSheets";
+import { getAppSettings, getGameResults, getStandingsData, getHeadToHeadHistory } from "../services/googleSheets";
 import { MESH_PATCHES } from "../assets/logos/patches";
 import { getFranchisePrestigeLeaders, getCoachPrestigeLeaders } from "../services/prestige";
 
@@ -105,7 +105,7 @@ function SectionHeading({ eyebrow, title, action, actionTo }) {
 
 function formatHomePoints(value) {
   const number = Number(value);
-  return Number.isFinite(number) ? number.toFixed(1) : "—";
+  return Number.isFinite(number) ? number.toFixed(2) : "—";
 }
 
 function TeamIdentity({
@@ -687,8 +687,8 @@ function buildHistoricalContext(game, priorMeetings = []) {
   let priorMeetingText = "";
 
   if (lastPrior) {
-    const score1 = Number(lastPrior.team1Score).toFixed(1);
-    const score2 = Number(lastPrior.team2Score).toFixed(1);
+    const score1 = Number(lastPrior.team1Score).toFixed(2);
+    const score2 = Number(lastPrior.team2Score).toFixed(2);
     priorMeetingText =
       ` Their previous meeting came in ${lastPrior.season}, Week ${lastPrior.week}, ` +
       `when ${lastPrior.team1Team} and ${lastPrior.team2Team} finished ${score1}–${score2}.`;
@@ -743,7 +743,7 @@ function buildResultHeadline(game, week, priorMeetings = []) {
     ? `#${loserRank} ${loserTeam}`
     : loserTeam;
 
-  const margin = Math.abs(winnerScore - loserScore).toFixed(1);
+  const margin = Math.abs(winnerScore - loserScore).toFixed(2);
 
   let title;
 
@@ -757,7 +757,7 @@ function buildResultHeadline(game, week, priorMeetings = []) {
 
   const summary =
     `${winnerCoach || winnerTeam} guided ${winnerLabel} to a ` +
-    `${winnerScore.toFixed(1)}–${loserScore.toFixed(1)} victory over ${loserLabel}.`;
+    `${winnerScore.toFixed(2)}–${loserScore.toFixed(2)} victory over ${loserLabel}.`;
 
   const context = isRankedUpset
     ? `The result immediately changes the conversation in the ${game.tier} race, with ${winnerLabel} taking down a higher-ranked opponent.`
@@ -843,7 +843,7 @@ function buildWeekOneMatchupStory(game, priorMeetings = []) {
 
     historyParagraph =
       `${seriesText}. Their most recent archived meeting was ${last.season}, Week ${last.week}, ` +
-      `a ${Number(last.team1Score).toFixed(1)}–${Number(last.team2Score).toFixed(1)} result between ` +
+      `a ${Number(last.team1Score).toFixed(2)}–${Number(last.team2Score).toFixed(2)} result between ` +
       `${last.team1Team} and ${last.team2Team}.`;
   } else {
     historyParagraph =
@@ -1004,7 +1004,7 @@ function buildUpcomingNflStory(game, week, priorMeetings = []) {
     historyParagraph =
       `${seriesText}. Their most recent archived meeting was ${last.season}, Week ${last.week}, ` +
       `when ${last.team1Team} and ${last.team2Team} finished ` +
-      `${Number(last.team1Score).toFixed(1)}–${Number(last.team2Score).toFixed(1)}.`;
+      `${Number(last.team1Score).toFixed(2)}–${Number(last.team2Score).toFixed(2)}.`;
   }
 
   return {
@@ -1259,90 +1259,6 @@ function buildWeeklyHighScorers(games, week) {
 }
 
 
-const TOP_PERFORMER_POSITIONS = ["QB", "DL", "RB", "LB", "WR", "DB", "TE", "K"];
-
-function buildTopPerformers(playerRows, season, week) {
-  return TOP_PERFORMER_POSITIONS.map((position) => {
-    const candidates = playerRows.filter(
-      (row) =>
-        Number(row.season) === Number(season) &&
-        Number(row.week) === Number(week) &&
-        row.isStarter === true &&
-        String(row.position || "").trim().toUpperCase() === position &&
-        Number.isFinite(Number(row.playerPoints)),
-    );
-
-    if (candidates.length === 0) {
-      return {
-        position,
-        player: "",
-        nflTeam: "",
-        points: null,
-      };
-    }
-
-    const uniquePlayers = new Map();
-
-    candidates.forEach((row) => {
-      const key =
-        String(row.playerId || "").trim() ||
-        `${row.playerName}-${row.nflTeam}-${position}`;
-
-      const existing = uniquePlayers.get(key);
-
-      if (
-        !existing ||
-        Number(row.playerPoints) > Number(existing.playerPoints)
-      ) {
-        uniquePlayers.set(key, row);
-      }
-    });
-
-    const leader = [...uniquePlayers.values()].sort(
-      (a, b) =>
-        Number(b.playerPoints) - Number(a.playerPoints) ||
-        String(a.playerName || "").localeCompare(String(b.playerName || "")),
-    )[0];
-
-    return {
-      position,
-      player: String(leader.playerName || "").trim(),
-      nflTeam: String(leader.nflTeam || "").trim(),
-      points: Number(leader.playerPoints),
-    };
-  });
-}
-
-function TopPerformerCard({ performer }) {
-  const hasWinner =
-    performer.player && Number.isFinite(Number(performer.points));
-
-  return (
-    <article className="home-card performer-card performer-card-live">
-      <div className="performer-position">{performer.position}</div>
-
-      {hasWinner ? (
-        <>
-          <div className="performer-info">
-            <strong>{performer.player}</strong>
-            <span>{performer.nflTeam || "NFL"}</span>
-          </div>
-
-          <div className="performer-points">
-            <strong>{Number(performer.points).toFixed(2)}</strong>
-            <span>PTS</span>
-          </div>
-        </>
-      ) : (
-        <div className="performer-empty-copy">
-          <strong>Awaiting results</strong>
-          <span>Week leader will appear here</span>
-        </div>
-      )}
-    </article>
-  );
-}
-
 function Home() {
   const navigate = useNavigate();
   const [games, setGames] = useState([]);
@@ -1358,7 +1274,6 @@ function Home() {
     FBS: [],
     FCS: [],
   });
-  const [playerScoreArchive, setPlayerScoreArchive] = useState([]);
   const [headlineHistory, setHeadlineHistory] = useState({});
   const [homeLoading, setHomeLoading] = useState(true);
   const [selectedWeek, setSelectedWeek] = useState(null);
@@ -1527,31 +1442,6 @@ function Home() {
     };
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadTopPerformers() {
-      try {
-        const rows = await getPlayerScoreArchive();
-
-        if (!cancelled) {
-          setPlayerScoreArchive(rows);
-        }
-      } catch (error) {
-        console.warn(
-          "Top performer data unavailable; placeholders will remain.",
-          error,
-        );
-      }
-    }
-
-    loadTopPerformers();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   const currentSeason = Number(settings?.currentSeason) || 2026;
   const currentWeek = Number(settings?.currentWeek) || 1;
   const activeWeek = Number(selectedWeek) || currentWeek;
@@ -1675,20 +1565,6 @@ function Home() {
 
 
 
-  const topPerformersWeek = currentWeek - 1;
-
-  const topPerformers = useMemo(() => {
-    if (topPerformersWeek < 1) {
-      return TOP_PERFORMER_POSITIONS.map((position) => ({
-        position,
-        player: "",
-        nflTeam: "",
-        points: null,
-      }));
-    }
-
-    return buildTopPerformers(playerScoreArchive, currentSeason, topPerformersWeek);
-  }, [playerScoreArchive, currentSeason, topPerformersWeek]);
 
   return (
     <div className="home-page">
@@ -1906,26 +1782,6 @@ function Home() {
             franchiseLeaders={franchisePrestige.FCS}
             coachLeaders={coachPrestige.FCS}
           />
-        </div>
-      </section>
-
-      <section className="home-section">
-        <SectionHeading
-          eyebrow={
-            topPerformersWeek < 1
-              ? "Weekly leaders begin after Week 1"
-              : `Week ${topPerformersWeek} leaders`
-          }
-          title="Top Performers"
-        />
-
-        <div className="performers-grid performers-grid-eight">
-          {topPerformers.map((performer) => (
-            <TopPerformerCard
-              key={performer.position}
-              performer={performer}
-            />
-          ))}
         </div>
       </section>
 

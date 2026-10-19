@@ -23,10 +23,10 @@ import "../styles/gameCenter.css";
 
 function formatScore(value, status) {
   if (value === null || value === undefined) {
-    return status === "upcoming" ? "—" : "0.0";
+    return status === "upcoming" ? "—" : "0.00";
   }
 
-  return Number(value).toFixed(1);
+  return Number(value).toFixed(2);
 }
 
 function formatProjection(value) {
@@ -34,7 +34,7 @@ function formatProjection(value) {
     return null;
   }
 
-  return Number(value).toFixed(1);
+  return Number(value).toFixed(2);
 }
 
 function clampProbability(value) {
@@ -281,7 +281,7 @@ function TeamSide({
       <div className="game-center-side-score">
         <strong>{formatScore(score, status)}</strong>
         {status !== "final" && projection !== null && projection !== undefined ? (
-          <span>Proj: {Number(projection).toFixed(1)}</span>
+          <span>Proj: {Number(projection).toFixed(2)}</span>
         ) : null}
       </div>
     </section>
@@ -603,7 +603,7 @@ function formatPlayerScore(value) {
     return "—";
   }
 
-  return Number(value).toFixed(1);
+  return Number(value).toFixed(2);
 }
 
 function formatTeamProjection(value) {
@@ -611,7 +611,7 @@ function formatTeamProjection(value) {
     return null;
   }
 
-  return Number(value).toFixed(1);
+  return Number(value).toFixed(2);
 }
 
 function RosterPanel({ team, players, side }) {
@@ -685,9 +685,9 @@ function HistoryCard({ meeting, currentTeam1Id }) {
 
       <div className="game-center-history-score">
         <span>{leftName}</span>
-        <strong>{leftScore === null ? "—" : Number(leftScore).toFixed(1)}</strong>
+        <strong>{leftScore === null ? "—" : Number(leftScore).toFixed(2)}</strong>
         <span className="game-center-history-vs">vs</span>
-        <strong>{rightScore === null ? "—" : Number(rightScore).toFixed(1)}</strong>
+        <strong>{rightScore === null ? "—" : Number(rightScore).toFixed(2)}</strong>
         <span>{rightName}</span>
       </div>
     </div>
@@ -823,8 +823,8 @@ function buildSeriesAnalytics(history, game) {
     leftWins,
     rightWins,
     ties,
-    leftAverage: completed.length ? (leftPoints / completed.length).toFixed(1) : "—",
-    rightAverage: completed.length ? (rightPoints / completed.length).toFixed(1) : "—",
+    leftAverage: completed.length ? (leftPoints / completed.length).toFixed(2) : "—",
+    rightAverage: completed.length ? (rightPoints / completed.length).toFixed(2) : "—",
     largestWin,
     closestMeeting,
     highestScoring,
@@ -838,7 +838,7 @@ function buildSeriesAnalytics(history, game) {
 }
 
 function formatHistoryMargin(value) {
-  return Number.isFinite(Number(value)) ? `+${Number(value).toFixed(1)}` : "—";
+  return Number.isFinite(Number(value)) ? `+${Number(value).toFixed(2)}` : "—";
 }
 
 function meetingLabel(meeting) {
@@ -909,11 +909,11 @@ function SeriesHistory({ game, analytics }) {
           <div className="game-center-history-team-lines">
             <div>
               <strong>{last.leftName}</strong>
-              <b>{last.leftScore.toFixed(1)}</b>
+              <b>{last.leftScore.toFixed(2)}</b>
             </div>
             <div>
               <strong>{last.rightName}</strong>
-              <b>{last.rightScore.toFixed(1)}</b>
+              <b>{last.rightScore.toFixed(2)}</b>
             </div>
           </div>
           <small>{meetingLabel(last)}</small>
@@ -938,11 +938,11 @@ function SeriesHistory({ game, analytics }) {
               <div className="game-center-history-team-lines">
                 <div>
                   <strong>{largest.meeting.leftName}</strong>
-                  <b>{largest.meeting.leftScore.toFixed(1)}</b>
+                  <b>{largest.meeting.leftScore.toFixed(2)}</b>
                 </div>
                 <div>
                   <strong>{largest.meeting.rightName}</strong>
-                  <b>{largest.meeting.rightScore.toFixed(1)}</b>
+                  <b>{largest.meeting.rightScore.toFixed(2)}</b>
                 </div>
               </div>
               <small><strong>Margin:</strong> {formatHistoryMargin(largest.margin)}</small>
@@ -959,11 +959,11 @@ function SeriesHistory({ game, analytics }) {
               <div className="game-center-history-team-lines">
                 <div>
                   <strong>{closest.meeting.leftName}</strong>
-                  <b>{closest.meeting.leftScore.toFixed(1)}</b>
+                  <b>{closest.meeting.leftScore.toFixed(2)}</b>
                 </div>
                 <div>
                   <strong>{closest.meeting.rightName}</strong>
-                  <b>{closest.meeting.rightScore.toFixed(1)}</b>
+                  <b>{closest.meeting.rightScore.toFixed(2)}</b>
                 </div>
               </div>
               <small>
@@ -984,14 +984,14 @@ function SeriesHistory({ game, analytics }) {
               <div className="game-center-history-team-lines">
                 <div>
                   <strong>{highest.meeting.leftName}</strong>
-                  <b>{highest.meeting.leftScore.toFixed(1)}</b>
+                  <b>{highest.meeting.leftScore.toFixed(2)}</b>
                 </div>
                 <div>
                   <strong>{highest.meeting.rightName}</strong>
-                  <b>{highest.meeting.rightScore.toFixed(1)}</b>
+                  <b>{highest.meeting.rightScore.toFixed(2)}</b>
                 </div>
               </div>
-              <small><strong>Combined:</strong> {highest.combined.toFixed(1)}</small>
+              <small><strong>Combined:</strong> {highest.combined.toFixed(2)}</small>
             </>
           ) : (
             <small>—</small>
@@ -1058,9 +1058,9 @@ function SeriesHistory({ game, analytics }) {
               </div>
               <div className="game-center-recent-score">
                 <span>{meeting.leftName}</span>
-                <strong className={leftWon ? "is-history-winner" : ""}>{meeting.leftScore.toFixed(1)}</strong>
+                <strong className={leftWon ? "is-history-winner" : ""}>{meeting.leftScore.toFixed(2)}</strong>
                 <em>vs</em>
-                <strong className={rightWon ? "is-history-winner" : ""}>{meeting.rightScore.toFixed(1)}</strong>
+                <strong className={rightWon ? "is-history-winner" : ""}>{meeting.rightScore.toFixed(2)}</strong>
                 <span>{meeting.rightName}</span>
               </div>
             </div>

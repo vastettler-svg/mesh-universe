@@ -376,10 +376,10 @@ function StatusBadge({ status, label }) {
 
 function formatScore(score, status) {
   if (score === null || score === undefined) {
-    return status === "upcoming" ? "—" : "0.0";
+    return status === "upcoming" ? "—" : "0.00";
   }
 
-  return Number(score).toFixed(1);
+  return Number(score).toFixed(2);
 }
 
 function formatProjection(projection) {
@@ -387,7 +387,7 @@ function formatProjection(projection) {
     return "";
   }
 
-  return `Proj: ${Number(projection).toFixed(1)}`;
+  return `Proj: ${Number(projection).toFixed(2)}`;
 }
 
 function TeamRow({
